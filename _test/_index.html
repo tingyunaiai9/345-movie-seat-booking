@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电影院在线选座系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 页面头部 -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🎬 电影院选座系统</h1>
+            <nav class="nav">
+                <div class="nav-steps">
+                    <span class="step active" data-step="config">影厅配置</span>
+                    <span class="step" data-step="movie">电影选择</span>
+                    <span class="step" data-step="seat">选座</span>
+                    <span class="step" data-step="payment">支付</span>
+                    <span class="step" data-step="confirm">确认</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="main">
+        <div class="container">
+            
+            <!-- 配置视图 -->
+            <section id="config-view" class="view active">
+                <div class="config-panel">
+                    <h2>影厅配置</h2>
+                    <div class="config-section">
+                        <h3>选择影厅规模</h3>
+                        <div class="preset-options">
+                            <label class="preset-option">
+                                <input type="radio" name="cinema-preset" value="small">
+                                <span class="preset-info">
+                                    <strong>小厅</strong>
+                                    <span class="preset-details">8排 × 15座 = 120个座位</span>
+                                </span>
+                            </label>
+                            <label class="preset-option">
+                                <input type="radio" name="cinema-preset" value="medium" checked>
+                                <span class="preset-info">
+                                    <strong>中厅</strong>
+                                    <span class="preset-details">10排 × 20座 = 200个座位</span>
+                                </span>
+                            </label>
+                            <label class="preset-option">
+                                <input type="radio" name="cinema-preset" value="large">
+                                <span class="preset-info">
+                                    <strong>大厅</strong>
+                                    <span class="preset-details">12排 × 25座 = 300个座位</span>
+                                </span>
+                            </label>
+                            <label class="preset-option">
+                                <input type="radio" name="cinema-preset" value="custom">
+                                <span class="preset-info">
+                                    <strong>自定义</strong>
+                                    <span class="preset-details">自定义影厅大小</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="config-section custom-config" style="display: none;">
+                        <h3>自定义配置</h3>
+                        <div class="custom-inputs">
+                            <div class="input-group">
+                                <label for="custom-rows">排数:</label>
+                                <input type="number" id="custom-rows" min="5" max="20" value="10">
+                                <span class="input-hint">建议5-20排</span>
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-seats">每排座位数:</label>
+                                <input type="number" id="custom-seats" min="10" max="30" value="20">
+                                <span class="input-hint">建议10-30座</span>
+                            </div>
+                            <div class="total-info">
+                                总座位数: <span id="total-seats">200</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-actions">
+                        <button class="btn btn-primary" id="next-to-movie">下一步：选择电影</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 电影选择视图 -->
+            <section id="movie-view" class="view">
+                <div class="movie-panel">
+                    <h2>选择电影</h2>
+                    <div class="movie-list">
+                        <div class="movie-item active" data-movie="avengers">
+                            <img src="https://via.placeholder.com/150x200?text=复仇者联盟" alt="复仇者联盟">
+                            <div class="movie-info">
+                                <h3>复仇者联盟：终局之战</h3>
+                                <p class="movie-time">2024-12-25 19:30</p>
+                                <p class="movie-price">票价: ¥45</p>
+                            </div>
+                        </div>
+                        <div class="movie-item" data-movie="avatar">
+                            <img src="https://via.placeholder.com/150x200?text=阿凡达" alt="阿凡达">
+                            <div class="movie-info">
+                                <h3>阿凡达：水之道</h3>
+                                <p class="movie-time">2024-12-25 21:00</p>
+                                <p class="movie-price">票价: ¥50</p>
+                            </div>
+                        </div>
+                        <div class="movie-item" data-movie="spider">
+                            <img src="https://via.placeholder.com/150x200?text=蜘蛛侠" alt="蜘蛛侠">
+                            <div class="movie-info">
+                                <h3>蜘蛛侠：纵横宇宙</h3>
+                                <p class="movie-time">2024-12-25 22:30</p>
+                                <p class="movie-price">票价: ¥40</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="movie-actions">
+                        <button class="btn btn-secondary" id="back-to-config">上一步</button>
+                        <button class="btn btn-primary" id="next-to-seat">下一步：选择座位</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 选座视图 -->
+            <section id="seat-view" class="view">
+                <div class="seat-panel">
+                    <div class="seat-header">
+                        <h2>选择座位</h2>
+                        <div class="ticket-type-selector">
+                            <label class="ticket-type active">
+                                <input type="radio" name="ticket-type" value="individual" checked>
+                                <span>个人票</span>
+                            </label>
+                            <label class="ticket-type">
+                                <input type="radio" name="ticket-type" value="group">
+                                <span>团体票</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="seat-content">
+                        <!-- 左侧控制面板 -->
+                        <div class="seat-controls">
+                            <!-- 个人票控制 -->
+                            <div class="individual-controls">
+                                <div class="customer-info">
+                                    <h3>客户信息</h3>
+                                    <div class="input-group">
+                                        <label for="customer-name">姓名:</label>
+                                        <input type="text" id="customer-name" placeholder="请输入姓名">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="customer-age">年龄:</label>
+                                        <input type="number" id="customer-age" min="1" max="120" value="25">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="customer-phone">手机号:</label>
+                                        <input type="tel" id="customer-phone" placeholder="请输入手机号">
+                                    </div>
+                                </div>
+
+                                <div class="seat-preference">
+                                    <h3>选座偏好</h3>
+                                    <select id="seat-preference">
+                                        <option value="auto">自动推荐</option>
+                                        <option value="front">前排</option>
+                                        <option value="middle">中间</option>
+                                        <option value="back">后排</option>
+                                    </select>
+                                </div>
+
+                                <div class="auto-seat-actions">
+                                    <button class="btn btn-auto" id="auto-select-individual">自动选座</button>
+                                </div>
+                            </div>
+
+                            <!-- 团体票控制 -->
+                            <div class="group-controls" style="display: none;">
+                                <div class="group-info">
+                                    <h3>团体信息</h3>
+                                    <div class="group-members">
+                                        <div class="member-list">
+                                            <!-- 动态生成团体成员列表 -->
+                                        </div>
+                                        <div class="add-member">
+                                            <div class="input-row">
+                                                <input type="text" id="member-name" placeholder="成员姓名">
+                                                <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
+                                                <button class="btn btn-add" id="add-member">添加</button>
+                                            </div>
+                                            <div class="member-count">
+                                                已添加 <span id="member-count">0</span> 人 (最多20人)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="group-preference">
+                                    <h3>选座偏好</h3>
+                                    <select id="group-preference">
+                                        <option value="auto">自动推荐</option>
+                                        <option value="front">前排</option>
+                                        <option value="middle">中间</option>
+                                        <option value="back">后排</option>
+                                    </select>
+                                </div>
+
+                                <div class="auto-seat-actions">
+                                    <button class="btn btn-auto" id="auto-select-group">团体自动选座</button>
+                                </div>
+                            </div>
+
+                            <!-- 手动选座模式切换 -->
+                            <div class="manual-controls">
+                                <h3>手动选座</h3>
+                                <div class="manual-options">
+                                    <label class="manual-option">
+                                        <input type="radio" name="manual-mode" value="single" checked>
+                                        <span>单选模式</span>
+                                    </label>
+                                    <label class="manual-option">
+                                        <input type="radio" name="manual-mode" value="multi">
+                                        <span>多选模式 (Ctrl+点击)</span>
+                                    </label>
+                                </div>
+                                <button class="btn btn-clear" id="clear-selection">清除选择</button>
+                            </div>
+
+                            <!-- 已选座位信息 -->
+                            <div class="selected-seats">
+                                <h3>已选座位</h3>
+                                <div class="selected-list" id="selected-seats-list">
+                                    <p class="no-selection">暂未选择座位</p>
+                                </div>
+                                <div class="selection-summary">
+                                    <div class="summary-item">
+                                        <span>已选座位数:</span>
+                                        <span id="selected-count">0</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>总金额:</span>
+                                        <span id="total-price">¥0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 中间Canvas座位图 -->
+                        <div class="seat-canvas-container">
+                            <div class="screen">
+                                <div class="screen-label">银幕</div>
+                            </div>
+                            <canvas id="cinema-canvas" width="800" height="600">
+                                您的浏览器不支持Canvas，请升级浏览器
+                            </canvas>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <span class="legend-color available"></span>
+                                    <span>可选座位</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color selected"></span>
+                                    <span>已选座位</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color sold"></span>
+                                    <span>已售座位</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color reserved"></span>
+                                    <span>已预订</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右侧操作面板 -->
+                        <div class="seat-operations">
+                            <div class="operations-section">
+                                <h3>座位操作</h3>
+                                <div class="operation-buttons">
+                                    <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
+                                    <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
+                                </div>
+                            </div>
+
+                            <div class="operations-section">
+                                <h3>管理操作</h3>
+                                <div class="management-controls">
+                                    <div class="input-group">
+                                        <label for="reservation-id">预订号:</label>
+                                        <input type="text" id="reservation-id" placeholder="输入预订号">
+                                        <button class="btn btn-cancel" id="cancel-reservation">取消预订</button>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="ticket-id">票务号:</label>
+                                        <input type="text" id="ticket-id" placeholder="输入票务号">
+                                        <button class="btn btn-refund" id="refund-ticket">退票</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="operations-section">
+                                <h3>影厅状态</h3>
+                                <div class="cinema-stats" id="cinema-stats">
+                                    <div class="stat-item">
+                                        <span>可选:</span>
+                                        <span id="available-count">200</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>已售:</span>
+                                        <span id="sold-count">0</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>已订:</span>
+                                        <span id="reserved-count">0</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>上座率:</span>
+                                        <span id="occupancy-rate">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="seat-actions">
+                        <button class="btn btn-secondary" id="back-to-movie">上一步</button>
+                        <button class="btn btn-primary" id="next-to-payment" disabled>下一步：支付确认</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 支付视图 -->
+            <section id="payment-view" class="view">
+                <div class="payment-panel">
+                    <h2>支付确认</h2>
+                    <div class="payment-content">
+                        <div class="order-summary">
+                            <h3>订单详情</h3>
+                            <div class="movie-info-summary">
+                                <div class="movie-poster">
+                                    <img src="https://via.placeholder.com/100x150?text=电影海报" alt="电影海报">
+                                </div>
+                                <div class="movie-details">
+                                    <h4 id="payment-movie-title">复仇者联盟：终局之战</h4>
+                                    <p id="payment-movie-time">2024-12-25 19:30</p>
+                                    <p id="payment-cinema-info">中厅 (10排×20座)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="seats-summary">
+                                <h4>选中座位</h4>
+                                <div id="payment-seats-list">
+                                    <!-- 动态生成座位列表 -->
+                                </div>
+                            </div>
+
+                            <div class="price-breakdown">
+                                <div class="price-item">
+                                    <span>票价:</span>
+                                    <span id="unit-price">¥45</span>
+                                </div>
+                                <div class="price-item">
+                                    <span>数量:</span>
+                                    <span id="ticket-quantity">1</span>
+                                </div>
+                                <div class="price-item total">
+                                    <span>总计:</span>
+                                    <span id="final-total">¥45</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-method">
+                            <h3>支付方式</h3>
+                            <div class="payment-options">
+                                <label class="payment-option active">
+                                    <input type="radio" name="payment-method" value="wechat" checked>
+                                    <span class="payment-icon">💳</span>
+                                    <span>微信支付</span>
+                                </label>
+                                <label class="payment-option">
+                                    <input type="radio" name="payment-method" value="alipay">
+                                    <span class="payment-icon">💰</span>
+                                    <span>支付宝</span>
+                                </label>
+                                <label class="payment-option">
+                                    <input type="radio" name="payment-method" value="card">
+                                    <span class="payment-icon">💳</span>
+                                    <span>银行卡</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="customer-summary">
+                            <h3>客户信息</h3>
+                            <div id="payment-customer-info">
+                                <!-- 动态生成客户信息 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-actions">
+                        <button class="btn btn-secondary" id="back-to-seat">返回选座</button>
+                        <button class="btn btn-success" id="confirm-payment">确认支付</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 确认视图 -->
+            <section id="confirm-view" class="view">
+                <div class="confirm-panel">
+                    <div class="success-icon">✅</div>
+                    <h2>购票成功！</h2>
+                    
+                    <div class="ticket-info">
+                        <h3>电子票据</h3>
+                        <div class="ticket-details">
+                            <div class="ticket-item">
+                                <span>订单号:</span>
+                                <span id="order-number">-</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>电影:</span>
+                                <span id="confirm-movie-title">-</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>场次:</span>
+                                <span id="confirm-movie-time">-</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>座位:</span>
+                                <span id="confirm-seats">-</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>金额:</span>
+                                <span id="confirm-amount">-</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>购票时间:</span>
+                                <span id="purchase-time">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qr-code">
+                        <h4>取票二维码</h4>
+                        <div class="qr-placeholder">
+                            <div class="qr-code-box">📱</div>
+                            <p>请凭此二维码到影院取票</p>
+                        </div>
+                    </div>
+
+                    <div class="confirm-actions">
+                        <button class="btn btn-primary" id="new-order">继续购票</button>
+                        <button class="btn btn-secondary" id="print-ticket">打印票据</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- 消息提示组件 -->
+    <div class="message-container" id="message-container">
+        <!-- 动态生成消息提示 -->
+    </div>
+
+    <!-- 加载状态遮罩 -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">正在加载...</p>
+        </div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div class="modal-overlay" id="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 id="modal-title">确认操作</h3>
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">确定要执行此操作吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel">取消</button>
+                <button class="btn btn-primary" id="modal-confirm">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面底部 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 电影院选座系统 - 基于Canvas技术实现</p>
+        </div>
+    </footer>
+
+    <!-- 引入JavaScript模块 -->
+    <script src="js/main.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/stateManager.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>

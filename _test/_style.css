@@ -1,0 +1,1197 @@
+/* ========================= 基础样式重置 ========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+/* ========================= 通用组件样式 ========================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 按钮样式 */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    min-width: 100px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    color: #333;
+}
+
+.btn-auto {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #333;
+}
+
+.btn-reserve {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #333;
+}
+
+.btn-purchase {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #333;
+}
+
+.btn-cancel {
+    background: #dc3545;
+    color: white;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-refund {
+    background: #fd7e14;
+    color: white;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-clear {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-add {
+    background: #28a745;
+    color: white;
+    min-width: 60px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+/* 输入框样式 */
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* ========================= 页面头部样式 ========================= */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.nav-steps {
+    display: flex;
+    gap: 30px;
+}
+
+.step {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.step.active {
+    background: rgba(255, 255, 255, 0.2);
+    opacity: 1;
+}
+
+.step:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ========================= 主要内容样式 ========================= */
+.main {
+    min-height: calc(100vh - 120px);
+    padding: 30px 0;
+}
+
+.view {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================= 配置视图样式 ========================= */
+.config-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.config-section {
+    margin-bottom: 30px;
+}
+
+.config-section h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 18px;
+}
+
+.preset-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.preset-option {
+    display: block;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preset-option:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.preset-option input[type="radio"] {
+    display: none;
+}
+
+.preset-option input[type="radio"]:checked + .preset-info {
+    color: #667eea;
+}
+
+.preset-option:has(input[type="radio"]:checked) {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.preset-info strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.preset-details {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.custom-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.total-info {
+    grid-column: 1 / -1;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.config-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+/* ========================= 电影选择样式 ========================= */
+.movie-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.movie-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.movie-item {
+    display: flex;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.movie-item:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.movie-item.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.movie-item img {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+}
+
+.movie-info h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.movie-time,
+.movie-price {
+    margin: 5px 0;
+    color: #6c757d;
+}
+
+.movie-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* ========================= 选座视图样式 ========================= */
+.seat-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.seat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e1e5e9;
+}
+
+.ticket-type-selector {
+    display: flex;
+    gap: 20px;
+}
+
+.ticket-type {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border: 2px solid #e1e5e9;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ticket-type input[type="radio"] {
+    display: none;
+}
+
+.ticket-type.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+}
+
+.seat-content {
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* 左侧控制面板 */
+.seat-controls {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    height: fit-content;
+}
+
+.seat-controls h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 2px solid #e1e5e9;
+    padding-bottom: 10px;
+}
+
+.customer-info,
+.seat-preference,
+.auto-seat-actions,
+.group-info,
+.manual-controls,
+.selected-seats {
+    margin-bottom: 25px;
+}
+
+.seat-preference select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 2px solid #e1e5e9;
+}
+
+.group-members {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.member-list {
+    margin-bottom: 15px;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.member-remove {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input-row input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.manual-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.manual-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.manual-option input[type="radio"] {
+    margin-right: 8px;
+}
+
+.selected-list {
+    max-height: 150px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.selected-seat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+
+.no-selection {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.selection-summary {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+/* Canvas容器样式 */
+.seat-canvas-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+}
+
+.screen {
+    width: 80%;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px 10px 50px 50px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.screen-label {
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+#cinema-canvas {
+    border-radius: 8px;
+    cursor: crosshair;
+    background: #2a2a2a;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 12px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid #555;
+}
+
+.legend-color.available { background: #2ecc71; }
+.legend-color.selected { background: #f1c40f; }
+.legend-color.sold { background: #e74c3c; }
+.legend-color.reserved { background: #3498db; }
+
+/* 右侧操作面板 */
+.seat-operations {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    height: fit-content;
+}
+
+.operations-section {
+    margin-bottom: 25px;
+}
+
+.operations-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 2px solid #e1e5e9;
+    padding-bottom: 10px;
+}
+
+.operation-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.management-controls .input-group {
+    margin-bottom: 10px;
+}
+
+.management-controls .input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.management-controls .input-group label {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.management-controls .input-group input {
+    margin-bottom: 8px;
+    font-size: 12px;
+    padding: 6px 10px;
+}
+
+.cinema-stats {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.stat-item:last-child {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.seat-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e1e5e9;
+}
+
+/* ========================= 支付视图样式 ========================= */
+.payment-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.payment-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin: 30px 0;
+}
+
+.order-summary,
+.payment-method,
+.customer-summary {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.movie-info-summary {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.movie-poster img {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.movie-details h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.movie-details p {
+    margin: 5px 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.seats-summary {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.seats-summary h4 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.seat-tag {
+    display: inline-block;
+    background: #667eea;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+.price-breakdown {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.price-item.total {
+    border-top: 2px solid #e1e5e9;
+    padding-top: 15px;
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-option input[type="radio"] {
+    display: none;
+}
+
+.payment-option.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.payment-icon {
+    font-size: 24px;
+    margin-right: 15px;
+}
+
+.payment-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* ========================= 确认视图样式 ========================= */
+.confirm-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.confirm-panel h2 {
+    color: #28a745;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.ticket-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.ticket-details {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.ticket-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.ticket-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.qr-code {
+    margin: 30px 0;
+}
+
+.qr-placeholder {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 30px;
+    margin-top: 15px;
+}
+
+.qr-code-box {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+/* ========================= 消息提示样式 ========================= */
+.message-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.message {
+    background: white;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #667eea;
+    animation: slideIn 0.3s ease-out;
+}
+
+.message.success { border-left-color: #28a745; }
+.message.error { border-left-color: #dc3545; }
+.message.warning { border-left-color: #ffc107; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ========================= 加载状态样式 ========================= */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: #333;
+    font-size: 16px;
+}
+
+/* ========================= 模态框样式 ========================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-dialog {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 20px 25px;
+    border-top: 1px solid #e1e5e9;
+}
+
+/* ========================= 页面底部样式 ========================= */
+.footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 40px;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ========================= 响应式设计 ========================= */
+@media (max-width: 1024px) {
+    .seat-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .seat-controls,
+    .seat-operations {
+        order: 2;
+    }
+    
+    .seat-canvas-container {
+        order: 1;
+    }
+    
+    .payment-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .header .container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-steps {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .step {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .preset-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .custom-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .movie-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .movie-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .movie-item img {
+        width: 120px;
+        height: 180px;
+        margin: 0 auto 15px;
+    }
+    
+    .movie-actions,
+    .seat-actions,
+    .payment-actions,
+    .confirm-actions {
+        flex-direction: column;
+    }
+    
+    #cinema-canvas {
+        width: 100%;
+        height: auto;
+    }
+    
+    .legend {
+        gap: 10px;
+    }
+    
+    .legend-item {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main {
+        padding: 15px 0;
+    }
+    
+    .config-panel,
+    .movie-panel,
+    .seat-panel,
+    .payment-panel,
+    .confirm-panel {
+        padding: 20px;
+        margin: 0 10px;
+    }
+    
+    .btn {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .modal-dialog {
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+    
+    .message-container {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+/* ========================= 打印样式 ========================= */
+@media print {
+    .header,
+    .footer,
+    .btn,
+    .message-container,
+    .loading-overlay,
+    .modal-overlay {
+        display: none !important;
+    }
+    
+    .main {
+        padding: 0;
+    }
+    
+    .confirm-panel {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* ========================= 高对比度模式 ========================= */
+@media (prefers-contrast: high) {
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    .preset-option,
+    .movie-item,
+    .ticket-type,
+    .payment-option {
+        border-width: 3px;
+    }
+}
+
+/* ========================= 减少动画模式 ========================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

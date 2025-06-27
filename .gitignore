@@ -114,5 +114,9 @@ fabric.properties
 *.log
 *.synctex.gz
 
+# Folder view configuration files
+.DS_Store
+Desktop.ini
+
 .vscode/
 __pycache__/
