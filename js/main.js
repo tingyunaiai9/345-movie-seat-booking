@@ -249,37 +249,50 @@ function checkAndReleaseExpiredReservations() {
 
 /**
  * 预订票务
- * @param {Array} seats - 座位对象列表
+ * @param {Array} seats - 座位对象列表，可以是不完整的对象，如 {row: 8, col: 8}
  * @param {Object} customerInfo - 客户信息
  * @returns {Object} 预订结果
  */
 function reserveTickets(seats, customerInfo) {
     if (!currentCinemaConfig.movieStartTime) return { success: false, message: '无法预订：未设置电影开始时间。' };
-    if (!seats || seats.length === 0) return { success: false, message: '未选择任何座位' };
-    if (!seats.every(s => isSeatAvailable(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
+
+    // 即使调用者只传入 {row, col}，也通过 getSeat 获取完整的座位对象，确保 id 存在。
+    const fullSeatObjects = seats.map(s => getSeat(s.row, s.col));
+    if (fullSeatObjects.some(s => s === null)) {
+        return { success: false, message: '选择的座位中包含无效或不存在的座位。' };
+    }
+
+    if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
+    if (!fullSeatObjects.every(s => isSeatAvailable(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
     const expiresAt = new Date(currentCinemaConfig.movieStartTime.getTime() - currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
     if (new Date() > expiresAt) return { success: false, message: `已超过预订时间，请直接购票。` };
 
     const ticketId = `r-${Date.now()}`;
-    ticketRecords.push({ ticketId, status: SEAT_STATUS.RESERVED, seats: seats.map(s => s.id), customerInfo, createdAt: new Date(), expiresAt });
-    seats.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.RESERVED; });
+    // 使用标准化后的 fullSeatObjects 来创建票据
+    ticketRecords.push({ ticketId, status: SEAT_STATUS.RESERVED, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), expiresAt });
+    fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.RESERVED; });
     return { success: true, reservationId: ticketId, message: `预订成功！请在 ${expiresAt.toLocaleString()} 前完成支付。` };
 }
 
 /**
  * 直接购票
- * @param {Array} seats - 座位对象列表
+ * @param {Array} seats - 座位对象列表，可以是不完整的对象
  * @param {Object} customerInfo - 客户信息
  * @returns {Object} 购票结果
  */
 function purchaseTickets(seats, customerInfo) {
-    if (!seats || seats.length === 0) return { success: false, message: '未选择任何座位' };
-    if (!seats.every(s => isSeatAvailable(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
+    const fullSeatObjects = seats.map(s => getSeat(s.row, s.col));
+    if (fullSeatObjects.some(s => s === null)) {
+        return { success: false, message: '选择的座位中包含无效或不存在的座位。' };
+    }
+
+    if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
+    if (!fullSeatObjects.every(s => isSeatAvailable(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
     const ticketId = `s-${Date.now()}`;
-    ticketRecords.push({ ticketId, status: SEAT_STATUS.SOLD, seats: seats.map(s => s.id), customerInfo, createdAt: new Date(), paidAt: new Date() });
-    seats.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.SOLD; });
+    ticketRecords.push({ ticketId, status: SEAT_STATUS.SOLD, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), paidAt: new Date() });
+    fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.SOLD; });
     return { success: true, ticketId, message: '购票成功！' };
 }
 
@@ -440,4 +453,4 @@ window.CinemaData = {
     validateCustomerInfo
 };
 
-console.log('电影院票务系统核心模块(main.js)已加载并调整');
+console.log('电影院票务系统核心模块(main.js)已加载');
