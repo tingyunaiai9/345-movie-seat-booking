@@ -271,9 +271,9 @@ function drawCenterSector(ctx, centerRowsStart, centerRowsEnd, centerColsStart, 
  */
 function preloadSeatImages() {
     const imageSources = {
-        available: 'images/available.png',
-        selected: 'images/selected.png',
-        sold: 'images/sold.png'
+        available: '../img/available.PNG',
+        selected: '../img/selected.PNG',
+        sold: '../img/sold.PNG'
     };
 
     const promises = Object.entries(imageSources).map(([status, src]) => {
