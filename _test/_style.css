@@ -386,6 +386,7 @@ body {
     gap: 20px;
 }
 
+/* 票务类型切换样式 */
 .ticket-type {
     display: flex;
     align-items: center;
@@ -394,16 +395,87 @@ body {
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ticket-type::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    z-index: 0;
+}
+
+.ticket-type span {
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .ticket-type input[type="radio"] {
     display: none;
 }
 
+.ticket-type:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.ticket-type:hover::before {
+    transform: scaleX(1);
+}
+
 .ticket-type.active {
     border-color: #667eea;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.ticket-type.active::before {
+    transform: scaleX(1);
+}
+
+.ticket-type.active span {
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* 控制面板显示切换 */
+.individual-controls,
+.group-controls {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e8ecef;
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.individual-controls.hidden,
+.group-controls.hidden {
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.individual-controls.active,
+.group-controls.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .seat-content {
@@ -432,6 +504,23 @@ body {
     margin-bottom: 25px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     border: 1px solid #e8ecef;
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.individual-controls.hidden,
+.group-controls.hidden {
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.individual-controls.active,
+.group-controls.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* 手动选择控制样式优化 */
@@ -784,344 +873,108 @@ body {
 }
 
 .add-member .input-row {
-    display: grid;
-    grid-template-columns: 1fr 80px 80px;
+    display: flex;
+    flex-direction: column; /* 改为垂直布局 */
+    gap: 12px; /* 增加间距 */
+    margin-bottom: 15px;
+}
+
+/* 输入框容器 - 保持水平排列 */
+.add-member .input-container {
+    display: flex;
     gap: 10px;
-    margin-bottom: 10px;
-}
-
-.member-count {
-    text-align: center;
-    color: #6c757d;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-/* 右侧Canvas区域 - 垂直排列Canvas和操作面板 */
-.seat-canvas-area {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    /* 移除 min-height: 100vh; 这行导致了问题 */
-}
-
-/* Canvas容器样式调整 */
-.seat-canvas-container {
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    background: #1a1a1a;
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    /* 移除 flex: 1; 避免高度问题 */
 }
 
-/* 银幕样式 */
-.screen {
-    width: 60%;
-    height: 35px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px 10px 50px 50px;
-    margin-bottom: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-}
-
-.screen-label {
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Canvas样式 - 修复显示问题 */
-#cinema-canvas {
-    border-radius: 8px;
-    width: 600px;
-    height: 375px;
-    max-width: 100%;
-    cursor: crosshair;
-    background: #2a2a2a;
-    border: 2px solid #444;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-    display: block; /* 确保Canvas正常显示 */
-}
-
-#cinema-canvas:hover {
-    border-color: #667eea;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
-}
-
-/* 图例样式 */
-.legend {
-    display: flex;
-    justify-content: center;
-    gap: 25px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: white;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 5px 10px;
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.legend-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-}
-
-.legend-color {
-    width: 14px;
-    height: 10px;
-    border-radius: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* 图例颜色定义 */
-.legend-color.available {
-    background: #28a745;
-}
-
-.legend-color.selected {
-    background: #667eea;
-}
-
-.legend-color.sold {
-    background: #dc3545;
-}
-
-.legend-color.reserved {
-    background: #ffc107;
-}
-
-/* Canvas下方的操作面板 */
-.seat-operations-bottom {
-    background: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e8ecef;
-}
-
-.operations-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 两列等宽布局 */
-    gap: 30px;
-    align-items: start;
-}
-
-.operations-section {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 25px;
-    transition: all 0.3s ease;
-    border: 1px solid #e9ecef;
-    min-height: 200px; /* 设置最小高度而不是100% */
-}
-
-.operations-section:hover {
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-.operations-section h3 {
-    margin: 0 0 20px 0;
-    color: #2c3e50;
-    font-size: 16px;
-    font-weight: 600;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e9ecef;
-    position: relative;
-}
-
-.operations-section h3::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 40px;
-    height: 2px;
-    border-radius: 2px;
-}
-
-/* 座位操作区域装饰色 */
-.operations-section:nth-child(1) h3::after {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-/* 影厅状态区域装饰色 */
-.operations-section:nth-child(2) h3::after {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
-
-/* 操作按钮样式 */
-.operation-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.operation-buttons .btn {
-    width: 100%;
-    padding: 14px 20px;
-    font-weight: 600;
-    font-size: 14px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.btn-reserve {
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    color: #8b4513;
-    border: 2px solid transparent;
-}
-
-.btn-reserve:hover {
-    background: linear-gradient(135deg, #fdd7b7 0%, #fb9f84 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(252, 182, 159, 0.4);
-}
-
-.btn-purchase {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-    color: #8b0a1a;
-    border: 2px solid transparent;
-}
-
-.btn-purchase:hover {
-    background: linear-gradient(135deg, #ff7983 0%, #fdb8e4 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 154, 158, 0.4);
-}
-
-/* 影厅状态样式 */
-.cinema-stats {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-radius: 8px;
-    padding: 20px;
-    border: 1px solid #e9ecef;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f1f3f4;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-    background: rgba(40, 167, 69, 0.05);
+.add-member .input-container input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid #e9ecef;
     border-radius: 6px;
-    margin: 0 -8px;
-    padding: 12px 8px;
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-    font-weight: 600;
-    color: #28a745;
-    padding-top: 18px;
-    margin-top: 8px;
-    border-top: 2px solid #e9ecef;
-    font-size: 16px;
-}
-
-.stat-item:last-child:hover {
-    background: rgba(40, 167, 69, 0.1);
-}
-
-.stat-item span:first-child {
-    color: #6c757d;
-    font-weight: 500;
-    font-size: 13px;
-}
-
-.stat-item span:last-child {
-    color: #2c3e50;
-    font-weight: 600;
-    font-size: 15px;
-}
-
-.stat-item:last-child span:last-child {
-    color: #28a745;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-/* 添加数据可视化小图标 */
-.stat-item::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-
-.stat-item:nth-child(1)::before {
-    background: #28a745; /* 可选座位 - 绿色 */
-}
-
-.stat-item:nth-child(2)::before {
-    background: #dc3545; /* 已售座位 - 红色 */
-}
-
-.stat-item:nth-child(3)::before {
-    background: #ffc107; /* 已预订 - 黄色 */
-}
-
-.stat-item:nth-child(4)::before {
-    background: #667eea; /* 上座率 - 蓝色 */
-}
-
-/* 确保左侧各个控制区域能够填充高度 */
-.selected-seats {
-    flex: 1; /* 让已选座位区域填充剩余空间 */
-    background: white;
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e8ecef;
-    display: flex;
-    flex-direction: column;
-}
-
-.selected-list {
-    flex: 1; /* 让选座列表填充可用空间 */
-    min-height: 120px; /* 增加最小高度 */
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 2px dashed #dee2e6;
+    font-size: 14px;
     transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+}
+
+.add-member .input-container input:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    outline: none;
+}
+
+.add-member .input-container input[placeholder*="姓名"] {
+    flex: none; /* 姓名输入框更宽 */
+    width: 140px;
+}
+
+.add-member .input-container input[placeholder*="年龄"] {
+    flex: none; /* 年龄输入框较窄 */
+    width: 80px;
+}
+
+/* 添加按钮独占一行 */
+.add-member .btn-add {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.add-member .btn-add:hover {
+    background: linear-gradient(135deg, #5a2d91 0%, #d91a72 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(111, 66, 193, 0.3);
+}
+
+/* ========================= 打印样式 ========================= */
+@media print {
+    .header,
+    .footer,
+    .btn,
+    .message-container,
+    .loading-overlay,
+    .modal-overlay {
+        display: none !important;
+    }
+    
+    .main {
+        padding: 0;
+    }
+    
+    .confirm-panel {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* ========================= 高对比度模式 ========================= */
+@media (prefers-contrast: high) {
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    .preset-option,
+    .movie-item,
+    .ticket-type,
+    .payment-option {
+        border-width: 3px;
+    }
+}
+
+/* ========================= 减少动画模式 ========================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 /* 响应式调整 */
@@ -1346,5 +1199,661 @@ body {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* 右侧Canvas区域 - 垂直排列Canvas和操作面板 */
+.seat-canvas-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Canvas容器样式调整 */
+.seat-canvas-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 银幕样式 */
+.screen {
+    width: 60%;
+    height: 35px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px 10px 50px 50px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.screen-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Canvas样式 - 确保正常显示 */
+#cinema-canvas {
+    display: block !important;
+    border-radius: 8px;
+    width: 600px;
+    height: 375px;
+    max-width: 100%;
+    cursor: crosshair;
+    background: #2a2a2a;
+    border: 2px solid #444;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+#cinema-canvas:hover {
+    border-color: #667eea;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+}
+
+/* 图例样式 */
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.legend-color {
+    width: 14px;
+    height: 10px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* 图例颜色定义 */
+.legend-color.available {
+    background: #28a745;
+}
+
+.legend-color.selected {
+    background: #667eea;
+}
+
+.legend-color.sold {
+    background: #dc3545;
+}
+
+.legend-color.reserved {
+    background: #ffc107;
+}
+
+/* Canvas下方的操作面板 */
+.seat-operations-bottom {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e8ecef;
+}
+
+.operations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.operations-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    min-height: 200px;
+}
+
+.operations-section:hover {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.operations-section h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+}
+
+.operations-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    border-radius: 2px;
+}
+
+.operations-section:nth-child(1) h3::after {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.operations-section:nth-child(2) h3::after {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+/* 操作按钮样式 */
+.operation-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.operation-buttons .btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-reserve {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #8b4513;
+    border: 2px solid transparent;
+}
+
+.btn-reserve:hover {
+    background: linear-gradient(135deg, #fdd7b7 0%, #fb9f84 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(252, 182, 159, 0.4);
+}
+
+.btn-purchase {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #8b0a1a;
+    border: 2px solid transparent;
+}
+
+.btn-purchase:hover {
+    background: linear-gradient(135deg, #ff7983 0%, #fdb8e4 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 154, 158, 0.4);
+}
+
+/* 影厅状态样式 */
+.cinema-stats {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f3f4;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(40, 167, 69, 0.05);
+    border-radius: 6px;
+    margin: 0 -8px;
+    padding: 12px 8px;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    color: #28a745;
+    padding-top: 18px;
+    margin-top: 8px;
+    border-top: 2px solid #e9ecef;
+    font-size: 16px;
+}
+
+.stat-item:last-child:hover {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.stat-item span:first-child {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.stat-item span:last-child {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.stat-item:last-child span:last-child {
+    color: #28a745;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* 添加数据可视化小图标 */
+.stat-item::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.stat-item:nth-child(1)::before {
+    background: #28a745; /* 可选座位 - 绿色 */
+}
+
+.stat-item:nth-child(2)::before {
+    background: #dc3545; /* 已售座位 - 红色 */
+}
+
+.stat-item:nth-child(3)::before {
+    background: #ffc107; /* 已预订 - 黄色 */
+}
+
+.stat-item:nth-child(4)::before {
+    background: #667eea; /* 上座率 - 蓝色 */
+}
+
+/* ========================= 支付确认页面样式 ========================= */
+.confirm-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.confirm-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e1e5e9;
+}
+
+.confirm-header h2 {
+    color: #2c3e50;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.confirm-header .subtitle {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+/* 订单详情样式 */
+.order-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.detail-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.detail-section h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+}
+
+.detail-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    border-radius: 2px;
+}
+
+.detail-section:nth-child(1) h3::after {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.detail-section:nth-child(2) h3::after {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+/* 详情项样式 */
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item .label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.detail-item .value {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* 座位信息样式 */
+.seat-info {
+    grid-column: 1 / -1;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.seat-info h3::after {
+    background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+}
+
+.seat-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.seat-item {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+/* 费用明细样式 */
+.cost-breakdown {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 10px;
+    padding: 25px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 20px;
+}
+
+.cost-breakdown h3::after {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.cost-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 15px;
+}
+
+.cost-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    font-size: 18px;
+    color: #dc3545;
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 2px solid #e9ecef;
+}
+
+.cost-item .label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.cost-item .amount {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.cost-item:last-child .amount {
+    color: #dc3545;
+    font-size: 20px;
+}
+
+/* 支付方式选择 */
+.payment-methods {
+    margin-bottom: 30px;
+}
+
+.payment-methods h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.payment-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.payment-option:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.payment-option.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.payment-option input[type="radio"] {
+    display: none;
+}
+
+.payment-option .payment-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 15px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.payment-option .payment-info {
+    flex: 1;
+}
+
+.payment-option .payment-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.payment-option .payment-desc {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* 支付图标样式 */
+.payment-icon.alipay {
+    background: linear-gradient(135deg, #00a0e9 0%, #0084c7 100%);
+    color: white;
+}
+
+.payment-icon.wechat {
+    background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+    color: white;
+}
+
+.payment-icon.card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.payment-icon.cash {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    color: white;
+}
+
+/* 确认按钮区域 */
+.confirm-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e1e5e9;
+}
+
+.confirm-actions .btn {
+    flex: 1;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-pay {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.btn-pay:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-pay:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .order-details {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .payment-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .confirm-actions {
+        flex-direction: column;
+    }
+    
+    .seat-list {
+        justify-content: center;
+    }
+    
+    .cost-item {
+        font-size: 14px;
+    }
+    
+    .cost-item:last-child {
+        font-size: 16px;
+    }
+    
+    .cost-item:last-child .amount {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .confirm-panel {
+        padding: 20px;
+        margin: 0 10px;
+    }
+    
+    .detail-section {
+        padding: 15px;
+    }
+    
+    .confirm-actions .btn {
+        padding: 12px 20px;
+        font-size: 14px;
     }
 }

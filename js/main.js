@@ -321,3 +321,80 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTicketSystem();
     console.log('电影院票务系统核心模块已初始化');
 });
+
+// 票务类型切换功能
+function initTicketTypeToggle() {
+    const ticketTypes = document.querySelectorAll('.ticket-type');
+    const individualControls = document.querySelector('.individual-controls');
+    const groupControls = document.querySelector('.group-controls');
+    
+    ticketTypes.forEach(ticketType => {
+        ticketType.addEventListener('click', function() {
+            // 移除所有active类
+            ticketTypes.forEach(type => type.classList.remove('active'));
+            
+            // 添加active类到当前点击的类型
+            this.classList.add('active');
+            
+            // 获取选中的票务类型
+            const radioButton = this.querySelector('input[type="radio"]');
+            if (radioButton) {
+                radioButton.checked = true;
+                const ticketType = radioButton.value;
+                
+                // 根据票务类型显示对应的控制面板
+                if (ticketType === 'individual') {
+                    showIndividualControls();
+                } else if (ticketType === 'group') {
+                    showGroupControls();
+                }
+            }
+        });
+    });
+    
+    // 初始化显示个人票控制面板
+    showIndividualControls();
+}
+
+function showIndividualControls() {
+    const individualControls = document.querySelector('.individual-controls');
+    const groupControls = document.querySelector('.group-controls');
+    
+    if (individualControls && groupControls) {
+        // 显示个人票控制
+        individualControls.style.display = 'block';
+        individualControls.classList.add('active');
+        individualControls.classList.remove('hidden');
+        
+        // 隐藏团体票控制
+        groupControls.style.display = 'none';
+        groupControls.classList.add('hidden');
+        groupControls.classList.remove('active');
+    }
+}
+
+function showGroupControls() {
+    const individualControls = document.querySelector('.individual-controls');
+    const groupControls = document.querySelector('.group-controls');
+    
+    if (individualControls && groupControls) {
+        // 隐藏个人票控制
+        individualControls.style.display = 'none';
+        individualControls.classList.add('hidden');
+        individualControls.classList.remove('active');
+        
+        // 显示团体票控制
+        groupControls.style.display = 'block';
+        groupControls.classList.add('active');
+        groupControls.classList.remove('hidden');
+    }
+}
+
+// 在DOM加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    initTicketTypeToggle();
+});
+
+// 如果你的项目已经有其他初始化函数，可以在那里调用
+// 例如在 main.js 的初始化函数中添加：
+// initTicketTypeToggle();
