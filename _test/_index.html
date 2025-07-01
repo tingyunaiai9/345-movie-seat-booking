@@ -251,78 +251,66 @@
                             </div>
                         </div>
 
-                        <!-- 中间Canvas座位图 -->
-                        <div class="seat-canvas-container">
-                            <div class="screen">
-                                <div class="screen-label">银幕</div>
-                            </div>
-                            <canvas id="cinema-canvas" width="800" height="500">
-                                您的浏览器不支持Canvas，请升级浏览器
-                            </canvas>
-                            <div class="legend">
-                                <div class="legend-item">
-                                    <span class="legend-color available"></span>
-                                    <span>可选座位</span>
+                        <!-- 中间Canvas座位图区域 -->
+                        <div class="seat-canvas-area">
+                            <div class="seat-canvas-container">
+                                <div class="screen">
+                                    <div class="screen-label">银幕</div>
                                 </div>
-                                <div class="legend-item">
-                                    <span class="legend-color selected"></span>
-                                    <span>已选座位</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color sold"></span>
-                                    <span>已售座位</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color reserved"></span>
-                                    <span>已预订</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 右侧操作面板 -->
-                        <div class="seat-operations">
-                            <div class="operations-section">
-                                <h3>座位操作</h3>
-                                <div class="operation-buttons">
-                                    <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
-                                    <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
-                                </div>
-                            </div>
-
-                            <div class="operations-section">
-                                <h3>管理操作</h3>
-                                <div class="management-controls">
-                                    <div class="input-group">
-                                        <label for="reservation-id">预订号:</label>
-                                        <input type="text" id="reservation-id" placeholder="输入预订号">
-                                        <button class="btn btn-cancel" id="cancel-reservation">取消预订</button>
+                                <canvas id="cinema-canvas" width="800" height="500">
+                                    您的浏览器不支持Canvas，请升级浏览器
+                                </canvas>
+                                <div class="legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color available"></span>
+                                        <span>可选座位</span>
                                     </div>
-                                    <div class="input-group">
-                                        <label for="ticket-id">票务号:</label>
-                                        <input type="text" id="ticket-id" placeholder="输入票务号">
-                                        <button class="btn btn-refund" id="refund-ticket">退票</button>
+                                    <div class="legend-item">
+                                        <span class="legend-color selected"></span>
+                                        <span>已选座位</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color sold"></span>
+                                        <span>已售座位</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color reserved"></span>
+                                        <span>已预订</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="operations-section">
-                                <h3>影厅状态</h3>
-                                <div class="cinema-stats" id="cinema-stats">
-                                    <div class="stat-item">
-                                        <span>可选:</span>
-                                        <span id="available-count">200</span>
+                            <!-- 座位操作面板移到Canvas下方 -->
+                            <div class="seat-operations-bottom">
+                                <div class="operations-grid">
+                                    <div class="operations-section">
+                                        <h3>座位操作</h3>
+                                        <div class="operation-buttons">
+                                            <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
+                                            <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
+                                        </div>
                                     </div>
-                                    <div class="stat-item">
-                                        <span>已售:</span>
-                                        <span id="sold-count">0</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span>已订:</span>
-                                        <span id="reserved-count">0</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span>上座率:</span>
-                                        <span id="occupancy-rate">0%</span>
+
+                                    <div class="operations-section">
+                                        <h3>影厅状态</h3>
+                                        <div class="cinema-stats" id="cinema-stats">
+                                            <div class="stat-item">
+                                                <span>可选座位:</span>
+                                                <span id="available-count">200</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>已售座位:</span>
+                                                <span id="sold-count">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>已预订:</span>
+                                                <span id="reserved-count">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>上座率:</span>
+                                                <span id="occupancy-rate">0%</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
