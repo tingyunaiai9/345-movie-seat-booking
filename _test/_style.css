@@ -553,14 +553,15 @@ body {
     flex-direction: column;
     align-items: center;
     background: #1a1a1a;
-    border-radius: 10px;
-    padding: 20px;
+    border-radius: 8px;
+    padding: 15px;
     position: relative;
+    max-height: 500px;
 }
 
 .screen {
     width: 80%;
-    height: 40px;
+    height: 35px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px 10px 50px 50px;
     margin-bottom: 30px;
@@ -578,6 +579,8 @@ body {
 
 #cinema-canvas {
     border-radius: 8px;
+    width: 760px;
+    height: 350px;
     cursor: crosshair;
     background: #2a2a2a;
 }
