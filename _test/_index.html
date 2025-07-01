@@ -190,8 +190,10 @@
                                         </div>
                                         <div class="add-member">
                                             <div class="input-row">
-                                                <input type="text" id="member-name" placeholder="成员姓名">
-                                                <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
+                                                <div class="input-container">
+                                                    <input type="text" id="member-name" placeholder="成员姓名">
+                                                    <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
+                                                </div>
                                                 <button class="btn btn-add" id="add-member">添加</button>
                                             </div>
                                             <div class="member-count">
@@ -251,78 +253,66 @@
                             </div>
                         </div>
 
-                        <!-- 中间Canvas座位图 -->
-                        <div class="seat-canvas-container">
-                            <div class="screen">
-                                <div class="screen-label">银幕</div>
-                            </div>
-                            <canvas id="cinema-canvas" width="800" height="500">
-                                您的浏览器不支持Canvas，请升级浏览器
-                            </canvas>
-                            <div class="legend">
-                                <div class="legend-item">
-                                    <span class="legend-color available"></span>
-                                    <span>可选座位</span>
+                        <!-- 中间Canvas座位图区域 -->
+                        <div class="seat-canvas-area">
+                            <div class="seat-canvas-container">
+                                <div class="screen">
+                                    <div class="screen-label">银幕</div>
                                 </div>
-                                <div class="legend-item">
-                                    <span class="legend-color selected"></span>
-                                    <span>已选座位</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color sold"></span>
-                                    <span>已售座位</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color reserved"></span>
-                                    <span>已预订</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 右侧操作面板 -->
-                        <div class="seat-operations">
-                            <div class="operations-section">
-                                <h3>座位操作</h3>
-                                <div class="operation-buttons">
-                                    <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
-                                    <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
-                                </div>
-                            </div>
-
-                            <div class="operations-section">
-                                <h3>管理操作</h3>
-                                <div class="management-controls">
-                                    <div class="input-group">
-                                        <label for="reservation-id">预订号:</label>
-                                        <input type="text" id="reservation-id" placeholder="输入预订号">
-                                        <button class="btn btn-cancel" id="cancel-reservation">取消预订</button>
+                                <canvas id="cinema-canvas" width="800" height="500">
+                                    您的浏览器不支持Canvas，请升级浏览器
+                                </canvas>
+                                <div class="legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color available"></span>
+                                        <span>可选座位</span>
                                     </div>
-                                    <div class="input-group">
-                                        <label for="ticket-id">票务号:</label>
-                                        <input type="text" id="ticket-id" placeholder="输入票务号">
-                                        <button class="btn btn-refund" id="refund-ticket">退票</button>
+                                    <div class="legend-item">
+                                        <span class="legend-color selected"></span>
+                                        <span>已选座位</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color sold"></span>
+                                        <span>已售座位</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color reserved"></span>
+                                        <span>已预订</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="operations-section">
-                                <h3>影厅状态</h3>
-                                <div class="cinema-stats" id="cinema-stats">
-                                    <div class="stat-item">
-                                        <span>可选:</span>
-                                        <span id="available-count">200</span>
+                            <!-- 座位操作面板移到Canvas下方 -->
+                            <div class="seat-operations-bottom">
+                                <div class="operations-grid">
+                                    <div class="operations-section">
+                                        <h3>座位操作</h3>
+                                        <div class="operation-buttons">
+                                            <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
+                                            <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
+                                        </div>
                                     </div>
-                                    <div class="stat-item">
-                                        <span>已售:</span>
-                                        <span id="sold-count">0</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span>已订:</span>
-                                        <span id="reserved-count">0</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span>上座率:</span>
-                                        <span id="occupancy-rate">0%</span>
+
+                                    <div class="operations-section">
+                                        <h3>影厅状态</h3>
+                                        <div class="cinema-stats" id="cinema-stats">
+                                            <div class="stat-item">
+                                                <span>可选座位:</span>
+                                                <span id="available-count">200</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>已售座位:</span>
+                                                <span id="sold-count">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>已预订:</span>
+                                                <span id="reserved-count">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>上座率:</span>
+                                                <span id="occupancy-rate">0%</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -416,50 +406,109 @@
             <!-- 确认视图 -->
             <section id="confirm-view" class="view">
                 <div class="confirm-panel">
-                    <div class="success-icon">✅</div>
-                    <h2>购票成功！</h2>
-                    
-                    <div class="ticket-info">
-                        <h3>电子票据</h3>
-                        <div class="ticket-details">
-                            <div class="ticket-item">
-                                <span>订单号:</span>
-                                <span id="order-number">-</span>
+                    <div class="confirm-header">
+                        <h2>确认订单</h2>
+                        <p class="subtitle">请确认您的订票信息</p>
+                    </div>
+
+                    <div class="order-details">
+                        <div class="detail-section">
+                            <h3>电影信息</h3>
+                            <div class="detail-item">
+                                <span class="label">电影名称:</span>
+                                <span class="value" id="confirm-movie-title">-</span>
                             </div>
-                            <div class="ticket-item">
-                                <span>电影:</span>
-                                <span id="confirm-movie-title">-</span>
+                            <div class="detail-item">
+                                <span class="label">放映时间:</span>
+                                <span class="value" id="confirm-showtime">-</span>
                             </div>
-                            <div class="ticket-item">
-                                <span>场次:</span>
-                                <span id="confirm-movie-time">-</span>
+                            <div class="detail-item">
+                                <span class="label">影厅:</span>
+                                <span class="value" id="confirm-cinema">-</span>
                             </div>
-                            <div class="ticket-item">
-                                <span>座位:</span>
-                                <span id="confirm-seats">-</span>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3>客户信息</h3>
+                            <div class="detail-item">
+                                <span class="label">姓名:</span>
+                                <span class="value" id="confirm-customer-name">-</span>
                             </div>
-                            <div class="ticket-item">
-                                <span>金额:</span>
-                                <span id="confirm-amount">-</span>
+                            <div class="detail-item">
+                                <span class="label">电话:</span>
+                                <span class="value" id="confirm-customer-phone">-</span>
                             </div>
-                            <div class="ticket-item">
-                                <span>购票时间:</span>
-                                <span id="purchase-time">-</span>
+                            <div class="detail-item">
+                                <span class="label">票务类型:</span>
+                                <span class="value" id="confirm-ticket-type">-</span>
+                            </div>
+                        </div>
+
+                        <div class="seat-info">
+                            <h3>座位信息</h3>
+                            <div class="seat-list" id="confirm-seat-list">
+                                <!-- 座位信息将在这里动态生成 -->
+                            </div>
+                        </div>
+
+                        <div class="cost-breakdown">
+                            <h3>费用明细</h3>
+                            <div class="cost-item">
+                                <span class="label">票价 × 数量:</span>
+                                <span class="amount" id="ticket-cost">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="label">服务费:</span>
+                                <span class="amount" id="service-fee">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="label">总计:</span>
+                                <span class="amount" id="total-cost">¥0</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="qr-code">
-                        <h4>取票二维码</h4>
-                        <div class="qr-placeholder">
-                            <div class="qr-code-box">📱</div>
-                            <p>请凭此二维码到影院取票</p>
+                    <div class="payment-methods">
+                        <h3>选择支付方式</h3>
+                        <div class="payment-options">
+                            <label class="payment-option">
+                                <input type="radio" name="payment-method" value="alipay">
+                                <div class="payment-icon alipay">💳</div>
+                                <div class="payment-info">
+                                    <div class="payment-name">支付宝</div>
+                                    <div class="payment-desc">安全便捷的移动支付</div>
+                                </div>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment-method" value="wechat">
+                                <div class="payment-icon wechat">💚</div>
+                                <div class="payment-info">
+                                    <div class="payment-name">微信支付</div>
+                                    <div class="payment-desc">快速扫码支付</div>
+                                </div>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment-method" value="card">
+                                <div class="payment-icon card">💳</div>
+                                <div class="payment-info">
+                                    <div class="payment-name">银行卡</div>
+                                    <div class="payment-desc">借记卡/信用卡支付</div>
+                                </div>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment-method" value="cash">
+                                <div class="payment-icon cash">💰</div>
+                                <div class="payment-info">
+                                    <div class="payment-name">现金支付</div>
+                                    <div class="payment-desc">现场取票付款</div>
+                                </div>
+                            </label>
                         </div>
                     </div>
 
                     <div class="confirm-actions">
-                        <button class="btn btn-primary" id="new-order">继续购票</button>
-                        <button class="btn btn-secondary" id="print-ticket">打印票据</button>
+                        <button class="btn btn-back" id="back-to-seat">返回选座</button>
+                        <button class="btn btn-pay" id="confirm-payment" disabled>确认支付</button>
                     </div>
                 </div>
             </section>
@@ -511,5 +560,265 @@
     <script src="../js/canvas.js"></script>
     <script src="../js/stateManager.js"></script>
     <script src="../js/ui.js"></script>
+    <!-- 票务类型切换功能 -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('页面加载完成，初始化所有功能');
+        
+        // 票务类型切换功能
+        const ticketTypes = document.querySelectorAll('.ticket-type');
+        const individualControls = document.querySelector('.individual-controls');
+        const groupControls = document.querySelector('.group-controls');
+        
+        ticketTypes.forEach((ticketType, index) => {
+            ticketType.addEventListener('click', function() {
+                console.log(`点击了票务类型 ${index}`);
+                
+                // 移除所有active类
+                ticketTypes.forEach(type => type.classList.remove('active'));
+                
+                // 添加active类到当前点击的类型
+                this.classList.add('active');
+                
+                // 获取选中的票务类型
+                const radioButton = this.querySelector('input[type="radio"]');
+                if (radioButton) {
+                    radioButton.checked = true;
+                    const ticketType = radioButton.value;
+                    console.log('选中的票务类型:', ticketType);
+                    
+                    // 根据票务类型显示对应的控制面板
+                    if (ticketType === 'individual') {
+                        showIndividualControls();
+                    } else if (ticketType === 'group') {
+                        showGroupControls();
+                    }
+                }
+            });
+        });
+        
+        // 显示个人票控制面板
+        function showIndividualControls() {
+            console.log('显示个人票控制面板');
+            if (individualControls && groupControls) {
+                individualControls.style.display = 'block';
+                individualControls.classList.add('active');
+                individualControls.classList.remove('hidden');
+                
+                groupControls.style.display = 'none';
+                groupControls.classList.add('hidden');
+                groupControls.classList.remove('active');
+            }
+        }
+        
+        // 显示团体票控制面板
+        function showGroupControls() {
+            console.log('显示团体票控制面板');
+            if (individualControls && groupControls) {
+                individualControls.style.display = 'none';
+                individualControls.classList.add('hidden');
+                individualControls.classList.remove('active');
+                
+                groupControls.style.display = 'block';
+                groupControls.classList.add('active');
+                groupControls.classList.remove('hidden');
+            }
+        }
+        
+        // 团体成员管理功能
+        let memberCount = 0;
+        const maxMembers = 20;
+        const memberList = document.querySelector('.member-list');
+        const addMemberBtn = document.getElementById('add-member');
+        const memberNameInput = document.getElementById('member-name');
+        const memberAgeInput = document.getElementById('member-age');
+        const memberCountSpan = document.getElementById('member-count');
+        
+        if (addMemberBtn) {
+            addMemberBtn.addEventListener('click', function() {
+                const name = memberNameInput.value.trim();
+                const age = memberAgeInput.value.trim();
+                
+                if (!name) {
+                    alert('请输入成员姓名');
+                    return;
+                }
+                
+                if (!age || age < 1 || age > 120) {
+                    alert('请输入有效年龄（1-120）');
+                    return;
+                }
+                
+                if (memberCount >= maxMembers) {
+                    alert(`最多只能添加${maxMembers}名成员`);
+                    return;
+                }
+                
+                // 添加成员到列表
+                addMemberToList(name, age);
+                
+                // 清空输入框
+                memberNameInput.value = '';
+                memberAgeInput.value = '';
+                
+                // 更新计数
+                memberCount++;
+                updateMemberCount();
+            });
+        }
+        
+        function addMemberToList(name, age) {
+            const memberItem = document.createElement('div');
+            memberItem.className = 'member-item';
+            memberItem.innerHTML = `
+                <div class="member-info">
+                    <span class="member-name">${name}</span>
+                    <span class="member-age">${age}岁</span>
+                </div>
+                <button class="remove-member" onclick="removeMember(this)">删除</button>
+            `;
+            memberList.appendChild(memberItem);
+        }
+        
+        // 删除成员函数（全局）
+        window.removeMember = function(button) {
+            const memberItem = button.parentElement;
+            memberItem.remove();
+            memberCount--;
+            updateMemberCount();
+        };
+        
+        function updateMemberCount() {
+            if (memberCountSpan) {
+                memberCountSpan.textContent = memberCount;
+            }
+        }
+        
+        // 页面跳转功能
+        function showView(viewId) {
+            // 隐藏所有视图
+            const views = document.querySelectorAll('.view');
+            views.forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // 显示目标视图
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.add('active');
+                console.log('跳转到视图:', viewId);
+            }
+        }
+        
+        // ===== 添加所有页面跳转按钮的事件监听器 =====
+        
+        // 配置页面 -> 电影选择
+        const nextToMovieBtn = document.getElementById('next-to-movie');
+        if (nextToMovieBtn) {
+            nextToMovieBtn.addEventListener('click', function() {
+                showView('movie-view');
+            });
+        }
+        
+        // 电影选择 -> 选座页面
+        const nextToSeatBtn = document.getElementById('next-to-seat');
+        if (nextToSeatBtn) {
+            nextToSeatBtn.addEventListener('click', function() {
+                showView('seat-view');
+            });
+        }
+        
+        // 选座页面 -> 支付页面
+        const nextToPaymentBtn = document.getElementById('next-to-payment');
+        if (nextToPaymentBtn) {
+            // 移除disabled属性，让按钮可以点击
+            nextToPaymentBtn.disabled = false;
+            nextToPaymentBtn.addEventListener('click', function() {
+                console.log('跳转到支付页面');
+                showView('payment-view');
+            });
+        }
+        
+        // 支付页面 -> 确认页面
+        const confirmPaymentBtn = document.getElementById('confirm-payment');
+        if (confirmPaymentBtn) {
+            // 移除disabled属性，让按钮可以点击
+            confirmPaymentBtn.disabled = false;
+            confirmPaymentBtn.addEventListener('click', function() {
+                console.log('跳转到确认页面');
+                showView('confirm-view');
+            });
+        }
+        
+        // 确认页面的支付按钮
+        const confirmPayBtn = document.querySelector('#confirm-view .btn-pay');
+        if (confirmPayBtn) {
+            // 移除disabled属性，让按钮可以点击
+            confirmPayBtn.disabled = false;
+            confirmPayBtn.addEventListener('click', function() {
+                alert('支付成功！订单已确认。');
+                // 可以在这里添加跳转到成功页面的逻辑
+                console.log('支付完成');
+            });
+        }
+        
+        // 返回按钮们
+        const backToConfigBtn = document.getElementById('back-to-config');
+        if (backToConfigBtn) {
+            backToConfigBtn.addEventListener('click', function() {
+                showView('config-view');
+            });
+        }
+        
+        const backToMovieBtn = document.getElementById('back-to-movie');
+        if (backToMovieBtn) {
+            backToMovieBtn.addEventListener('click', function() {
+                showView('movie-view');
+            });
+        }
+        
+        const backToSeatBtns = document.querySelectorAll('#back-to-seat');
+        backToSeatBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                showView('seat-view');
+            });
+        });
+        
+        // 支付方式选择功能
+        const paymentOptions = document.querySelectorAll('.payment-option');
+        paymentOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除所有active类
+                const allOptions = this.parentElement.querySelectorAll('.payment-option');
+                allOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // 添加active类到当前选项
+                this.classList.add('active');
+                
+                // 选中对应的radio按钮
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                }
+                
+                console.log('选择支付方式:', radio ? radio.value : '未知');
+            });
+        });
+        
+        // 初始化：确保个人票是激活状态
+        const individualTicketType = document.querySelector('.ticket-type input[value="individual"]');
+        if (individualTicketType) {
+            const parentLabel = individualTicketType.parentElement;
+            parentLabel.classList.add('active');
+            individualTicketType.checked = true;
+        }
+        
+        // 初始化：显示个人票控制面板
+        showIndividualControls();
+        
+        console.log('所有功能初始化完成');
+    });
+    </script>
+
 </body>
 </html>
