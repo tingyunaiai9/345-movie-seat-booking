@@ -425,7 +425,53 @@ class ViewController {
      */
     onSeatViewActivated() {
         console.log('选座视图已激活');
-        // 这里将来会调用Canvas渲染和状态管理的初始化
+        
+        // 初始化Canvas绘制
+        this.initializeCanvasDrawing();
+    }
+
+    /**
+     * 初始化Canvas绘制
+     */
+    initializeCanvasDrawing() {
+        const canvas = document.getElementById('cinema-canvas');
+        if (!canvas) {
+            console.error('未找到Canvas元素');
+            return;
+        }
+        
+        // 设置Canvas尺寸
+        canvas.width = 800;
+        canvas.height = 500;
+        
+        // 创建测试用座位数据
+        const testSeatsData = [];
+        const rows = 10;
+        const cols = 20;
+        for (let i = 1; i <= rows; i++) {
+            for (let j = 1; j <= cols; j++) {
+                let status = 'available';
+                if (Math.random() > 0.8) {
+                    status = 'sold';
+                }
+                testSeatsData.push({ row: i, col: j, status: status });
+            }
+        }
+        
+        // 预加载图片并绘制
+        if (typeof preloadSeatImages === 'function') {
+            preloadSeatImages().then(seatImages => {
+                console.log('图片加载完成，开始绘制');
+                drawCinema(testSeatsData, seatImages, 'arc');
+            }).catch(error => {
+                console.warn('图片加载失败，使用默认绘制:', error);
+                // 即使图片加载失败也绘制（使用灰色圆形）
+                drawCinema(testSeatsData, {}, 'arc');
+            });
+        } else {
+            console.warn('preloadSeatImages函数未找到，使用默认绘制');
+            drawCinema(testSeatsData, {}, 'arc');
+        }
     }
 
     /**
