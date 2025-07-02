@@ -352,3 +352,15 @@ window.onload = () => {
     }
 };
 
+// ========================= 模块导出 =========================
+
+// 通过在 window 对象上挂载，让其他模块可以访问 Canvas 渲染相关的函数
+window.CanvasRenderer = {
+    drawSeat,          // 绘制单个座位
+    drawCinema,        // 绘制整个影厅布局
+    drawCenterZone,    // 绘制中心区域虚线框
+    drawCenterSector,  // 绘制弧形布局的中心扇形区域
+    preloadSeatImages  // 预加载座位状态图片
+};
+
+console.log('电影院Canvas渲染模块(canvas.js)已加载');
