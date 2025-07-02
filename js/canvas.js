@@ -85,7 +85,7 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
     const seatRadius = 15; // 座位半径 (可参数化)
     const rowSpacing = 40; // 行间距 (可参数化)
     const colSpacing = 10; // 列间距 (仅用于平行布局)
-    const arcRadius = 600; // 弧形布局的基准半径 (可参数化)
+    const arcRadius = 700; // 弧形布局的基准半径 (可参数化)
     const circleCenter = -400;  // 圆心位置，调整为与弧形布局一致
 
     // --- 动态计算中心区域 ---
@@ -116,7 +116,7 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
             const seatWidth = seatRadius * 2;
             const totalWidth = totalCols * (seatWidth + colSpacing) - colSpacing;
             const xOffset = (canvas.width - totalWidth) / 2;
-            const yOffset = 80; // 顶部留白，为屏幕留出空间
+            const yOffset = 100; // 顶部留白，为屏幕留出空间
 
             x = xOffset + (seat.col - 1) * (seatWidth + colSpacing) + seatRadius;
             y = yOffset + (seat.row - 1) * rowSpacing + seatRadius;

@@ -431,7 +431,7 @@ class ViewController {
     }
 
     /**
-     * 初始化Canvas绘制
+     * 初始化Canvas绘制 - 简化版，不设置Canvas尺寸
      */
     initializeCanvasDrawing() {
         const canvas = document.getElementById('cinema-canvas');
@@ -440,38 +440,40 @@ class ViewController {
             return;
         }
         
-        // 设置Canvas尺寸
-        canvas.width = 800;
-        canvas.height = 500;
+        // 不设置Canvas尺寸，使用canvas.js中window.onload的设置
+        console.log('Canvas元素已找到，Canvas.js将在window.onload时自动绘制');
         
-        // 创建测试用座位数据
-        const testSeatsData = [];
-        const rows = 10;
-        const cols = 20;
-        for (let i = 1; i <= rows; i++) {
-            for (let j = 1; j <= cols; j++) {
-                let status = 'available';
-                if (Math.random() > 0.8) {
-                    status = 'sold';
+        // 如果需要立即显示，可以手动触发绘制
+        // 但需要等待canvas.js的window.onload执行完毕
+        setTimeout(() => {
+            // 检查canvas.js是否已经绘制
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const hasContent = imageData.data.some(channel => channel !== 0);
+            
+            if (!hasContent) {
+                console.log('Canvas内容为空，尝试手动触发绘制');
+                // 如果canvas.js的window.onload还没执行，手动调用绘制
+                if (window.CanvasRenderer && window.CanvasRenderer.drawCinema) {
+                    // 创建测试数据
+                    const testSeatsData = [];
+                    const rows = 10;
+                    const cols = 20;
+                    for (let i = 1; i <= rows; i++) {
+                        for (let j = 1; j <= cols; j++) {
+                            let status = 'available';
+                            if (Math.random() > 0.8) {
+                                status = 'sold';
+                            }
+                            testSeatsData.push({ row: i, col: j, status: status });
+                        }
+                    }
+                    
+                    // 调用canvas.js的绘制函数
+                    window.CanvasRenderer.drawCinema(testSeatsData, {}, 'arc');
                 }
-                testSeatsData.push({ row: i, col: j, status: status });
             }
-        }
-        
-        // 预加载图片并绘制
-        if (typeof preloadSeatImages === 'function') {
-            preloadSeatImages().then(seatImages => {
-                console.log('图片加载完成，开始绘制');
-                drawCinema(testSeatsData, seatImages, 'arc');
-            }).catch(error => {
-                console.warn('图片加载失败，使用默认绘制:', error);
-                // 即使图片加载失败也绘制（使用灰色圆形）
-                drawCinema(testSeatsData, {}, 'arc');
-            });
-        } else {
-            console.warn('preloadSeatImages函数未找到，使用默认绘制');
-            drawCinema(testSeatsData, {}, 'arc');
-        }
+        }, 500);
     }
 
     /**

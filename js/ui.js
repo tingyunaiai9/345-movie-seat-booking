@@ -859,3 +859,49 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('UI与总成模块已加载');
+
+/**
+ * 初始化座位布局切换功能
+ */
+function initializeSeatLayoutToggle() {
+    const toggleBtn = document.getElementById('toggle-layout-btn');
+    if (toggleBtn) {
+        // 移除可能存在的旧事件监听器
+        const newToggleBtn = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+        
+        // 添加新的事件监听器
+        newToggleBtn.addEventListener('click', function() {
+            console.log('布局切换按钮被点击');
+            
+            // 获取当前布局类型
+            const currentLayout = this.dataset.layout || 'arc';
+            const newLayout = currentLayout === 'arc' ? 'parallel' : 'arc';
+            
+            // 更新按钮数据和文本
+            this.dataset.layout = newLayout;
+            this.textContent = newLayout === 'arc' ? '切换到平行布局' : '切换到弧形布局';
+            
+            // 检查canvas.js是否已加载
+            if (window.CanvasRenderer && window.CanvasRenderer.drawCinema) {
+                // 使用canvas.js中的虚拟数据重新绘制
+                const testSeatsData = [];
+                const rows = 10;
+                const cols = 20;
+                for (let i = 1; i <= rows; i++) {
+                    for (let j = 1; j <= cols; j++) {
+                        let status = 'available';
+                        if (Math.random() > 0.8) {
+                            status = 'sold';
+                        }
+                        testSeatsData.push({ row: i, col: j, status: status });
+                    }
+                }
+                
+                window.CanvasRenderer.drawCinema(testSeatsData, {}, newLayout);
+            } else {
+                console.warn('CanvasRenderer未找到，无法切换布局');
+            }
+        });
+    }
+}

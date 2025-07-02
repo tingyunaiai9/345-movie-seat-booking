@@ -127,7 +127,7 @@
                 </div>
             </section>
 
-            <!-- 选座视图 -->
+            <!-- 选座视图 - 重新布局 -->
             <section id="seat-view" class="view">
                 <div class="seat-panel">
                     <div class="seat-header">
@@ -144,24 +144,26 @@
                         </div>
                     </div>
 
-                    <div class="seat-content">
-                        <!-- 左侧控制面板 -->
-                        <div class="seat-controls">
-                            <!-- 个人票控制 -->
-                            <div class="individual-controls">
+                    <!-- 第一部分：客户信息区域 -->
+                    <div class="seat-top-section">
+                        <!-- 个人票控制 -->
+                        <div class="individual-controls">
+                            <div class="top-controls-grid">
                                 <div class="customer-info">
                                     <h3>客户信息</h3>
-                                    <div class="input-group">
-                                        <label for="customer-name">姓名:</label>
-                                        <input type="text" id="customer-name" placeholder="请输入姓名">
-                                    </div>
-                                    <div class="input-group">
-                                        <label for="customer-age">年龄:</label>
-                                        <input type="number" id="customer-age" min="1" max="120" value="25">
-                                    </div>
-                                    <div class="input-group">
-                                        <label for="customer-phone">手机号:</label>
-                                        <input type="tel" id="customer-phone" placeholder="请输入手机号">
+                                    <div class="info-grid">
+                                        <div class="input-group">
+                                            <label for="customer-name">姓名:</label>
+                                            <input type="text" id="customer-name" placeholder="请输入姓名">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="customer-age">年龄:</label>
+                                            <input type="number" id="customer-age" min="1" max="120" value="25">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="customer-phone">手机号:</label>
+                                            <input type="tel" id="customer-phone" placeholder="请输入手机号">
+                                        </div>
                                     </div>
                                 </div>
 
@@ -173,15 +175,31 @@
                                         <option value="middle">中间</option>
                                         <option value="back">后排</option>
                                     </select>
+                                    <div class="auto-seat-actions">
+                                        <button class="btn btn-auto" id="auto-select-individual">自动选座</button>
+                                    </div>
                                 </div>
 
-                                <div class="auto-seat-actions">
-                                    <button class="btn btn-auto" id="auto-select-individual">自动选座</button>
+                                <div class="manual-controls">
+                                    <h3>手动选座</h3>
+                                    <div class="manual-options">
+                                        <label class="manual-option">
+                                            <input type="radio" name="manual-mode" value="single" checked>
+                                            <span>单选模式</span>
+                                        </label>
+                                        <label class="manual-option">
+                                            <input type="radio" name="manual-mode" value="multi">
+                                            <span>多选模式 (Ctrl+点击)</span>
+                                        </label>
+                                    </div>
+                                    <button class="btn btn-clear" id="clear-selection">清除选择</button>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- 团体票控制 -->
-                            <div class="group-controls" style="display: none;">
+                        <!-- 团体票控制 -->
+                        <div class="group-controls" style="display: none;">
+                            <div class="top-controls-grid">
                                 <div class="group-info">
                                     <h3>团体信息</h3>
                                     <div class="group-members">
@@ -211,30 +229,71 @@
                                         <option value="middle">中间</option>
                                         <option value="back">后排</option>
                                     </select>
+                                    <div class="auto-seat-actions">
+                                        <button class="btn btn-auto" id="auto-select-group">团体自动选座</button>
+                                    </div>
                                 </div>
 
-                                <div class="auto-seat-actions">
-                                    <button class="btn btn-auto" id="auto-select-group">团体自动选座</button>
+                                <div class="manual-controls">
+                                    <h3>手动选座</h3>
+                                    <div class="manual-options">
+                                        <label class="manual-option">
+                                            <input type="radio" name="manual-mode" value="single" checked>
+                                            <span>单选模式</span>
+                                        </label>
+                                        <label class="manual-option">
+                                            <input type="radio" name="manual-mode" value="multi">
+                                            <span>多选模式 (Ctrl+点击)</span>
+                                        </label>
+                                    </div>
+                                    <button class="btn btn-clear" id="clear-selection">清除选择</button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- 手动选座模式切换 -->
-                            <div class="manual-controls">
-                                <h3>手动选座</h3>
-                                <div class="manual-options">
-                                    <label class="manual-option">
-                                        <input type="radio" name="manual-mode" value="single" checked>
-                                        <span>单选模式</span>
-                                    </label>
-                                    <label class="manual-option">
-                                        <input type="radio" name="manual-mode" value="multi">
-                                        <span>多选模式 (Ctrl+点击)</span>
-                                    </label>
-                                </div>
-                                <button class="btn btn-clear" id="clear-selection">清除选择</button>
+                    <!-- 第二部分：银幕和Canvas区域 - 放大 -->
+                    <div class="seat-canvas-section">
+                        <div class="seat-canvas-container-large">
+                            <div class="screen-large">
+                                <div class="screen-label">银幕</div>
                             </div>
+                            
+                            <!-- 布局切换按钮 -->
+                            <div class="canvas-controls">
+                                <button id="toggle-layout-btn" class="btn btn-secondary" data-layout="arc">
+                                    切换布局
+                                </button>
+                            </div>
+                            
+                            <canvas id="cinema-canvas" width="1400" height="933">
+                                您的浏览器不支持Canvas，请升级浏览器
+                            </canvas>
+                            
+                            <div class="legend-large">
+                                <div class="legend-item">
+                                    <span class="legend-color available"></span>
+                                    <span>可选座位</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color selected"></span>
+                                    <span>已选座位</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color sold"></span>
+                                    <span>已售座位</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color reserved"></span>
+                                    <span>已预订</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- 已选座位信息 -->
+                    <!-- 第三部分：已选座位、座位操作和影厅状态 -->
+                    <div class="seat-bottom-section">
+                        <div class="bottom-controls-grid">
                             <div class="selected-seats">
                                 <h3>已选座位</h3>
                                 <div class="selected-list" id="selected-seats-list">
@@ -251,68 +310,33 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 中间Canvas座位图区域 -->
-                        <div class="seat-canvas-area">
-                            <div class="seat-canvas-container">
-                                <div class="screen">
-                                    <div class="screen-label">银幕</div>
-                                </div>
-                                <canvas id="cinema-canvas" width="800" height="500">
-                                    您的浏览器不支持Canvas，请升级浏览器
-                                </canvas>
-                                <div class="legend">
-                                    <div class="legend-item">
-                                        <span class="legend-color available"></span>
-                                        <span>可选座位</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <span class="legend-color selected"></span>
-                                        <span>已选座位</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <span class="legend-color sold"></span>
-                                        <span>已售座位</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <span class="legend-color reserved"></span>
-                                        <span>已预订</span>
-                                    </div>
+                            <div class="seat-operations">
+                                <h3>座位操作</h3>
+                                <div class="operation-buttons">
+                                    <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
+                                    <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
                                 </div>
                             </div>
 
-                            <!-- 座位操作面板移到Canvas下方 -->
-                            <div class="seat-operations-bottom">
-                                <div class="operations-grid">
-                                    <div class="operations-section">
-                                        <h3>座位操作</h3>
-                                        <div class="operation-buttons">
-                                            <button class="btn btn-reserve" id="reserve-seats">预订座位</button>
-                                            <button class="btn btn-purchase" id="purchase-seats">直接购票</button>
-                                        </div>
+                            <div class="cinema-status">
+                                <h3>影厅状态</h3>
+                                <div class="cinema-stats" id="cinema-stats">
+                                    <div class="stat-item">
+                                        <span>可选座位:</span>
+                                        <span id="available-count">200</span>
                                     </div>
-
-                                    <div class="operations-section">
-                                        <h3>影厅状态</h3>
-                                        <div class="cinema-stats" id="cinema-stats">
-                                            <div class="stat-item">
-                                                <span>可选座位:</span>
-                                                <span id="available-count">200</span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span>已售座位:</span>
-                                                <span id="sold-count">0</span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span>已预订:</span>
-                                                <span id="reserved-count">0</span>
-                                            </div>
-                                            <div class="stat-item">
-                                                <span>上座率:</span>
-                                                <span id="occupancy-rate">0%</span>
-                                            </div>
-                                        </div>
+                                    <div class="stat-item">
+                                        <span>已售座位:</span>
+                                        <span id="sold-count">0</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>已预订:</span>
+                                        <span id="reserved-count">0</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span>上座率:</span>
+                                        <span id="occupancy-rate">0%</span>
                                     </div>
                                 </div>
                             </div>
