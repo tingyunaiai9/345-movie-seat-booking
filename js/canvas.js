@@ -1,3 +1,4 @@
+
 /**
  * @file canvas.js
  * @description 负责项目的“视觉呈现”，使用原生Canvas API将数据结构可视化。
