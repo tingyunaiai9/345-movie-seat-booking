@@ -125,6 +125,7 @@ function drawSeat(x, y, seat) {
 
 /**
  * 核心函数：绘制整个影厅的座位布局
+ * 包含屏幕绘制、过道绘制、座位绘制和中心区域标识
  */
 function drawCinema() {
     const { canvas, ctx, seatsArray, currentLayout } = GLOBAL_STATE;
@@ -134,8 +135,9 @@ function drawCinema() {
         return;
     }
 
-    // 更新全局状态
-    updateGlobalLayoutInfo();
+    // 更新全局布局信息
+    GLOBAL_STATE.totalRows = Math.max(...seatsArray.map(s => s.row));
+    GLOBAL_STATE.totalCols = Math.max(...seatsArray.map(s => s.col));
 
     // 设置画布尺寸
     const canvasDimensions = calculateCanvasSize();
@@ -149,15 +151,45 @@ function drawCinema() {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 绘制屏幕和过道
-    drawScreen();
-    drawAisle();
+    // ===== 绘制屏幕 =====
+    const { SCREEN_COLOR, SCREEN_WIDTH_RATIO, SCREEN_MARGIN, TEXT_COLOR, SCREEN_FONT } = CANVAS_CONFIG;
+    const { canvasWidth, canvasHeight } = GLOBAL_STATE;
+    
+    // 绘制屏幕背景
+    ctx.fillStyle = SCREEN_COLOR;
+    ctx.fillRect(canvasWidth * (1 - SCREEN_WIDTH_RATIO) / 2, SCREEN_MARGIN, canvasWidth * SCREEN_WIDTH_RATIO, 30);
 
-    // 计算中心区域
+    // 绘制屏幕文字
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = SCREEN_FONT;
+    ctx.textAlign = 'center';
+    ctx.fillText('屏幕', canvasWidth / 2, 30);
+
+    // ===== 绘制中央过道虚线 =====
+    const { AISLE_LINE_COLOR, AISLE_LINE_WIDTH, AISLE_DASH_PATTERN } = CANVAS_CONFIG;
+    
+    ctx.save();
+    ctx.strokeStyle = AISLE_LINE_COLOR;
+    ctx.lineWidth = AISLE_LINE_WIDTH;
+    ctx.setLineDash(AISLE_DASH_PATTERN);
+    ctx.beginPath();
+    ctx.moveTo(canvasWidth / 2, 50);
+    ctx.lineTo(canvasWidth / 2, canvasHeight - 20);
+    ctx.stroke();
+    ctx.restore();
+
+    // ===== 计算中心区域 =====
     GLOBAL_STATE.centerZoneInfo = calculateCenterZone();
     GLOBAL_STATE.centerSeatsCoords = [];
 
-    // 绘制所有座位
+    // 内联的 isInCenterZone 判断逻辑
+    const isInCenterZone = (seat) => {
+        const { centerZoneInfo } = GLOBAL_STATE;
+        return seat.row >= centerZoneInfo.rowStart && seat.row <= centerZoneInfo.rowEnd &&
+               seat.col >= centerZoneInfo.colStart && seat.col <= centerZoneInfo.colEnd;
+    };
+
+    // ===== 绘制所有座位 =====
     seatsArray.forEach(seat => {
         const coords = calculateSeatPosition(seat);
         
@@ -169,61 +201,12 @@ function drawCinema() {
         drawSeat(coords.x, coords.y, seat);
     });
 
-    // 绘制中心区域标识
+    // ===== 绘制中心区域标识 =====
     if (GLOBAL_STATE.centerSeatsCoords.length > 0) {
         if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
             drawCenterZone();
-        } else {
-            drawCenterSector();
         }
     }
-
-    console.log('影厅绘制完毕');
-}
-
-/**
- * 更新全局布局信息
- */
-function updateGlobalLayoutInfo() {
-    const { seatsArray } = GLOBAL_STATE;
-    GLOBAL_STATE.totalRows = Math.max(...seatsArray.map(s => s.row));
-    GLOBAL_STATE.totalCols = Math.max(...seatsArray.map(s => s.col));
-}
-
-/**
- * 绘制屏幕
- */
-function drawScreen() {
-    const { SCREEN_COLOR, SCREEN_WIDTH_RATIO, SCREEN_MARGIN, TEXT_COLOR, SCREEN_FONT } = CANVAS_CONFIG;
-    const { ctx, canvasWidth } = GLOBAL_STATE;
-    
-    // 绘制屏幕背景
-    ctx.fillStyle = SCREEN_COLOR;
-    ctx.fillRect(canvasWidth * (1 - SCREEN_WIDTH_RATIO) / 2, SCREEN_MARGIN, canvasWidth * SCREEN_WIDTH_RATIO, 30);
-
-    // 绘制屏幕文字
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = SCREEN_FONT;
-    ctx.textAlign = 'center';
-    ctx.fillText('屏幕', canvasWidth / 2, 30);
-}
-
-/**
- * 绘制中央过道虚线
- */
-function drawAisle() {
-    const { AISLE_LINE_COLOR, AISLE_LINE_WIDTH, AISLE_DASH_PATTERN } = CANVAS_CONFIG;
-    const { ctx, canvasWidth, canvasHeight } = GLOBAL_STATE;
-    
-    ctx.save();
-    ctx.strokeStyle = AISLE_LINE_COLOR;
-    ctx.lineWidth = AISLE_LINE_WIDTH;
-    ctx.setLineDash(AISLE_DASH_PATTERN);
-    ctx.beginPath();
-    ctx.moveTo(canvasWidth / 2, 50);
-    ctx.lineTo(canvasWidth / 2, canvasHeight - 20);
-    ctx.stroke();
-    ctx.restore();
 }
 
 /**
@@ -282,118 +265,88 @@ function calculateCenterZone() {
 }
 
 /**
- * 判断座位是否在中心区域
- * @param {Object} seat - 座位对象
- * @returns {boolean} 是否在中心区域
- */
-function isInCenterZone(seat) {
-    const { centerZoneInfo } = GLOBAL_STATE;
-    return seat.row >= centerZoneInfo.rowStart && seat.row <= centerZoneInfo.rowEnd &&
-           seat.col >= centerZoneInfo.colStart && seat.col <= centerZoneInfo.colEnd;
-}
-
-/**
- * 在中心座位周围绘制一个橙色虚线框
+ * 绘制中心区域标识（支持平行布局和弧形布局）
  */
 function drawCenterZone() {
-    const { CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_PADDING, SEAT_RADIUS } = CANVAS_CONFIG;
-    const { ctx, centerSeatsCoords } = GLOBAL_STATE;
-    
-    // 计算包围盒
-    const minX = Math.min(...centerSeatsCoords.map(c => c.x));
-    const minY = Math.min(...centerSeatsCoords.map(c => c.y));
-    const maxX = Math.max(...centerSeatsCoords.map(c => c.x));
-    const maxY = Math.max(...centerSeatsCoords.map(c => c.y));
-
-    // 设置虚线框样式
-    ctx.strokeStyle = CENTER_ZONE_COLOR;
-    ctx.lineWidth = CENTER_ZONE_WIDTH;
-    ctx.setLineDash(CENTER_ZONE_DASH);
-
-    // 绘制矩形
-    ctx.strokeRect(
-        minX - SEAT_RADIUS - CENTER_ZONE_PADDING,
-        minY - SEAT_RADIUS - CENTER_ZONE_PADDING,
-        (maxX - minX) + (SEAT_RADIUS * 2) + (CENTER_ZONE_PADDING * 2),
-        (maxY - minY) + (SEAT_RADIUS * 2) + (CENTER_ZONE_PADDING * 2)
-    );
-
-    // 恢复为实线
-    ctx.setLineDash([]);
-}
-
-/**
- * 为弧形布局绘制扇形中心区域
- */
-function drawCenterSector() {
     const { 
-        CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_MARGIN,
-        ARC_RADIUS, ROW_SPACING, CIRCLE_CENTER, ANGLE_FACTOR
+        CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_PADDING, CENTER_ZONE_MARGIN,
+        SEAT_RADIUS, ARC_RADIUS, ROW_SPACING, CIRCLE_CENTER, ANGLE_FACTOR
     } = CANVAS_CONFIG;
-    const { ctx, centerZoneInfo, totalCols, canvasWidth } = GLOBAL_STATE;
+    const { ctx, centerSeatsCoords, centerZoneInfo, totalCols, canvasWidth, currentLayout } = GLOBAL_STATE;
     
-    const centerX = canvasWidth / 2;
-    const centerY = CIRCLE_CENTER;
-
-    // 计算扇形的角度范围
-    const baseStartAngle = (centerZoneInfo.colStart - 0.5 - totalCols / 2) * ANGLE_FACTOR;
-    const baseEndAngle = (centerZoneInfo.colEnd + 0.5 - totalCols / 2) * ANGLE_FACTOR;
-    const startAngleForArc = Math.PI / 2 + baseStartAngle;
-    const endAngleForArc = Math.PI / 2 + baseEndAngle;
-
-    // 计算扇形的半径范围
-    const innerRadius = ARC_RADIUS + (centerZoneInfo.rowStart - 1) * ROW_SPACING - CENTER_ZONE_MARGIN;
-    const outerRadius = ARC_RADIUS + centerZoneInfo.rowEnd * ROW_SPACING + CENTER_ZONE_MARGIN;
-
-    // 设置扇形样式
+    // 设置通用样式
     ctx.save();
     ctx.strokeStyle = CENTER_ZONE_COLOR;
     ctx.lineWidth = CENTER_ZONE_WIDTH;
     ctx.setLineDash(CENTER_ZONE_DASH);
-
-    // 绘制扇形边界
-    drawSectorBoundaries(centerX, centerY, innerRadius, outerRadius, 
-                        startAngleForArc, endAngleForArc, baseStartAngle, baseEndAngle);
-
-    ctx.restore();
-}
-
-/**
- * 绘制扇形边界
- */
-function drawSectorBoundaries(centerX, centerY, innerRadius, outerRadius, 
-                            startAngleForArc, endAngleForArc, baseStartAngle, baseEndAngle) {
-    const { ctx } = GLOBAL_STATE;
     
-    // 绘制内弧
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, innerRadius, startAngleForArc, endAngleForArc);
-    ctx.stroke();
+    if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
+        // ===== 平行布局：绘制矩形虚线框 =====
+        if (centerSeatsCoords.length > 0) {
+            // 计算包围盒
+            const minX = Math.min(...centerSeatsCoords.map(c => c.x));
+            const minY = Math.min(...centerSeatsCoords.map(c => c.y));
+            const maxX = Math.max(...centerSeatsCoords.map(c => c.x));
+            const maxY = Math.max(...centerSeatsCoords.map(c => c.y));
 
-    // 绘制外弧
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, outerRadius, startAngleForArc, endAngleForArc);
-    ctx.stroke();
+            // 绘制矩形
+            ctx.strokeRect(
+                minX - SEAT_RADIUS - CENTER_ZONE_PADDING,
+                minY - SEAT_RADIUS - CENTER_ZONE_PADDING,
+                (maxX - minX) + (SEAT_RADIUS * 2) + (CENTER_ZONE_PADDING * 2),
+                (maxY - minY) + (SEAT_RADIUS * 2) + (CENTER_ZONE_PADDING * 2)
+            );
+        }
+    } else {
+        // ===== 弧形布局：绘制扇形区域 =====
+        if (centerZoneInfo) {
+            const centerX = canvasWidth / 2;
+            const centerY = CIRCLE_CENTER;
 
-    // 绘制径向线
-    const radialLines = [
-        { angle: baseStartAngle, label: '左径向线' },
-        { angle: baseEndAngle, label: '右径向线' }
-    ];
+            // 计算扇形的角度范围
+            const baseStartAngle = (centerZoneInfo.colStart - 0.5 - totalCols / 2) * ANGLE_FACTOR;
+            const baseEndAngle = (centerZoneInfo.colEnd + 0.5 - totalCols / 2) * ANGLE_FACTOR;
+            const startAngleForArc = Math.PI / 2 + baseStartAngle;
+            const endAngleForArc = Math.PI / 2 + baseEndAngle;
 
-    radialLines.forEach(({ angle, label }) => {
-        const innerX = centerX + innerRadius * Math.sin(angle);
-        const innerY = centerY + innerRadius * Math.cos(angle);
-        const outerX = centerX + outerRadius * Math.sin(angle);
-        const outerY = centerY + outerRadius * Math.cos(angle);
+            // 计算扇形的半径范围
+            const innerRadius = ARC_RADIUS + (centerZoneInfo.rowStart - 1) * ROW_SPACING - CENTER_ZONE_MARGIN;
+            const outerRadius = ARC_RADIUS + centerZoneInfo.rowEnd * ROW_SPACING + CENTER_ZONE_MARGIN;
 
-        console.log(`${label}坐标:`, { innerX, innerY, outerX, outerY, angle: angle * 180 / Math.PI });
+            // 绘制内弧
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, innerRadius, startAngleForArc, endAngleForArc);
+            ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(innerX, innerY);
-        ctx.lineTo(outerX, outerY);
-        ctx.stroke();
-    });
+            // 绘制外弧
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, startAngleForArc, endAngleForArc);
+            ctx.stroke();
+
+            // 绘制径向线
+            const radialLines = [
+                { angle: baseStartAngle, label: '左径向线' },
+                { angle: baseEndAngle, label: '右径向线' }
+            ];
+
+            radialLines.forEach(({ angle, label }) => {
+                const innerX = centerX + innerRadius * Math.sin(angle);
+                const innerY = centerY + innerRadius * Math.cos(angle);
+                const outerX = centerX + outerRadius * Math.sin(angle);
+                const outerY = centerY + outerRadius * Math.cos(angle);
+
+                console.log(`${label}坐标:`, { innerX, innerY, outerX, outerY, angle: angle * 180 / Math.PI });
+
+                ctx.beginPath();
+                ctx.moveTo(innerX, innerY);
+                ctx.lineTo(outerX, outerY);
+                ctx.stroke();
+            });
+        }
+    }
+    
+    // 恢复Canvas状态
+    ctx.restore();
 }
 
 /**
@@ -466,14 +419,32 @@ function calculateCanvasSize() {
 // ========================= 虚拟数据和初始化 =========================
 
 /**
- * 从main.js获取实际座位数据并转换为Canvas绘制格式
- * @returns {Array} 座位数据数组
+ * 初始化并绘制Cinema - 集成了数据获取、状态初始化和绘制功能
+ * @param {string} layoutType - 布局类型
  */
-function getActualSeatsData() {
+function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
+    // ===== 初始化全局状态 =====
+    // 获取Canvas元素
+    GLOBAL_STATE.canvas = document.getElementById('cinema-canvas');
+    if (!GLOBAL_STATE.canvas || !GLOBAL_STATE.canvas.getContext) {
+        console.error('浏览器不支持Canvas或未找到canvas元素');
+        return;
+    }
+    
+    GLOBAL_STATE.ctx = GLOBAL_STATE.canvas.getContext('2d');
+    
+    // 首先尝试初始化main.js中的座位数据
+    if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
+        // 使用默认配置初始化座位数据
+        window.CinemaData.initializeCinemaSeats(10, 20);
+        console.log('已初始化main.js中的座位数据');
+    }
+
+    // ===== 获取实际座位数据 =====
     // 检查main.js模块是否已加载
     if (!window.CinemaData) {
-        console.warn('CinemaData模块未加载，使用虚拟数据');
-        return generateVirtualSeatsData();
+        console.error('CinemaData模块未加载，无法获取座位数据');
+        return;
     }
 
     const config = window.CinemaData.getCurrentConfig();
@@ -495,79 +466,13 @@ function getActualSeatsData() {
     }
 
     console.log(`从main.js获取到${seatsData.length}个座位数据`);
-    return seatsData;
-}
-
-/**
- * 生成虚拟座位数据（作为后备方案）
- * @returns {Array} 虚拟座位数据数组
- */
-function generateVirtualSeatsData() {
-    const virtualSeatsData = [];
-    const rows = 10;
-    const cols = 20;
     
-    for (let i = 1; i <= rows; i++) {
-        for (let j = 1; j <= cols; j++) {
-            let status = 'available';
-            if (Math.random() > 0.8) {
-                status = 'sold';
-            }
-            virtualSeatsData.push({ 
-                row: i, 
-                col: j, 
-                status: status,
-                id: `seat-${i}-${j}`
-            });
-        }
-    }
-    
-    console.log('使用虚拟数据生成座位');
-    return virtualSeatsData;
-}
-
-/**
- * 初始化全局状态
- */
-function initializeGlobalState() {
-    // 获取Canvas元素
-    GLOBAL_STATE.canvas = document.getElementById('cinema-canvas');
-    if (!GLOBAL_STATE.canvas || !GLOBAL_STATE.canvas.getContext) {
-        console.error('浏览器不支持Canvas或未找到canvas元素');
-        return false;
-    }
-    
-    GLOBAL_STATE.ctx = GLOBAL_STATE.canvas.getContext('2d');
-    
-    // 首先尝试初始化main.js中的座位数据
-    if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
-        // 使用默认配置初始化座位数据
-        window.CinemaData.initializeCinemaSeats(10, 20);
-        console.log('已初始化main.js中的座位数据');
-    }
-
-    // 获取座位数据
-    GLOBAL_STATE.seatsArray = getActualSeatsData();
+    // 设置座位数据和状态
+    GLOBAL_STATE.seatsArray = seatsData;
     GLOBAL_STATE.isInitialized = true;
-    
-    return true;
-}
-
-/**
- * 初始化并绘制Cinema
- * @param {string} layoutType - 布局类型
- */
-function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
-    // 初始化全局状态
-    if (!initializeGlobalState()) {
-        console.error('初始化失败');
-        return;
-    }
-    
-    // 设置当前布局
     GLOBAL_STATE.currentLayout = layoutType;
     
-    // 预加载图片并绘制
+    // ===== 预加载图片并绘制 =====
     preloadSeatImages().then(() => {
         drawCinema();
     }).catch(error => {
@@ -594,7 +499,27 @@ function refreshCinemaDisplay(layoutType) {
     }
     
     // 刷新座位数据
-    GLOBAL_STATE.seatsArray = getActualSeatsData();
+    if (window.CinemaData) {
+        const config = window.CinemaData.getCurrentConfig();
+        const seatsData = [];
+
+        // 遍历所有座位并获取实际数据
+        for (let row = 1; row <= config.TOTAL_ROWS; row++) {
+            for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
+                const seat = window.CinemaData.getSeat(row, col);
+                if (seat) {
+                    seatsData.push({
+                        row: seat.row,
+                        col: seat.col,
+                        status: seat.status,
+                        id: seat.id
+                    });
+                }
+            }
+        }
+        
+        GLOBAL_STATE.seatsArray = seatsData;
+    }
     
     // 重绘Canvas
     drawCinema();
@@ -634,14 +559,12 @@ window.CanvasRenderer = {
     drawSeat,
     drawCinema,
     drawCenterZone,
-    drawCenterSector,
     preloadSeatImages,
     calculateCanvasSize,
     CANVAS_CONFIG,
     GLOBAL_STATE,
     
     // 新增的实际数据相关函数
-    getActualSeatsData,
     initializeAndDrawCinema,
     refreshCinemaDisplay,
 };
