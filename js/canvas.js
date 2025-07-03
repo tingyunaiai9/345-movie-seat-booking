@@ -10,34 +10,34 @@ const CANVAS_CONFIG = {
     SEAT_RADIUS: 15,
     ROW_SPACING: 40,
     COL_SPACING: 10,
-    
+
     // 弧形布局配置
     ARC_RADIUS: 600,
     CIRCLE_CENTER: -400,
     ANGLE_FACTOR: Math.PI / 60,
-    
+
     // 画布配置
     CANVAS_PADDING: 50,
     MIN_CANVAS_WIDTH: 800,
     MIN_CANVAS_HEIGHT: 600,
     MIN_ARC_HEIGHT: 400,
-    
+
     // 屏幕配置
     SCREEN_HEIGHT: 50,
     SCREEN_WIDTH_RATIO: 0.8,
     SCREEN_MARGIN: 10,
-    
+
     // 样式配置
     SCREEN_COLOR: '#2c2c2c',
     TEXT_COLOR: 'white',
     SCREEN_FONT: '16px Arial',
     SEAT_FONT: '10px Arial',
-    
+
     // 虚线配置
     AISLE_LINE_COLOR: 'grey',
     AISLE_LINE_WIDTH: 1,
     AISLE_DASH_PATTERN: [8, 4],
-    
+
     // 中心区域配置
     CENTER_ZONE_COLOR: 'orange',
     CENTER_ZONE_WIDTH: 2,
@@ -45,14 +45,14 @@ const CANVAS_CONFIG = {
     CENTER_ZONE_PADDING: 5,
     CENTER_ZONE_MARGIN: 20,
     CENTER_ZONE_RATIO: 0.2,
-    
+
     // 图片路径配置
     IMAGE_PATHS: {
         available: 'img/available.PNG',
         selected: 'img/selected.PNG',
         sold: 'img/sold.PNG'
     },
-    
+
     // 布局类型
     LAYOUT_TYPES: {
         ARC: 'arc',
@@ -68,25 +68,25 @@ const CANVAS_CONFIG = {
 const GLOBAL_STATE = {
     // 座位数据
     seatsArray: [],
-    
+
     // 预加载的图片
     seatImages: {},
-    
+
     // 布局相关
     currentLayout: CANVAS_CONFIG.LAYOUT_TYPES.ARC,
     totalRows: 0,
     totalCols: 0,
-    
+
     // 画布相关
     canvas: null,
     ctx: null,
     canvasWidth: 0,
     canvasHeight: 0,
-    
+
     // 中心区域信息
     centerZoneInfo: null,
     centerSeatsCoords: [],
-    
+
     // 初始化状态
     isInitialized: false
 };
@@ -102,7 +102,14 @@ const GLOBAL_STATE = {
 function drawSeat(x, y, seat) {
     const { SEAT_RADIUS, SEAT_FONT, TEXT_COLOR } = CANVAS_CONFIG;
     const { ctx, seatImages } = GLOBAL_STATE;
-    const img = seatImages[seat.status];
+    
+    // 确定显示状态：如果座位被选中，显示selected状态，否则显示原状态
+    let displayStatus = seat.status;
+    if (seat.isSelected && seat.status === 'available') {
+        displayStatus = 'selected';
+    }
+    
+    const img = seatImages[displayStatus];
 
     if (img) {
         // 使用 drawImage 绘制贴图，坐标需要调整为左上角
@@ -129,7 +136,7 @@ function drawSeat(x, y, seat) {
  */
 function drawCinema() {
     const { canvas, ctx, seatsArray, currentLayout } = GLOBAL_STATE;
-    
+
     if (!canvas || !ctx) {
         console.error('Canvas未初始化');
         return;
@@ -154,7 +161,7 @@ function drawCinema() {
     // ===== 绘制屏幕 =====
     const { SCREEN_COLOR, SCREEN_WIDTH_RATIO, SCREEN_MARGIN, TEXT_COLOR, SCREEN_FONT } = CANVAS_CONFIG;
     const { canvasWidth, canvasHeight } = GLOBAL_STATE;
-    
+
     // 绘制屏幕背景
     ctx.fillStyle = SCREEN_COLOR;
     ctx.fillRect(canvasWidth * (1 - SCREEN_WIDTH_RATIO) / 2, SCREEN_MARGIN, canvasWidth * SCREEN_WIDTH_RATIO, 30);
@@ -167,7 +174,7 @@ function drawCinema() {
 
     // ===== 绘制中央过道虚线 =====
     const { AISLE_LINE_COLOR, AISLE_LINE_WIDTH, AISLE_DASH_PATTERN } = CANVAS_CONFIG;
-    
+
     ctx.save();
     ctx.strokeStyle = AISLE_LINE_COLOR;
     ctx.lineWidth = AISLE_LINE_WIDTH;
@@ -186,13 +193,21 @@ function drawCinema() {
     const isInCenterZone = (seat) => {
         const { centerZoneInfo } = GLOBAL_STATE;
         return seat.row >= centerZoneInfo.rowStart && seat.row <= centerZoneInfo.rowEnd &&
-               seat.col >= centerZoneInfo.colStart && seat.col <= centerZoneInfo.colEnd;
+            seat.col >= centerZoneInfo.colStart && seat.col <= centerZoneInfo.colEnd;
     };
 
     // ===== 绘制所有座位 =====
     seatsArray.forEach(seat => {
         const coords = calculateSeatPosition(seat);
-        
+
+        // 从StateManager获取选中状态（如果StateManager已加载）
+        if (window.StateManager && window.StateManager.getSelectedSeats) {
+            const selectedSeats = window.StateManager.getSelectedSeats();
+            seat.isSelected = selectedSeats.some(selectedSeat => selectedSeat.id === seat.id);
+        } else {
+            seat.isSelected = false; // 默认未选中
+        }
+
         // 检查是否为中心座位
         if (isInCenterZone(seat)) {
             GLOBAL_STATE.centerSeatsCoords.push(coords);
@@ -204,6 +219,8 @@ function drawCinema() {
     // ===== 绘制中心区域标识 =====
     if (GLOBAL_STATE.centerSeatsCoords.length > 0) {
         if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
+            drawCenterZone();
+        } else {
             drawCenterZone();
         }
     }
@@ -217,7 +234,7 @@ function drawCinema() {
 function calculateSeatPosition(seat) {
     const { SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR } = CANVAS_CONFIG;
     const { currentLayout, totalRows, totalCols, canvasWidth } = GLOBAL_STATE;
-    
+
     let x, y;
 
     if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
@@ -247,7 +264,7 @@ function calculateSeatPosition(seat) {
 function calculateCenterZone() {
     const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
     const { totalRows, totalCols, seatsArray } = GLOBAL_STATE;
-    
+
     const targetCenterCount = Math.floor(seatsArray.length * CENTER_ZONE_RATIO);
     const layoutRatio = Math.sqrt(targetCenterCount / seatsArray.length);
     const numCenterCols = Math.ceil(totalCols * layoutRatio);
@@ -255,7 +272,7 @@ function calculateCenterZone() {
 
     const middleRow = Math.ceil(totalRows / 2);
     const middleCol = Math.ceil(totalCols / 2);
-    
+
     return {
         rowStart: middleRow - Math.floor(numCenterRows / 2),
         rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
@@ -268,18 +285,18 @@ function calculateCenterZone() {
  * 绘制中心区域标识（支持平行布局和弧形布局）
  */
 function drawCenterZone() {
-    const { 
+    const {
         CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_PADDING, CENTER_ZONE_MARGIN,
         SEAT_RADIUS, ARC_RADIUS, ROW_SPACING, CIRCLE_CENTER, ANGLE_FACTOR
     } = CANVAS_CONFIG;
     const { ctx, centerSeatsCoords, centerZoneInfo, totalCols, canvasWidth, currentLayout } = GLOBAL_STATE;
-    
+
     // 设置通用样式
     ctx.save();
     ctx.strokeStyle = CENTER_ZONE_COLOR;
     ctx.lineWidth = CENTER_ZONE_WIDTH;
     ctx.setLineDash(CENTER_ZONE_DASH);
-    
+
     if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
         // ===== 平行布局：绘制矩形虚线框 =====
         if (centerSeatsCoords.length > 0) {
@@ -344,7 +361,7 @@ function drawCenterZone() {
             });
         }
     }
-    
+
     // 恢复Canvas状态
     ctx.restore();
 }
@@ -355,7 +372,7 @@ function drawCenterZone() {
  */
 function preloadSeatImages() {
     const { IMAGE_PATHS } = CANVAS_CONFIG;
-    
+
     const promises = Object.entries(IMAGE_PATHS).map(([status, src]) => {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -384,7 +401,7 @@ function preloadSeatImages() {
  * @returns {Object} 包含width和height的对象
  */
 function calculateCanvasSize() {
-    const { 
+    const {
         CANVAS_PADDING, MIN_CANVAS_WIDTH, MIN_CANVAS_HEIGHT, MIN_ARC_HEIGHT,
         SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR
     } = CANVAS_CONFIG;
@@ -430,9 +447,9 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
         console.error('浏览器不支持Canvas或未找到canvas元素');
         return;
     }
-    
+
     GLOBAL_STATE.ctx = GLOBAL_STATE.canvas.getContext('2d');
-    
+
     // 首先尝试初始化main.js中的座位数据
     if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
         // 使用默认配置初始化座位数据
@@ -466,12 +483,12 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
     }
 
     console.log(`从main.js获取到${seatsData.length}个座位数据`);
-    
+
     // 设置座位数据和状态
     GLOBAL_STATE.seatsArray = seatsData;
     GLOBAL_STATE.isInitialized = true;
     GLOBAL_STATE.currentLayout = layoutType;
-    
+
     // ===== 预加载图片并绘制 =====
     preloadSeatImages().then(() => {
         drawCinema();
@@ -492,12 +509,12 @@ function refreshCinemaDisplay(layoutType) {
         console.error('Canvas未初始化');
         return;
     }
-    
+
     // 更新布局类型
     if (layoutType) {
         GLOBAL_STATE.currentLayout = layoutType;
     }
-    
+
     // 刷新座位数据
     if (window.CinemaData) {
         const config = window.CinemaData.getCurrentConfig();
@@ -517,13 +534,33 @@ function refreshCinemaDisplay(layoutType) {
                 }
             }
         }
-        
+
         GLOBAL_STATE.seatsArray = seatsData;
     }
-    
+
     // 重绘Canvas
     drawCinema();
 }
+
+// ========================= 布局切换函数 =========================
+
+/**
+ * 切换布局模式
+ */
+function toggleLayout() {
+    GLOBAL_STATE.currentLayout = (GLOBAL_STATE.currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC)
+        ? CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL
+        : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+
+    console.log(`布局已切换为: ${GLOBAL_STATE.currentLayout}`);
+
+    // 重新绘制
+    if (GLOBAL_STATE.isInitialized) {
+        drawCinema();
+    }
+}
+
+// ========================= 页面加载初始化 =========================
 
 // 页面加载后执行 - 修改版本
 window.addEventListener('DOMContentLoaded', () => {
@@ -539,10 +576,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // 为按钮添加点击事件
         toggleBtn.addEventListener('click', () => {
-            const newLayout = (GLOBAL_STATE.currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ? 
-                             CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+            const newLayout = (GLOBAL_STATE.currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ?
+                CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
             console.log(`布局已切换为: ${newLayout}`);
-            
+
             // 刷新显示
             refreshCinemaDisplay(newLayout);
         });
@@ -563,10 +600,11 @@ window.CanvasRenderer = {
     calculateCanvasSize,
     CANVAS_CONFIG,
     GLOBAL_STATE,
-    
+
     // 新增的实际数据相关函数
     initializeAndDrawCinema,
     refreshCinemaDisplay,
+    toggleLayout, // 导出布局切换函数
 };
 
 console.log('电影院Canvas渲染模块(canvas.js)已加载 - 使用实际数据和全局状态管理');
