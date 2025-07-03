@@ -1,14 +1,12 @@
 /**
  * 视图控制器 - 负责页面视图间的切换逻辑
- * 角色四：前端UI与总成工程师的核心功能
  */
 class ViewController {
     constructor() {
         this.currentView = 'config';
         this.viewHistory = ['config'];
-        this.selectedMovie = null; // 添加选中的电影数据
+        this.selectedMovie = null;
         this.initializeEventListeners();
-        this.initializeMovieSelection(); // 添加电影选择初始化
     }
 
     /**
@@ -69,14 +67,6 @@ class ViewController {
             });
         }
 
-        // 新订单按钮
-        const newOrderBtn = document.getElementById('new-order');
-        if (newOrderBtn) {
-            newOrderBtn.addEventListener('click', () => {
-                this.resetToStart();
-            });
-        }
-
         // 顶部导航步骤点击事件
         const stepElements = document.querySelectorAll('.nav-steps .step');
         stepElements.forEach(step => {
@@ -87,92 +77,6 @@ class ViewController {
                 }
             });
         });
-    }
-
-    /**
-     * 初始化电影选择功能
-     */
-    initializeMovieSelection() {
-        // 获取所有电影项并添加点击事件
-        const movieItems = document.querySelectorAll('.movie-item');
-        
-        movieItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                this.selectMovie(item);
-            });
-        });
-
-        // 初始化默认选择的电影
-        const defaultMovie = document.querySelector('.movie-item.active');
-        if (defaultMovie) {
-            this.setSelectedMovieData(defaultMovie);
-        }
-    }
-
-    /**
-     * 选择电影
-     * @param {HTMLElement} movieElement - 被点击的电影元素
-     */
-    selectMovie(movieElement) {
-        // 移除所有电影的选中状态
-        const allMovieItems = document.querySelectorAll('.movie-item');
-        allMovieItems.forEach(item => {
-            item.classList.remove('active');
-        });
-
-        // 为当前点击的电影添加选中状态
-        movieElement.classList.add('active');
-
-        // 设置选中的电影数据
-        this.setSelectedMovieData(movieElement);
-
-        console.log('已选择电影:', this.selectedMovie);
-    }
-
-    /**
-     * 设置选中的电影数据
-     * @param {HTMLElement} movieElement - 电影元素
-     */
-    setSelectedMovieData(movieElement) {
-        this.selectedMovie = {
-            id: movieElement.dataset.movie,
-            title: movieElement.querySelector('h3').textContent,
-            time: movieElement.querySelector('.movie-time').textContent,
-            price: movieElement.querySelector('.movie-price').textContent,
-            image: movieElement.querySelector('img').src
-        };
-
-        // 更新其他页面的电影信息
-        this.updateMovieInfoInOtherViews();
-    }
-
-    /**
-     * 更新其他视图中的电影信息
-     */
-    updateMovieInfoInOtherViews() {
-        if (!this.selectedMovie) return;
-
-        // 更新支付页面的电影信息
-        const paymentMovieTitle = document.getElementById('payment-movie-title');
-        if (paymentMovieTitle) {
-            paymentMovieTitle.textContent = this.selectedMovie.title;
-        }
-
-        const paymentMovieTime = document.getElementById('payment-movie-time');
-        if (paymentMovieTime) {
-            paymentMovieTime.textContent = this.selectedMovie.time;
-        }
-
-        // 更新确认页面的电影信息
-        const confirmMovieTitle = document.getElementById('confirm-movie-title');
-        if (confirmMovieTitle) {
-            confirmMovieTitle.textContent = this.selectedMovie.title;
-        }
-
-        const confirmMovieTime = document.getElementById('confirm-movie-time');
-        if (confirmMovieTime) {
-            confirmMovieTime.textContent = this.selectedMovie.time;
-        }
     }
 
     /**
@@ -202,6 +106,9 @@ class ViewController {
         // 显示目标视图
         targetView.classList.add('active');
 
+        // *** 新增：根据视图切换背景 ***
+        this.handleBackgroundForView(viewName);
+
         // 更新导航步骤状态
         this.updateNavigationSteps(viewName);
 
@@ -213,6 +120,25 @@ class ViewController {
         this.onViewChanged(viewName);
 
         console.log(`已切换到视图: ${viewName}`);
+    }
+
+    /**
+     * 根据视图处理背景切换
+     * @param {string} viewName - 视图名称
+     */
+    handleBackgroundForView(viewName) {
+        if (viewName === 'config') {
+            // 配置页面：使用田野背景
+            if (window.movieSelector) {
+                window.movieSelector.restoreConfigBackground();
+            }
+        } else {
+            // 其他页面：使用选中电影的背景（如果有）
+            const selectedMovieId = localStorage.getItem('selectedMovie');
+            if (selectedMovieId && window.movieSelector) {
+                window.movieSelector.applyBackgroundById(selectedMovieId);
+            }
+        }
     }
 
     /**
@@ -236,14 +162,13 @@ class ViewController {
         switch (viewName) {
             case 'seat':
                 // 进入选座页面需要先选择电影
-                if (!this.selectedMovie) {
+                if (window.movieSelector && !window.movieSelector.getSelectedMovie()) {
                     this.showMessage('请先选择电影', 'warning');
                     return false;
                 }
                 break;
             case 'payment':
                 // 进入支付页面需要选择座位
-                // 这里将来会添加座位选择的验证
                 break;
         }
 
@@ -287,19 +212,12 @@ class ViewController {
      * 处理支付确认
      */
     handlePaymentConfirmation() {
-        // 显示加载状态
         this.showLoading('正在处理支付...');
 
-        // 模拟支付处理
         setTimeout(() => {
             this.hideLoading();
-            
-            // 生成订单信息
             this.generateOrderInfo();
-            
-            // 切换到确认视图
             this.switchToView('confirm');
-            
             this.showMessage('支付成功！', 'success');
         }, 2000);
     }
@@ -311,7 +229,6 @@ class ViewController {
         const orderNumber = 'ORD' + Date.now();
         const purchaseTime = new Date().toLocaleString('zh-CN');
 
-        // 更新确认页面的信息
         const orderNumberElement = document.getElementById('order-number');
         if (orderNumberElement) {
             orderNumberElement.textContent = orderNumber;
@@ -321,8 +238,6 @@ class ViewController {
         if (purchaseTimeElement) {
             purchaseTimeElement.textContent = purchaseTime;
         }
-        
-        // 这里可以添加更多订单信息的更新逻辑
     }
 
     /**
@@ -331,12 +246,14 @@ class ViewController {
     resetToStart() {
         this.currentView = 'config';
         this.viewHistory = ['config'];
-        this.selectedMovie = null; // 重置选中的电影
+        
+        // 重置背景为田野背景
+        if (window.movieSelector) {
+            window.movieSelector.restoreConfigBackground();
+        }
+        
         this.switchToView('config');
-        
-        // 重置表单数据
         this.resetAllForms();
-        
         this.showMessage('已重置，可以开始新的订单', 'info');
     }
 
@@ -344,32 +261,18 @@ class ViewController {
      * 重置所有表单数据
      */
     resetAllForms() {
-        // 重置配置表单
-        const configForm = document.querySelector('#config-view');
-        if (configForm) {
-            const inputs = configForm.querySelectorAll('input');
-            inputs.forEach(input => {
-                if (input.type === 'radio' && input.value === 'medium') {
-                    input.checked = true;
-                } else if (input.type === 'radio') {
-                    input.checked = false;
-                } else if (input.type === 'number') {
-                    input.value = input.defaultValue || '';
-                }
-            });
-        }
-
-        // 重置电影选择
+        // 重置电影选择为第一个
         const allMovieItems = document.querySelectorAll('.movie-item');
         allMovieItems.forEach(item => {
             item.classList.remove('active');
         });
         
-        // 重新选择第一部电影作为默认选择
         const firstMovie = document.querySelector('.movie-item');
         if (firstMovie) {
             firstMovie.classList.add('active');
-            this.setSelectedMovieData(firstMovie);
+            if (window.movieSelector) {
+                window.movieSelector.selectMovie(firstMovie);
+            }
         }
     }
 
@@ -397,42 +300,19 @@ class ViewController {
         }
     }
 
-    /**
-     * 配置视图激活时的处理
-     */
     onConfigViewActivated() {
         console.log('配置视图已激活');
-        // 可以在这里添加配置视图特有的逻辑
     }
 
-    /**
-     * 电影选择视图激活时的处理
-     */
     onMovieViewActivated() {
         console.log('电影选择视图已激活');
-        // 确保电影选择功能已初始化
-        if (!this.selectedMovie) {
-            const defaultMovie = document.querySelector('.movie-item.active');
-            if (defaultMovie) {
-                this.setSelectedMovieData(defaultMovie);
-            }
-        }
-        console.log('当前选中电影:', this.selectedMovie);
     }
 
-    /**
-     * 选座视图激活时的处理
-     */
     onSeatViewActivated() {
         console.log('选座视图已激活');
-        
-        // 初始化Canvas绘制
         this.initializeCanvasDrawing();
     }
 
-    /**
-     * 初始化Canvas绘制 - 简化版，不设置Canvas尺寸
-     */
     initializeCanvasDrawing() {
         const canvas = document.getElementById('cinema-canvas');
         if (!canvas) {
@@ -440,82 +320,36 @@ class ViewController {
             return;
         }
         
-        // 不设置Canvas尺寸，使用canvas.js中window.onload的设置
-        console.log('Canvas元素已找到，Canvas.js将在window.onload时自动绘制');
+        console.log('Canvas元素已找到，Canvas.js将自动绘制');
         
-        // 如果需要立即显示，可以手动触发绘制
-        // 但需要等待canvas.js的window.onload执行完毕
         setTimeout(() => {
-            // 检查canvas.js是否已经绘制
             const ctx = canvas.getContext('2d');
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const hasContent = imageData.data.some(channel => channel !== 0);
             
             if (!hasContent) {
                 console.log('Canvas内容为空，尝试手动触发绘制');
-                // 如果canvas.js的window.onload还没执行，手动调用绘制
-                if (window.CanvasRenderer && window.CanvasRenderer.drawCinema) {
-                    // 创建测试数据
-                    const testSeatsData = [];
-                    const rows = 10;
-                    const cols = 20;
-                    for (let i = 1; i <= rows; i++) {
-                        for (let j = 1; j <= cols; j++) {
-                            let status = 'available';
-                            if (Math.random() > 0.8) {
-                                status = 'sold';
-                            }
-                            testSeatsData.push({ row: i, col: j, status: status });
-                        }
-                    }
-                    
-                    // 调用canvas.js的绘制函数
-                    window.CanvasRenderer.drawCinema(testSeatsData, {}, 'arc');
-                }
             }
         }, 500);
     }
 
-    /**
-     * 支付视图激活时的处理
-     */
     onPaymentViewActivated() {
         console.log('支付视图已激活');
-        // 更新支付页面的订单信息
-        this.updateMovieInfoInOtherViews();
     }
 
-    /**
-     * 确认视图激活时的处理
-     */
     onConfirmViewActivated() {
         console.log('确认视图已激活');
-        // 生成二维码等
-    }
-
-    /**
-     * 获取当前选中的电影
-     * @returns {Object|null} 当前选中的电影数据
-     */
-    getSelectedMovie() {
-        return this.selectedMovie;
     }
 
     /**
      * 显示消息提示
-     * @param {string} message - 消息内容
-     * @param {string} type - 消息类型 (success, error, warning, info)
      */
     showMessage(message, type = 'info') {
-        // 创建消息容器（如果不存在）
         let messageContainer = document.getElementById('message-container');
         if (!messageContainer) {
             messageContainer = document.createElement('div');
             messageContainer.id = 'message-container';
-            messageContainer.style.position = 'fixed';
-            messageContainer.style.top = '20px';
-            messageContainer.style.right = '20px';
-            messageContainer.style.zIndex = '9999';
+            messageContainer.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;';
             document.body.appendChild(messageContainer);
         }
 
@@ -535,19 +369,12 @@ class ViewController {
         `;
         
         messageElement.innerHTML = `
-            <span class="message-text">${message}</span>
-            <button class="message-close" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;margin-left:10px;">×</button>
+            <span>${message}</span>
+            <button onclick="this.parentNode.remove()" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;margin-left:10px;">×</button>
         `;
 
         messageContainer.appendChild(messageElement);
 
-        // 添加关闭事件
-        const closeBtn = messageElement.querySelector('.message-close');
-        closeBtn.addEventListener('click', () => {
-            messageElement.remove();
-        });
-
-        // 自动关闭
         setTimeout(() => {
             if (messageElement.parentNode) {
                 messageElement.remove();
@@ -555,11 +382,6 @@ class ViewController {
         }, 3000);
     }
 
-    /**
-     * 获取消息类型对应的颜色
-     * @param {string} type - 消息类型
-     * @returns {string} 颜色值
-     */
     getMessageColor(type) {
         const colors = {
             success: '#28a745',
@@ -572,10 +394,8 @@ class ViewController {
 
     /**
      * 显示加载状态
-     * @param {string} text - 加载文本
      */
     showLoading(text = '正在加载...') {
-        // 创建加载覆盖层（如果不存在）
         let loadingOverlay = document.getElementById('loading-overlay');
         if (!loadingOverlay) {
             loadingOverlay = document.createElement('div');
@@ -594,23 +414,17 @@ class ViewController {
             `;
             
             loadingOverlay.innerHTML = `
-                <div class="loading-content" style="background:white;padding:30px;border-radius:8px;text-align:center;">
-                    <div class="loading-spinner" style="border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 15px;"></div>
-                    <div id="loading-text" style="color:#333;font-size:16px;">${text}</div>
+                <div style="background:white;padding:30px;border-radius:8px;text-align:center;">
+                    <div style="border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 15px;"></div>
+                    <div>${text}</div>
                 </div>
             `;
             
             document.body.appendChild(loadingOverlay);
             
-            // 添加旋转动画
             const style = document.createElement('style');
             style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
             document.head.appendChild(style);
-        }
-        
-        const loadingText = document.getElementById('loading-text');
-        if (loadingText) {
-            loadingText.textContent = text;
         }
         
         loadingOverlay.style.display = 'flex';
