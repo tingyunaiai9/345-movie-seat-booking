@@ -453,49 +453,174 @@ function calculateCanvasSize(totalRows, totalCols, layoutType) {
 
 // ========================= 虚拟数据和初始化 =========================
 
-// 开发初期使用的虚拟数据
-const virtualSeatsData = [];
-const rows = 10;
-const cols = 20;
-for (let i = 1; i <= rows; i++) {
-    for (let j = 1; j <= cols; j++) {
-        let status = 'available';
-        if (Math.random() > 0.8) {
-            status = 'sold';
+/**
+ * 从main.js获取实际座位数据并转换为Canvas绘制格式
+ * @returns {Array} 座位数据数组
+ */
+function getActualSeatsData() {
+    // 检查main.js模块是否已加载
+    if (!window.CinemaData) {
+        console.warn('CinemaData模块未加载，使用虚拟数据');
+        return generateVirtualSeatsData();
+    }
+
+    const config = window.CinemaData.getCurrentConfig();
+    const seatsData = [];
+
+    // 遍历所有座位并获取实际数据
+    for (let row = 1; row <= config.TOTAL_ROWS; row++) {
+        for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
+            const seat = window.CinemaData.getSeat(row, col);
+            if (seat) {
+                seatsData.push({
+                    row: seat.row,
+                    col: seat.col,
+                    status: seat.status,
+                    id: seat.id
+                });
+            }
         }
-        virtualSeatsData.push({ row: i, col: j, status: status });
+    }
+
+    console.log(`从main.js获取到${seatsData.length}个座位数据`);
+    return seatsData;
+}
+
+/**
+ * 生成虚拟座位数据（作为后备方案）
+ * @returns {Array} 虚拟座位数据数组
+ */
+function generateVirtualSeatsData() {
+    const virtualSeatsData = [];
+    const rows = 10;
+    const cols = 20;
+    
+    for (let i = 1; i <= rows; i++) {
+        for (let j = 1; j <= cols; j++) {
+            let status = 'available';
+            if (Math.random() > 0.8) {
+                status = 'sold';
+            }
+            virtualSeatsData.push({ 
+                row: i, 
+                col: j, 
+                status: status,
+                id: `seat-${i}-${j}`
+            });
+        }
+    }
+    
+    console.log('使用虚拟数据生成座位');
+    return virtualSeatsData;
+}
+
+/**
+ * 初始化并绘制Cinema
+ * @param {string} layoutType - 布局类型
+ */
+function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
+    // 首先尝试初始化main.js中的座位数据
+    if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
+        // 使用默认配置初始化座位数据
+        window.CinemaData.initializeCinemaSeats(10, 20);
+        console.log('已初始化main.js中的座位数据');
+    }
+
+    // 获取实际座位数据
+    const actualSeatsData = getActualSeatsData();
+    
+    // 预加载图片并绘制
+    preloadSeatImages().then(seatImages => {
+        drawCinema(actualSeatsData, seatImages, layoutType);
+    }).catch(error => {
+        console.error("图片预加载失败:", error);
+        drawCinema(actualSeatsData, {}, layoutType);
+    });
+
+    return actualSeatsData;
+}
+
+/**
+ * 刷新Canvas显示（用于数据更新后重绘）
+ * @param {string} layoutType - 布局类型
+ */
+function refreshCinemaDisplay(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
+    const actualSeatsData = getActualSeatsData();
+    
+    // 检查是否有已加载的图片
+    if (window.loadedSeatImages) {
+        drawCinema(actualSeatsData, window.loadedSeatImages, layoutType);
+    } else {
+        preloadSeatImages().then(seatImages => {
+            window.loadedSeatImages = seatImages; // 缓存图片
+            drawCinema(actualSeatsData, seatImages, layoutType);
+        }).catch(error => {
+            console.error("图片加载失败:", error);
+            drawCinema(actualSeatsData, {}, layoutType);
+        });
     }
 }
 
-// 在页面加载时预加载图片并绘制初始影厅
-const canvas = document.getElementById('cinema-canvas');
-const toggleBtn = document.getElementById('toggle-layout-btn');
+// 页面加载后执行 - 修改版本
+window.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('cinema-canvas');
+    const toggleBtn = document.getElementById('toggle-layout-btn');
 
-if (canvas && toggleBtn) {
-    let currentLayout = CANVAS_CONFIG.LAYOUT_TYPES.ARC;
-    let loadedImages = {};
+    if (canvas && toggleBtn) {
+        let currentLayout = CANVAS_CONFIG.LAYOUT_TYPES.ARC;
 
-    // 预加载图片
-    preloadSeatImages().then(seatImages => {
-        loadedImages = seatImages;
-        drawCinema(virtualSeatsData, loadedImages, currentLayout);
-    }).catch(error => {
-        console.error("图片预加载失败:", error);
-        drawCinema(virtualSeatsData, {}, currentLayout);
-    });
+        // 等待所有模块加载完成
+        setTimeout(() => {
+            // 初始化并绘制Cinema
+            initializeAndDrawCinema(currentLayout);
+        }, 100);
 
-    // 为按钮添加点击事件
-    toggleBtn.addEventListener('click', () => {
-        currentLayout = (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ? 
-                        CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
-        console.log(`布局已切换为: ${currentLayout}`);
-        drawCinema(virtualSeatsData, loadedImages, currentLayout);
-    });
+        // 为按钮添加点击事件
+        toggleBtn.addEventListener('click', () => {
+            currentLayout = (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ? 
+                           CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+            console.log(`布局已切换为: ${currentLayout}`);
+            
+            // 刷新显示
+            refreshCinemaDisplay(currentLayout);
+        });
 
-} else {
-    if (!canvas) console.error('未找到ID为 cinema-canvas 的 canvas 元素');
-    if (!toggleBtn) console.error('未找到ID为 toggle-layout-btn 的按钮元素');
+    } else {
+        if (!canvas) console.error('未找到ID为 cinema-canvas 的 canvas 元素');
+        if (!toggleBtn) console.error('未找到ID为 toggle-layout-btn 的按钮元素');
+    }
+});
+
+// ========================= 数据同步功能 =========================
+
+/**
+ * 监听main.js中的数据变化并自动刷新Canvas
+ */
+function setupDataSyncListeners() {
+    // 如果main.js支持事件监听，可以在这里添加
+    // 目前使用定时检查的方式
+    setInterval(() => {
+        if (window.CinemaData && document.getElementById('cinema-canvas')) {
+            // 检查是否有数据更新的标记
+            const status = window.CinemaData.getCinemaStatus();
+            if (window.lastCinemaStatus && 
+                (status.available !== window.lastCinemaStatus.available || 
+                 status.sold !== window.lastCinemaStatus.sold || 
+                 status.reserved !== window.lastCinemaStatus.reserved)) {
+                
+                console.log('检测到座位数据变化，自动刷新Canvas');
+                const currentLayout = window.currentCanvasLayout || CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+                refreshCinemaDisplay(currentLayout);
+            }
+            window.lastCinemaStatus = status;
+        }
+    }, 2000); // 每2秒检查一次
 }
+
+// 启动数据同步监听
+window.addEventListener('load', () => {
+    setTimeout(setupDataSyncListeners, 500);
+});
 
 // ========================= 模块导出 =========================
 
@@ -506,8 +631,12 @@ window.CanvasRenderer = {
     drawCenterSector,
     preloadSeatImages,
     calculateCanvasSize,
-    // 新增配置对象导出
-    CANVAS_CONFIG
+    CANVAS_CONFIG,
+    
+    // 新增的实际数据相关函数
+    getActualSeatsData,
+    initializeAndDrawCinema,
+    refreshCinemaDisplay,
 };
 
-console.log('电影院Canvas渲染模块(canvas.js)已加载');
+console.log('电影院Canvas渲染模块(canvas.js)已加载 - 使用实际数据');
