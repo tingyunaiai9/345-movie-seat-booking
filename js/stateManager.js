@@ -88,31 +88,50 @@ function updateCanvasRect() {
  * 加载初始座位数据
  */
 function loadInitialSeatsData() {
-    if (window.CinemaData && typeof window.CinemaData.getCurrentConfig === 'function') {
-        const config = window.CinemaData.getCurrentConfig();
-        const seatsData = [];
-        
-        // 从main.js获取所有座位数据
-        for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-            for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-                const seat = window.CinemaData.getSeat(row, col);
-                if (seat) {
-                    seatsData.push({
-                        ...seat,
-                        isSelected: false,  // UI状态
-                        isHovered: false    // UI状态
-                    });
-                }
+    console.log('📥 开始加载初始座位数据');
+
+    if (!window.CinemaData || typeof window.CinemaData.getCurrentConfig !== 'function') {
+        console.warn('❌ CinemaData模块未加载，无法获取座位数据');
+        return;
+    }
+
+    const config = window.CinemaData.getCurrentConfig();
+    console.log('⚙️ 获取到配置:', config);
+
+    const seatsData = [];
+
+    // 从main.js获取所有座位数据
+    for (let row = 1; row <= config.TOTAL_ROWS; row++) {
+        for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
+            const seat = window.CinemaData.getSeat(row, col);
+            if (seat) {
+                seatsData.push({
+                    ...seat,
+                    isSelected: false,  // UI状态
+                    isHovered: false    // UI状态
+                });
+            } else {
+                console.warn(`⚠️ 无法获取座位 ${row}-${col} 的数据`);
             }
         }
-        
-        globalState.currentSeatsData = seatsData;
-        console.log(`已加载 ${seatsData.length} 个座位数据`);
-    } else {
-        console.warn('CinemaData模块未加载，无法获取座位数据');
+    }
+
+    globalState.currentSeatsData = seatsData;
+    console.log(`✅ 已加载 ${seatsData.length} 个座位数据`);
+
+    // 输出前几个座位的详细信息用于调试
+    if (seatsData.length > 0) {
+        console.log('🔍 前3个座位的详细信息:');
+        seatsData.slice(0, 3).forEach(seat => {
+            console.log(`  座位 ${seat.row}-${seat.col}:`, {
+                id: seat.id,
+                status: seat.status,
+                isSelected: seat.isSelected,
+                isHovered: seat.isHovered
+            });
+        });
     }
 }
-
 // ========================= 事件监听器绑定 =========================
 
 /**
@@ -154,13 +173,31 @@ function unbindEventListeners() {
  * @param {MouseEvent} event - 鼠标点击事件
  */
 function handleCanvasClick(event) {
-    if (!globalState.isInitialized) return;
-    
+    console.log('🖱️ Canvas点击事件触发');
+
+    if (!globalState.isInitialized) {
+        console.warn('❌ 状态管理器未初始化，忽略点击事件');
+        return;
+    }
+
     const mousePos = getRelativeMousePosition(event);
+    console.log('📍 鼠标相对位置:', mousePos);
+
     const hitSeat = performHitDetection(mousePos.x, mousePos.y);
-    
+    console.log('🎯 命中检测结果:', hitSeat ? `座位 ${hitSeat.row}-${hitSeat.col}` : '未命中任何座位');
+
     if (hitSeat) {
+        console.log('🪑 座位详细信息:', {
+            id: hitSeat.id,
+            row: hitSeat.row,
+            col: hitSeat.col,
+            status: hitSeat.status,
+            isSelected: hitSeat.isSelected,
+            isHovered: hitSeat.isHovered
+        });
         handleSeatClick(hitSeat);
+    } else {
+        console.log('🚫 点击位置没有座位');
     }
 }
 
@@ -170,10 +207,18 @@ function handleCanvasClick(event) {
  */
 function handleCanvasMouseMove(event) {
     if (!globalState.isInitialized) return;
-    
+
     const mousePos = getRelativeMousePosition(event);
     const hitSeat = performHitDetection(mousePos.x, mousePos.y);
-    
+
+    // 只在悬停座位变化时输出日志
+    if (hitSeat !== globalState.hoveredSeat) {
+        console.log('👆 悬停座位变化:', {
+            from: globalState.hoveredSeat ? `${globalState.hoveredSeat.row}-${globalState.hoveredSeat.col}` : 'null',
+            to: hitSeat ? `${hitSeat.row}-${hitSeat.col}` : 'null'
+        });
+    }
+
     // 更新悬停状态
     updateHoverState(hitSeat);
 }
@@ -221,26 +266,33 @@ function handleKeyUp(event) {
  * @param {Object} seat - 被点击的座位对象
  */
 function handleSeatClick(seat) {
+    console.log('🎫 处理座位点击:', `${seat.row}-${seat.col}`);
+    console.log('🎫 座位当前状态:', seat.status);
+    console.log('🎫 座位是否已选中:', seat.isSelected);
+    console.log('⌨️ Ctrl键是否按下:', globalState.isCtrlPressed);
+
     // 检查座位是否可点击
     if (!isSeatClickable(seat)) {
-        console.log(`座位 ${seat.row}-${seat.col} 不可选择（状态：${seat.status}）`);
+        console.warn(`❌ 座位 ${seat.row}-${seat.col} 不可选择（状态：${seat.status}）`);
         return;
     }
-    
+
+    console.log('✅ 座位可点击，开始处理选择逻辑');
+
     // 根据Ctrl键状态决定选择模式
     if (globalState.isCtrlPressed) {
-        // 多选模式：切换选择状态
+        console.log('🔀 多选模式：切换选择状态');
         toggleSeatSelection(seat);
     } else {
-        // 单选模式：清除其他选择，只选择当前座位
+        console.log('🔄 单选模式：清除其他选择，只选择当前座位');
         clearAllSelections();
         selectSeat(seat);
     }
-    
-    // 触发界面重绘
+
+    console.log('🎨 触发界面重绘');
     triggerRedraw();
-    
-    // 触发选座状态变化事件
+
+    console.log('📢 触发选座状态变化事件');
     notifySelectionChange();
 }
 
@@ -249,12 +301,24 @@ function handleSeatClick(seat) {
  * @param {Object} seat - 要选择的座位
  */
 function selectSeat(seat) {
-    if (!seat || seat.isSelected) return;
-    
+    console.log('➕ 尝试选择座位:', `${seat.row}-${seat.col}`);
+
+    if (!seat) {
+        console.warn('❌ 座位对象为空，无法选择');
+        return;
+    }
+
+    if (seat.isSelected) {
+        console.log('⚠️ 座位已被选中，跳过选择');
+        return;
+    }
+
     seat.isSelected = true;
     globalState.selectedSeats.push(seat);
-    
-    console.log(`座位 ${seat.row}-${seat.col} 已选择`);
+
+    console.log(`✅ 座位 ${seat.row}-${seat.col} 已选择`);
+    console.log('📊 当前选中座位数:', globalState.selectedSeats.length);
+    console.log('📋 选中座位列表:', globalState.selectedSeats.map(s => `${s.row}-${s.col}`));
 }
 
 /**
@@ -262,15 +326,29 @@ function selectSeat(seat) {
  * @param {Object} seat - 要取消选择的座位
  */
 function deselectSeat(seat) {
-    if (!seat || !seat.isSelected) return;
-    
+    console.log('➖ 尝试取消选择座位:', `${seat.row}-${seat.col}`);
+
+    if (!seat) {
+        console.warn('❌ 座位对象为空，无法取消选择');
+        return;
+    }
+
+    if (!seat.isSelected) {
+        console.log('⚠️ 座位未被选中，跳过取消选择');
+        return;
+    }
+
     seat.isSelected = false;
     const index = globalState.selectedSeats.findIndex(s => s.id === seat.id);
     if (index !== -1) {
         globalState.selectedSeats.splice(index, 1);
+        console.log(`✅ 座位 ${seat.row}-${seat.col} 已从选中列表中移除`);
+    } else {
+        console.warn(`⚠️ 座位 ${seat.row}-${seat.col} 不在选中列表中`);
     }
-    
-    console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
+
+    console.log('📊 当前选中座位数:', globalState.selectedSeats.length);
+    console.log('📋 选中座位列表:', globalState.selectedSeats.map(s => `${s.row}-${s.col}`));
 }
 
 /**
@@ -289,12 +367,16 @@ function toggleSeatSelection(seat) {
  * 清除所有选择
  */
 function clearAllSelections() {
+    console.log('🗑️ 清除所有选择');
+    console.log('📊 清除前选中座位数:', globalState.selectedSeats.length);
+
     globalState.selectedSeats.forEach(seat => {
         seat.isSelected = false;
+        console.log(`🔄 取消选择座位: ${seat.row}-${seat.col}`);
     });
     globalState.selectedSeats = [];
-    
-    console.log('已清除所有选择');
+
+    console.log('✅ 已清除所有选择');
 }
 
 /**
@@ -306,13 +388,13 @@ function updateHoverState(newHoveredSeat) {
     if (globalState.hoveredSeat) {
         globalState.hoveredSeat.isHovered = false;
     }
-    
+
     // 设置新的悬停状态
     globalState.hoveredSeat = newHoveredSeat;
     if (newHoveredSeat) {
         newHoveredSeat.isHovered = true;
     }
-    
+
     // 触发重绘
     triggerRedraw();
 }
@@ -326,19 +408,61 @@ function updateHoverState(newHoveredSeat) {
  * @returns {Object|null} 命中的座位对象或null
  */
 function performHitDetection(x, y) {
-    if (!globalState.currentSeatsData) return null;
-    
+    console.log('🔍 开始命中检测:', { x, y });
+
+    if (!globalState.currentSeatsData) {
+        console.warn('❌ 座位数据为空，无法进行命中检测');
+        return null;
+    }
+
+    console.log('📊 座位数据总数:', globalState.currentSeatsData.length);
+
+    // 检查Canvas渲染器是否可用
+    if (!window.CanvasRenderer || !window.CanvasRenderer.CANVAS_CONFIG) {
+        console.error('❌ CanvasRenderer模块未加载或配置缺失');
+        return null;
+    }
+
+    const seatRadius = window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS;
+    console.log('🎯 座位半径:', seatRadius);
+
+    let closestSeat = null;
+    let closestDistance = Infinity;
+
     // 遍历所有座位，检查鼠标点击位置
     for (const seat of globalState.currentSeatsData) {
         const seatPos = calculateSeatPosition(seat);
+        if (!seatPos) {
+            console.warn(`⚠️ 无法计算座位 ${seat.row}-${seat.col} 的位置`);
+            continue;
+        }
+
         const distance = Math.sqrt(Math.pow(x - seatPos.x, 2) + Math.pow(y - seatPos.y, 2));
-        
+
+        // 记录最近的座位用于调试
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestSeat = seat;
+        }
+
         // 使用座位半径进行命中检测
-        if (distance <= window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS) {
+        if (distance <= seatRadius) {
+            console.log(`🎯 命中座位 ${seat.row}-${seat.col}:`, {
+                seatPos,
+                distance: distance.toFixed(2),
+                seatRadius
+            });
             return seat;
         }
     }
-    
+
+    console.log('🚫 未命中任何座位');
+    console.log('🎯 最近的座位:', closestSeat ? {
+        seat: `${closestSeat.row}-${closestSeat.col}`,
+        distance: closestDistance.toFixed(2),
+        seatRadius
+    } : '无');
+
     return null;
 }
 
@@ -348,12 +472,18 @@ function performHitDetection(x, y) {
  * @returns {Object} 座位的x,y坐标
  */
 function calculateSeatPosition(seat) {
+    // 检查依赖模块
+    if (!window.CanvasRenderer || !window.CanvasRenderer.CANVAS_CONFIG || !window.CanvasRenderer.GLOBAL_STATE) {
+        console.error('❌ CanvasRenderer模块未完全加载');
+        return null;
+    }
+
     // 使用canvas.js中的座位位置计算逻辑
     const { SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR } = window.CanvasRenderer.CANVAS_CONFIG;
     const { currentLayout, totalRows, totalCols, canvasWidth } = window.CanvasRenderer.GLOBAL_STATE;
-    
+
     let x, y;
-    
+
     if (currentLayout === 'parallel') {
         // 平行布局计算
         const seatWidth = SEAT_RADIUS * 2;
@@ -370,7 +500,7 @@ function calculateSeatPosition(seat) {
         x = canvasWidth / 2 + currentArcRadius * Math.sin(angle);
         y = CIRCLE_CENTER + currentArcRadius * Math.cos(angle);
     }
-    
+
     return { x, y };
 }
 
@@ -513,8 +643,13 @@ function getRelativeMousePosition(event) {
  * @returns {boolean} 是否可点击
  */
 function isSeatClickable(seat) {
-    // 只有available状态的座位才可以点击选择
-    return seat.status === 'available';
+    const clickable = seat.status === 'available';
+    console.log('🔍 座位可点击性检查:', {
+        seat: `${seat.row}-${seat.col}`,
+        status: seat.status,
+        clickable
+    });
+    return clickable;
 }
 
 /**
@@ -538,10 +673,22 @@ function refreshSeatsData() {
  * 触发Canvas重绘
  */
 function triggerRedraw() {
-    if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-        // 更新Canvas渲染器的座位数据
-        window.CanvasRenderer.GLOBAL_STATE.seatsArray = globalState.currentSeatsData;
+    console.log('🎨 触发Canvas重绘');
+
+    if (!window.CanvasRenderer || typeof window.CanvasRenderer.drawCinema !== 'function') {
+        console.error('❌ CanvasRenderer模块未加载或drawCinema函数不存在');
+        return;
+    }
+
+    // 更新Canvas渲染器的座位数据
+    window.CanvasRenderer.GLOBAL_STATE.seatsArray = globalState.currentSeatsData;
+    console.log('📊 更新Canvas渲染器座位数据，数量:', globalState.currentSeatsData.length);
+
+    try {
         window.CanvasRenderer.drawCinema();
+        console.log('✅ Canvas重绘完成');
+    } catch (error) {
+        console.error('❌ Canvas重绘失败:', error);
     }
 }
 
@@ -549,14 +696,22 @@ function triggerRedraw() {
  * 通知选座状态变化
  */
 function notifySelectionChange() {
+    console.log('📢 发送选座状态变化事件');
+
+    const eventDetail = {
+        selectedSeats: globalState.selectedSeats,
+        selectedCount: globalState.selectedSeats.length
+    };
+
+    console.log('📊 事件详情:', eventDetail);
+
     // 发送自定义事件，供其他模块监听
     const event = new CustomEvent('seatSelectionChange', {
-        detail: {
-            selectedSeats: globalState.selectedSeats,
-            selectedCount: globalState.selectedSeats.length
-        }
+        detail: eventDetail
     });
+
     document.dispatchEvent(event);
+    console.log('✅ 选座状态变化事件已发送');
 }
 
 // ========================= 查询接口 =========================
