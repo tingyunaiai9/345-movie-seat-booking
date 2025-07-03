@@ -342,10 +342,9 @@ function calculateCanvasSize(totalRows, totalCols, seatRadius, rowSpacing, colSp
         const maxX = maxRadius * Math.sin(maxAngle);
         const width = Math.max(800, (maxX * 2) + (padding * 2));
 
-        // 计算高度（从屏幕到最后一排座位）
         const screenHeight = 50; // 屏幕区域高度
-        const lastRowY = circleCenter + maxRadius * Math.cos(maxAngle);
-        const height = Math.max(600, lastRowY + seatRadius + padding);
+        const effectiveHeight = circleCenter + arcRadius + (totalRows - 1) * rowSpacing + seatRadius + padding;
+        const height = Math.max(400, effectiveHeight); // 最小高度400
 
         return {
             width: Math.ceil(width),
