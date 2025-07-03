@@ -18,6 +18,8 @@ body {
     background: url("../img/background-field.png") no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
+
+    transition: background 0.3s ease-in-out;
 }
 
 /* ========================= 页面视图控制 ========================= */
