@@ -1,4 +1,3 @@
-
 /**
  * @file canvas.js
  * @description 负责项目的“视觉呈现”，使用原生Canvas API将数据结构可视化。
@@ -52,6 +51,24 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
     }
     const ctx = canvas.getContext('2d');
 
+    // 计算画布尺寸所需的基本参数
+    const totalRows = Math.max(...seatsArray.map(s => s.row));
+    const totalCols = Math.max(...seatsArray.map(s => s.col));
+    const seatRadius = 15; // 座位半径
+    const rowSpacing = 40; // 行间距
+    const colSpacing = 10; // 列间距
+    const arcRadius = 600; // 弧形布局基准半径
+    const circleCenter = -400; // 圆心位置
+
+    // 动态计算画布尺寸
+    const canvasDimensions = calculateCanvasSize(totalRows, totalCols, seatRadius, rowSpacing, colSpacing, arcRadius, circleCenter, layoutType);
+
+    // 设置画布尺寸
+    canvas.width = canvasDimensions.width;
+    canvas.height = canvasDimensions.height;
+
+    console.log(`画布尺寸已调整为: ${canvas.width} x ${canvas.height}`);
+
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -79,14 +96,6 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
     // --- 核心绘图逻辑 ---
     // TODO: 在这里实现弧形布局的计算逻辑
     // 您需要根据传入的 seatsArray (或其行列数) 来计算每个座位的坐标
-
-    const totalRows = Math.max(...seatsArray.map(s => s.row));
-    const totalCols = Math.max(...seatsArray.map(s => s.col));
-    const seatRadius = 15; // 座位半径 (可参数化)
-    const rowSpacing = 40; // 行间距 (可参数化)
-    const colSpacing = 10; // 列间距 (仅用于平行布局)
-    const arcRadius = 700; // 弧形布局的基准半径 (可参数化)
-    const circleCenter = -400;  // 圆心位置，调整为与弧形布局一致
 
     // --- 动态计算中心区域 ---
     const totalSeats = seatsArray.length;
@@ -272,9 +281,9 @@ function drawCenterSector(ctx, centerRowsStart, centerRowsEnd, centerColsStart, 
  */
 function preloadSeatImages() {
     const imageSources = {
-        available: '../img/available.PNG',
-        selected: '../img/selected.PNG',
-        sold: '../img/sold.PNG'
+        available: 'img/available.PNG',
+        selected: 'img/selected.PNG',
+        sold: 'img/sold.PNG'
     };
 
     const promises = Object.entries(imageSources).map(([status, src]) => {
@@ -299,6 +308,51 @@ function preloadSeatImages() {
     });
 }
 
+/**
+ * 根据座位布局动态计算画布尺寸
+ * @param {number} totalRows - 总行数
+ * @param {number} totalCols - 总列数
+ * @param {number} seatRadius - 座位半径
+ * @param {number} rowSpacing - 行间距
+ * @param {number} colSpacing - 列间距
+ * @param {number} arcRadius - 弧形布局基准半径
+ * @param {number} circleCenter - 圆心Y坐标
+ * @param {string} layoutType - 布局类型
+ * @returns {Object} 包含width和height的对象
+ */
+function calculateCanvasSize(totalRows, totalCols, seatRadius, rowSpacing, colSpacing, arcRadius, circleCenter, layoutType) {
+    const padding = 50; // 画布边距
+
+    if (layoutType === 'parallel') {
+        // 平行布局的尺寸计算
+        const seatWidth = seatRadius * 2;
+        const totalWidth = totalCols * (seatWidth + colSpacing) - colSpacing + (padding * 2);
+        const totalHeight = totalRows * rowSpacing + 100 + (padding * 2); // 100是屏幕区域高度
+
+        return {
+            width: Math.max(800, totalWidth), // 最小宽度800
+            height: Math.max(600, totalHeight) // 最小高度600
+        };
+    } else {
+        // 弧形布局的尺寸计算
+        const maxRadius = arcRadius + (totalRows - 1) * rowSpacing;
+        const maxAngle = (totalCols / 2) * (Math.PI / 60);
+
+        // 计算最大宽度（左右两端的X坐标）
+        const maxX = maxRadius * Math.sin(maxAngle);
+        const width = Math.max(800, (maxX * 2) + (padding * 2));
+
+        // 计算高度（从屏幕到最后一排座位）
+        const screenHeight = 50; // 屏幕区域高度
+        const lastRowY = circleCenter + maxRadius * Math.cos(maxAngle);
+        const height = Math.max(600, lastRowY + seatRadius + padding);
+
+        return {
+            width: Math.ceil(width),
+            height: Math.ceil(height)
+        };
+    }
+}
 
 // --- 开发初期使用的虚拟数据 ---
 const virtualSeatsData = [];
@@ -321,8 +375,9 @@ window.onload = () => {
     const toggleBtn = document.getElementById('toggle-layout-btn');
 
     if (canvas && toggleBtn) {
-        canvas.width = 1200;
-        canvas.height = 800;
+        // 移除固定尺寸设置，改为动态计算
+        // canvas.width = 1200;
+        // canvas.height = 800;
 
         let currentLayout = 'arc'; // 初始布局为弧形
         let loadedImages = {}; // 用于存储加载后的图片
@@ -361,7 +416,8 @@ window.CanvasRenderer = {
     drawCinema,        // 绘制整个影厅布局
     drawCenterZone,    // 绘制中心区域虚线框
     drawCenterSector,  // 绘制弧形布局的中心扇形区域
-    preloadSeatImages  // 预加载座位状态图片
+    preloadSeatImages, // 预加载座位状态图片
+    calculateCanvasSize // 动态计算画布尺寸
 };
 
 console.log('电影院Canvas渲染模块(canvas.js)已加载');
