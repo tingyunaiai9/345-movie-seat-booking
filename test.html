@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas 测试 - 电影院选座系统</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .canvas-container {
+            text-align: center;
+            margin: 30px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        #cinema-canvas {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+            cursor: crosshair;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+
+        .available {
+            background-color: #28a745;
+        }
+
+        .selected {
+            background-color: #ffc107;
+        }
+
+        .sold {
+            background-color: #dc3545;
+        }
+
+        .hovered {
+            background-color: #17a2b8;
+        }
+
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .info-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .info-card p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .selected-seats-list {
+            max-height: 120px;
+            overflow-y: auto;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .seat-tag {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .debug-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .cinema-config {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .config-item label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .config-item input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="header">
+            <h1>Canvas 功能测试</h1>
+            <p>测试电影院选座系统的Canvas绘制与交互功能</p>
+        </div>
+
+        <!-- 影厅配置 -->
+        <div class="cinema-config">
+            <div class="config-item">
+                <label>行数</label>
+                <input type="number" id="rows-input" value="10" min="5" max="20">
+            </div>
+            <div class="config-item">
+                <label>列数</label>
+                <input type="number" id="cols-input" value="20" min="10" max="30">
+            </div>
+            <button class="btn btn-secondary" id="apply-config">应用配置</button>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <div class="control-group">
+                <label>布局控制</label>
+                <button class="btn btn-primary" id="toggle-layout">切换布局 (当前: 弧形)</button>
+            </div>
+
+            <div class="control-group">
+                <label>选座测试</label>
+                <button class="btn btn-success" id="auto-select-individual">个人自动选座</button>
+            </div>
+
+            <div class="control-group">
+                <label>团体选座</label>
+                <button class="btn btn-success" id="auto-select-group">团体自动选座</button>
+            </div>
+
+            <div class="control-group">
+                <label>操作控制</label>
+                <button class="btn btn-warning" id="clear-selection">清除选择</button>
+            </div>
+
+            <div class="control-group">
+                <label>重绘测试</label>
+                <button class="btn btn-secondary" id="redraw-canvas">重新绘制</button>
+            </div>
+        </div>
+
+        <!-- Canvas 容器 -->
+        <div class="canvas-container">
+            <canvas id="cinema-canvas" width="1400" height="800">
+                您的浏览器不支持Canvas，请升级浏览器。
+            </canvas>
+
+            <!-- 图例 -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color available"></div>
+                    <span>可选座位</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color selected"></div>
+                    <span>已选座位</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color sold"></div>
+                    <span>已售座位</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color hovered"></div>
+                    <span>悬停座位</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 信息面板 -->
+        <div class="info-panel">
+            <div class="info-card">
+                <h3>影厅状态</h3>
+                <p>总座位数: <span id="total-seats">--</span></p>
+                <p>可选座位: <span id="available-seats">--</span></p>
+                <p>已售座位: <span id="sold-seats">--</span></p>
+                <p>已选座位: <span id="selected-count">0</span></p>
+            </div>
+
+            <div class="info-card">
+                <h3>当前配置</h3>
+                <p>布局模式: <span id="current-layout">弧形</span></p>
+                <p>影厅规模: <span id="cinema-size">10行 × 20列</span></p>
+                <p>Canvas尺寸: <span id="canvas-size">--</span></p>
+            </div>
+
+            <div class="info-card">
+                <h3>已选座位</h3>
+                <div class="selected-seats-list" id="selected-seats-list">
+                    <p style="color: #999; text-align: center;">暂无选中座位</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>交互提示</h3>
+                <p>• 点击座位进行选择</p>
+                <p>• 按住Ctrl多选座位</p>
+                <p>• 鼠标悬停查看座位信息</p>
+                <p>• 红色座位为已售出</p>
+                <p>• 橙色虚线框为推荐区域</p>
+            </div>
+        </div>
+
+        <!-- 调试信息 -->
+        <div class="debug-info" id="debug-info">
+            调试信息将在这里显示...
+        </div>
+    </div>
+
+    <!-- 引入JavaScript模块 -->
+    <script src="js/main.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/stateManager.js"></script>
+
+    <!-- 测试脚本 -->
+    <script>
+        // 测试页面的主要逻辑
+        class CanvasTest {
+            constructor() {
+                this.debugOutput = document.getElementById('debug-info');
+                this.isInitialized = false;
+                this.init();
+            }
+
+            init() {
+                this.log('开始初始化Canvas测试环境...');
+
+                // 等待所有模块加载完成
+                setTimeout(() => {
+                    this.setupCinemaData();
+                    this.setupEventListeners();
+                    this.setupStateManager();
+                    this.initializeCanvas();
+                    this.updateUI();
+                    this.isInitialized = true;
+                    this.log('Canvas测试环境初始化完成！');
+                }, 100);
+            }
+
+            setupCinemaData() {
+                this.log('初始化影院数据...');
+
+                // 初始化默认配置
+                const rows = parseInt(document.getElementById('rows-input').value);
+                const cols = parseInt(document.getElementById('cols-input').value);
+
+                if (window.CinemaData) {
+                    window.CinemaData.initializeCinemaSeats(rows, cols);
+                    this.addRandomSoldSeats(); // 添加一些已售座位用于测试
+                    this.log(`影院已初始化: ${rows}行 × ${cols}列`);
+                } else {
+                    this.log('错误: CinemaData模块未加载');
+                }
+            }
+
+            setupStateManager() {
+                this.log('初始化状态管理器...');
+
+                if (window.StateManager) {
+                    window.StateManager.initializeStateManager('cinema-canvas');
+                    this.log('状态管理器初始化完成');
+                } else {
+                    this.log('错误: StateManager模块未加载');
+                }
+            }
+
+            initializeCanvas() {
+                this.log('初始化Canvas渲染器...');
+
+                if (window.CanvasRenderer) {
+                    window.CanvasRenderer.initializeAndDrawCinema();
+                    this.log('Canvas渲染器初始化完成');
+                } else {
+                    this.log('错误: CanvasRenderer模块未加载');
+                }
+            }
+
+            setupEventListeners() {
+                this.log('绑定事件监听器...');
+
+                // 布局切换
+                document.getElementById('toggle-layout').addEventListener('click', () => {
+                    this.toggleLayout();
+                });
+
+                // 配置应用
+                document.getElementById('apply-config').addEventListener('click', () => {
+                    this.applyConfig();
+                });
+
+                // 自动选座
+                document.getElementById('auto-select-individual').addEventListener('click', () => {
+                    this.autoSelectIndividual();
+                });
+
+                document.getElementById('auto-select-group').addEventListener('click', () => {
+                    this.autoSelectGroup();
+                });
+
+                // 清除选择
+                document.getElementById('clear-selection').addEventListener('click', () => {
+                    this.clearSelection();
+                });
+
+                // 重新绘制
+                document.getElementById('redraw-canvas').addEventListener('click', () => {
+                    this.redrawCanvas();
+                });
+
+                // 监听选座状态变化
+                document.addEventListener('seatSelectionChange', (event) => {
+                    this.updateUI();
+                    this.log(`选座状态变化: 当前选中 ${event.detail?.selectedCount || 0} 个座位`);
+                });
+            }
+
+            toggleLayout() {
+                if (window.CanvasRenderer && window.CanvasRenderer.toggleLayout) {
+                    window.CanvasRenderer.toggleLayout();
+                    this.updateLayoutButton();
+                    this.updateUI();
+                    this.log('布局已切换');
+                }
+            }
+
+            applyConfig() {
+                const rows = parseInt(document.getElementById('rows-input').value);
+                const cols = parseInt(document.getElementById('cols-input').value);
+
+                if (rows < 5 || rows > 20 || cols < 10 || cols > 30) {
+                    alert('配置超出范围！行数：5-20，列数：10-30');
+                    return;
+                }
+
+                this.log(`应用新配置: ${rows}行 × ${cols}列`);
+                this.setupCinemaData();
+
+                if (window.StateManager) {
+                    window.StateManager.refreshSeatsData();
+                }
+
+                this.initializeCanvas();
+                this.updateUI();
+            }
+
+            autoSelectIndividual() {
+                if (window.StateManager) {
+                    window.StateManager.performAutoIndividualSelection({ age: 25, name: '测试用户' });
+                    this.log('执行个人自动选座');
+                }
+            }
+
+            autoSelectGroup() {
+                if (window.StateManager) {
+                    const groupMembers = [
+                        { age: 25, name: '成员1' },
+                        { age: 30, name: '成员2' },
+                        { age: 35, name: '成员3' },
+                        { age: 28, name: '成员4' }
+                    ];
+                    window.StateManager.performAutoGroupSelection(groupMembers);
+                    this.log('执行团体自动选座（4人）');
+                }
+            }
+
+            clearSelection() {
+                if (window.StateManager) {
+                    window.StateManager.clearAllSelections();
+                    this.log('已清除所有选择');
+                }
+            }
+
+            redrawCanvas() {
+                if (window.CanvasRenderer && window.CanvasRenderer.initializeAndDrawCinema) {
+                    window.CanvasRenderer.initializeAndDrawCinema();
+                    this.log('Canvas已重新绘制');
+                }
+            }
+
+            addRandomSoldSeats() {
+                // 随机将一些座位设置为已售状态，用于测试
+                if (!window.CinemaData) return;
+
+                const config = window.CinemaData.getCurrentConfig();
+                const soldCount = Math.floor(config.TOTAL_SEATS * 0.15); // 15%的座位已售
+
+                for (let i = 0; i < soldCount; i++) {
+                    const row = Math.floor(Math.random() * config.TOTAL_ROWS) + 1;
+                    const col = Math.floor(Math.random() * config.SEATS_PER_ROW) + 1;
+
+                    const seat = window.CinemaData.getSeat(row, col);
+                    if (seat && seat.status === 'available') {
+                        seat.status = 'sold';
+                    }
+                }
+
+                this.log(`随机设置了约 ${soldCount} 个座位为已售状态`);
+            }
+
+            updateUI() {
+                if (!window.CinemaData) return;
+
+                const status = window.CinemaData.getCinemaStatus();
+                const config = window.CinemaData.getCurrentConfig();
+
+                // 更新座位统计
+                document.getElementById('total-seats').textContent = status.total;
+                document.getElementById('available-seats').textContent = status.available;
+                document.getElementById('sold-seats').textContent = status.sold;
+
+                // 更新配置信息
+                document.getElementById('cinema-size').textContent = `${config.TOTAL_ROWS}行 × ${config.SEATS_PER_ROW}列`;
+
+                // 更新Canvas尺寸
+                const canvas = document.getElementById('cinema-canvas');
+                if (canvas) {
+                    document.getElementById('canvas-size').textContent = `${canvas.width} × ${canvas.height}`;
+                }
+
+                // 更新已选座位
+                this.updateSelectedSeats();
+            }
+
+            updateSelectedSeats() {
+                if (!window.StateManager) return;
+
+                const selectedSeats = window.StateManager.getSelectedSeats();
+                document.getElementById('selected-count').textContent = selectedSeats.length;
+
+                const listContainer = document.getElementById('selected-seats-list');
+                if (selectedSeats.length === 0) {
+                    listContainer.innerHTML = '<p style="color: #999; text-align: center;">暂无选中座位</p>';
+                } else {
+                    listContainer.innerHTML = selectedSeats
+                        .map(seat => `<span class="seat-tag">${seat.row}-${seat.col}</span>`)
+                        .join('');
+                }
+            }
+
+            updateLayoutButton() {
+                const btn = document.getElementById('toggle-layout');
+                const currentLayout = window.CanvasRenderer?.GLOBAL_STATE?.currentLayout || 'arc';
+                const layoutText = currentLayout === 'arc' ? '弧形' : '平行';
+                btn.textContent = `切换布局 (当前: ${layoutText})`;
+                document.getElementById('current-layout').textContent = layoutText;
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}\n`;
+                this.debugOutput.textContent += logEntry;
+                this.debugOutput.scrollTop = this.debugOutput.scrollHeight;
+                console.log(message);
+            }
+        }
+
+        // 启动测试环境
+        document.addEventListener('DOMContentLoaded', () => {
+            new CanvasTest();
+        });
+    </script>
+</body>
+
+</html>
