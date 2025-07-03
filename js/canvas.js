@@ -1,37 +1,95 @@
 /**
  * @file canvas.js
- * @description 负责项目的“视觉呈现”，使用原生Canvas API将数据结构可视化。
+ * @description 负责项目的"视觉呈现"，使用原生Canvas API将数据结构可视化。
  */
+
+// ========================= 配置常量 =========================
+
+const CANVAS_CONFIG = {
+    // 座位相关配置
+    SEAT_RADIUS: 15,
+    ROW_SPACING: 40,
+    COL_SPACING: 10,
+    
+    // 弧形布局配置
+    ARC_RADIUS: 600,
+    CIRCLE_CENTER: -400,
+    ANGLE_FACTOR: Math.PI / 60,
+    
+    // 画布配置
+    CANVAS_PADDING: 50,
+    MIN_CANVAS_WIDTH: 800,
+    MIN_CANVAS_HEIGHT: 600,
+    MIN_ARC_HEIGHT: 400,
+    
+    // 屏幕配置
+    SCREEN_HEIGHT: 50,
+    SCREEN_WIDTH_RATIO: 0.8,
+    SCREEN_MARGIN: 10,
+    
+    // 样式配置
+    SCREEN_COLOR: '#2c2c2c',
+    TEXT_COLOR: 'white',
+    SCREEN_FONT: '16px Arial',
+    SEAT_FONT: '10px Arial',
+    
+    // 虚线配置
+    AISLE_LINE_COLOR: 'grey',
+    AISLE_LINE_WIDTH: 1,
+    AISLE_DASH_PATTERN: [8, 4],
+    
+    // 中心区域配置
+    CENTER_ZONE_COLOR: 'orange',
+    CENTER_ZONE_WIDTH: 2,
+    CENTER_ZONE_DASH: [10, 5],
+    CENTER_ZONE_PADDING: 5,
+    CENTER_ZONE_MARGIN: 20,
+    CENTER_ZONE_RATIO: 0.2,
+    
+    // 图片路径配置
+    IMAGE_PATHS: {
+        available: 'img/available.PNG',
+        selected: 'img/selected.PNG',
+        sold: 'img/sold.PNG'
+    },
+    
+    // 布局类型
+    LAYOUT_TYPES: {
+        ARC: 'arc',
+        PARALLEL: 'parallel'
+    }
+};
+
+// ========================= 核心绘制函数 =========================
 
 /**
  * 绘制单个座位
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
  * @param {number} x - 座位的中心点 x 坐标
  * @param {number} y - 座位的中心点 y 坐标
- * @param {number} radius - 座位的半径
  * @param {string} status - 座位状态 ('available', 'selected', 'sold')
  * @param {string} seatNumber - 座位号
  * @param {string} rowNumber - 排号
  * @param {Object} seatImages - 预加载的图片对象
  */
-function drawSeat(ctx, x, y, radius, status, seatNumber, rowNumber, seatImages) {
+function drawSeat(ctx, x, y, status, seatNumber, rowNumber, seatImages) {
+    const { SEAT_RADIUS, SEAT_FONT, TEXT_COLOR } = CANVAS_CONFIG;
     const img = seatImages[status];
 
     if (img) {
         // 使用 drawImage 绘制贴图，坐标需要调整为左上角
-        // 以 (x, y) 为中心进行绘制
-        ctx.drawImage(img, x - radius, y - radius, radius * 2, radius * 2);
+        ctx.drawImage(img, x - SEAT_RADIUS, y - SEAT_RADIUS, SEAT_RADIUS * 2, SEAT_RADIUS * 2);
     } else {
         // 如果某个状态的图片加载失败或不存在，则回退到绘制灰色圆形
         ctx.fillStyle = 'gray';
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.arc(x, y, SEAT_RADIUS, 0, Math.PI * 2);
         ctx.fill();
     }
 
     // 绘制座位号和排号
-    ctx.fillStyle = 'white';
-    ctx.font = '10px Arial';
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = SEAT_FONT;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`${rowNumber}-${seatNumber}`, x, y);
@@ -43,7 +101,7 @@ function drawSeat(ctx, x, y, radius, status, seatNumber, rowNumber, seatImages) 
  * @param {Object} seatImages - 预加载的图片对象
  * @param {string} [layoutType='arc'] - 布局类型 ('arc' 或 'parallel')
  */
-function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
+function drawCinema(seatsArray, seatImages, layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
     const canvas = document.getElementById('cinema-canvas');
     if (!canvas.getContext) {
         console.error('浏览器不支持Canvas');
@@ -54,14 +112,9 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
     // 计算画布尺寸所需的基本参数
     const totalRows = Math.max(...seatsArray.map(s => s.row));
     const totalCols = Math.max(...seatsArray.map(s => s.col));
-    const seatRadius = 15; // 座位半径
-    const rowSpacing = 40; // 行间距
-    const colSpacing = 10; // 列间距
-    const arcRadius = 600; // 弧形布局基准半径
-    const circleCenter = -400; // 圆心位置
 
     // 动态计算画布尺寸
-    const canvasDimensions = calculateCanvasSize(totalRows, totalCols, seatRadius, rowSpacing, colSpacing, arcRadius, circleCenter, layoutType);
+    const canvasDimensions = calculateCanvasSize(totalRows, totalCols, layoutType);
 
     // 设置画布尺寸
     canvas.width = canvasDimensions.width;
@@ -72,89 +125,32 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // --- 绘制屏幕 ---
-    ctx.fillStyle = '#2c2c2c'; // 深灰色屏幕
-    ctx.fillRect(canvas.width * 0.1, 10, canvas.width * 0.8, 30);
+    // 绘制屏幕和过道
+    drawScreen(ctx, canvas.width, canvas.height);
+    drawAisle(ctx, canvas.width, canvas.height);
 
-    // 屏幕文字
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('屏幕', canvas.width / 2, 30);
-
-    // --- 绘制中央过道虚线 ---
-    ctx.save(); // 保存当前绘图状态
-    ctx.strokeStyle = 'grey';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([8, 4]); // 8px的线段，4px的间隔
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 50); // 从屏幕下方开始
-    ctx.lineTo(canvas.width / 2, canvas.height - 20); // 延伸到底部
-    ctx.stroke();
-    ctx.restore(); // 恢复绘图状态，以免影响后续绘制
-
-    // --- 核心绘图逻辑 ---
-    // TODO: 在这里实现弧形布局的计算逻辑
-    // 您需要根据传入的 seatsArray (或其行列数) 来计算每个座位的坐标
-
-    // --- 动态计算中心区域 ---
-    const totalSeats = seatsArray.length;
-    const targetCenterCount = Math.floor(totalSeats * 0.2); // 目标数量为总数的20%
-
-    // 计算中心区域的行数和列数，使其形状与影厅比例相似
-    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
-    const numCenterCols = Math.ceil(totalCols * layoutRatio);
-    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
-
-    // 计算中心区域的起始和结束行/列
-    const middleRow = Math.ceil(totalRows / 2);
-    const middleCol = Math.ceil(totalCols / 2);
-    const centerRowsStart = middleRow - Math.floor(numCenterRows / 2);
-    const centerRowsEnd = centerRowsStart + numCenterRows - 1;
-    const centerColsStart = middleCol - Math.floor(numCenterCols / 2);
-    const centerColsEnd = centerColsStart + numCenterCols - 1;
-
+    // 动态计算中心区域
+    const centerZoneInfo = calculateCenterZone(totalRows, totalCols, seatsArray.length);
     const centerSeatsCoords = []; // 存储中心座位的坐标
 
+    // 绘制所有座位
     seatsArray.forEach(seat => {
-        let x, y;
-
-        // 根据布局类型计算坐标
-        if (layoutType === 'parallel') {
-            // --- 平行布局计算 ---
-            const seatWidth = seatRadius * 2;
-            const totalWidth = totalCols * (seatWidth + colSpacing) - colSpacing;
-            const xOffset = (canvas.width - totalWidth) / 2;
-            const yOffset = 100; // 顶部留白，为屏幕留出空间
-
-            x = xOffset + (seat.col - 1) * (seatWidth + colSpacing) + seatRadius;
-            y = yOffset + (seat.row - 1) * rowSpacing + seatRadius;
-        } else {
-            // --- 弧形布局计算 (默认) ---
-            const angle = (seat.col - totalCols / 2) * (Math.PI / 60); // 减小角度间隔，从PI/18改为PI/36
-            const currentArcRadius = arcRadius + (seat.row - 1) * rowSpacing;
-            x = canvas.width / 2 + currentArcRadius * Math.sin(angle);
-            // 将圆心移动到画布上方，使第一排靠近屏幕位置
-            y = circleCenter + currentArcRadius * Math.cos(angle);
+        const coords = calculateSeatPosition(seat, totalRows, totalCols, canvas.width, layoutType);
+        
+        // 检查是否为中心座位
+        if (isInCenterZone(seat, centerZoneInfo)) {
+            centerSeatsCoords.push(coords);
         }
 
-        // 检查是否为中心座位，并存储其坐标
-        if (seat.row >= centerRowsStart && seat.row <= centerRowsEnd &&
-            seat.col >= centerColsStart && seat.col <= centerColsEnd) {
-            centerSeatsCoords.push({ x, y });
-        }
-
-        drawSeat(ctx, x, y, seatRadius, seat.status, seat.col, seat.row, seatImages);
+        drawSeat(ctx, coords.x, coords.y, seat.status, seat.col, seat.row, seatImages);
     });
 
-    // 在所有座位绘制完毕后，绘制中心区域的标识
+    // 绘制中心区域标识
     if (centerSeatsCoords.length > 0) {
-        if (layoutType === 'parallel') {
-            drawCenterZone(ctx, centerSeatsCoords, seatRadius);
+        if (layoutType === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
+            drawCenterZone(ctx, centerSeatsCoords);
         } else {
-            // 弧形布局时绘制扇形区域
-            drawCenterSector(ctx, centerRowsStart, centerRowsEnd, centerColsStart, centerColsEnd,
-                totalCols, arcRadius, rowSpacing, circleCenter);
+            drawCenterSector(ctx, centerZoneInfo, totalCols, canvas.width);
         }
     }
 
@@ -162,117 +158,229 @@ function drawCinema(seatsArray, seatImages, layoutType = 'arc') {
 }
 
 /**
+ * 绘制屏幕
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
+ * @param {number} canvasWidth - 画布宽度
+ * @param {number} canvasHeight - 画布高度
+ */
+function drawScreen(ctx, canvasWidth, canvasHeight) {
+    const { SCREEN_COLOR, SCREEN_WIDTH_RATIO, SCREEN_MARGIN, TEXT_COLOR, SCREEN_FONT } = CANVAS_CONFIG;
+    
+    // 绘制屏幕背景
+    ctx.fillStyle = SCREEN_COLOR;
+    ctx.fillRect(canvasWidth * (1 - SCREEN_WIDTH_RATIO) / 2, SCREEN_MARGIN, canvasWidth * SCREEN_WIDTH_RATIO, 30);
+
+    // 绘制屏幕文字
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = SCREEN_FONT;
+    ctx.textAlign = 'center';
+    ctx.fillText('屏幕', canvasWidth / 2, 30);
+}
+
+/**
+ * 绘制中央过道虚线
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
+ * @param {number} canvasWidth - 画布宽度
+ * @param {number} canvasHeight - 画布高度
+ */
+function drawAisle(ctx, canvasWidth, canvasHeight) {
+    const { AISLE_LINE_COLOR, AISLE_LINE_WIDTH, AISLE_DASH_PATTERN } = CANVAS_CONFIG;
+    
+    ctx.save();
+    ctx.strokeStyle = AISLE_LINE_COLOR;
+    ctx.lineWidth = AISLE_LINE_WIDTH;
+    ctx.setLineDash(AISLE_DASH_PATTERN);
+    ctx.beginPath();
+    ctx.moveTo(canvasWidth / 2, 50);
+    ctx.lineTo(canvasWidth / 2, canvasHeight - 20);
+    ctx.stroke();
+    ctx.restore();
+}
+
+/**
+ * 计算座位位置
+ * @param {Object} seat - 座位对象
+ * @param {number} totalRows - 总行数
+ * @param {number} totalCols - 总列数
+ * @param {number} canvasWidth - 画布宽度
+ * @param {string} layoutType - 布局类型
+ * @returns {Object} 包含x和y坐标的对象
+ */
+function calculateSeatPosition(seat, totalRows, totalCols, canvasWidth, layoutType) {
+    const { SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR } = CANVAS_CONFIG;
+    
+    let x, y;
+
+    if (layoutType === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
+        // 平行布局计算
+        const seatWidth = SEAT_RADIUS * 2;
+        const totalWidth = totalCols * (seatWidth + COL_SPACING) - COL_SPACING;
+        const xOffset = (canvasWidth - totalWidth) / 2;
+        const yOffset = 100; // 顶部留白
+
+        x = xOffset + (seat.col - 1) * (seatWidth + COL_SPACING) + SEAT_RADIUS;
+        y = yOffset + (seat.row - 1) * ROW_SPACING + SEAT_RADIUS;
+    } else {
+        // 弧形布局计算
+        const angle = (seat.col - totalCols / 2) * ANGLE_FACTOR;
+        const currentArcRadius = ARC_RADIUS + (seat.row - 1) * ROW_SPACING;
+        x = canvasWidth / 2 + currentArcRadius * Math.sin(angle);
+        y = CIRCLE_CENTER + currentArcRadius * Math.cos(angle);
+    }
+
+    return { x, y };
+}
+
+/**
+ * 计算中心区域信息
+ * @param {number} totalRows - 总行数
+ * @param {number} totalCols - 总列数
+ * @param {number} totalSeats - 总座位数
+ * @returns {Object} 中心区域信息
+ */
+function calculateCenterZone(totalRows, totalCols, totalSeats) {
+    const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
+    
+    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
+    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
+    const numCenterCols = Math.ceil(totalCols * layoutRatio);
+    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
+
+    const middleRow = Math.ceil(totalRows / 2);
+    const middleCol = Math.ceil(totalCols / 2);
+    
+    return {
+        rowStart: middleRow - Math.floor(numCenterRows / 2),
+        rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
+        colStart: middleCol - Math.floor(numCenterCols / 2),
+        colEnd: middleCol - Math.floor(numCenterCols / 2) + numCenterCols - 1
+    };
+}
+
+/**
+ * 判断座位是否在中心区域
+ * @param {Object} seat - 座位对象
+ * @param {Object} centerZoneInfo - 中心区域信息
+ * @returns {boolean} 是否在中心区域
+ */
+function isInCenterZone(seat, centerZoneInfo) {
+    return seat.row >= centerZoneInfo.rowStart && seat.row <= centerZoneInfo.rowEnd &&
+           seat.col >= centerZoneInfo.colStart && seat.col <= centerZoneInfo.colEnd;
+}
+
+/**
  * 在中心座位周围绘制一个橙色虚线框
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
  * @param {Array<Object>} coords - 中心座位坐标的数组
- * @param {number} seatRadius - 座位的半径
  */
-function drawCenterZone(ctx, coords, seatRadius) {
+function drawCenterZone(ctx, coords) {
+    const { CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_PADDING, SEAT_RADIUS } = CANVAS_CONFIG;
+    
     // 计算包围盒
     const minX = Math.min(...coords.map(c => c.x));
     const minY = Math.min(...coords.map(c => c.y));
     const maxX = Math.max(...coords.map(c => c.x));
     const maxY = Math.max(...coords.map(c => c.y));
 
-    const padding = 5; // 虚线框与座位之间的间距
-
     // 设置虚线框样式
-    ctx.strokeStyle = 'orange';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([10, 5]); // 10px的线段，5px的间隔
+    ctx.strokeStyle = CENTER_ZONE_COLOR;
+    ctx.lineWidth = CENTER_ZONE_WIDTH;
+    ctx.setLineDash(CENTER_ZONE_DASH);
 
     // 绘制矩形
     ctx.strokeRect(
-        minX - seatRadius - padding,
-        minY - seatRadius - padding,
-        (maxX - minX) + (seatRadius * 2) + (padding * 2),
-        (maxY - minY) + (seatRadius * 2) + (padding * 2)
+        minX - SEAT_RADIUS - CENTER_ZONE_PADDING,
+        minY - SEAT_RADIUS - CENTER_ZONE_PADDING,
+        (maxX - minX) + (SEAT_RADIUS * 2) + (CENTER_ZONE_PADDING * 2),
+        (maxY - minY) + (SEAT_RADIUS * 2) + (CENTER_ZONE_PADDING * 2)
     );
 
-    // 恢复为实线，以免影响后续绘制
+    // 恢复为实线
     ctx.setLineDash([]);
 }
 
 /**
  * 为弧形布局绘制扇形中心区域
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
- * @param {number} centerRowsStart - 中心区域起始行
- * @param {number} centerRowsEnd - 中心区域结束行
- * @param {number} centerColsStart - 中心区域起始列
- * @param {number} centerColsEnd - 中心区域结束列
+ * @param {Object} centerZoneInfo - 中心区域信息
  * @param {number} totalCols - 总列数
- * @param {number} arcRadius - 弧形布局基准半径
- * @param {number} rowSpacing - 行间距
- * @param {number} circleCenter - 圆心Y坐标
+ * @param {number} canvasWidth - 画布宽度
  */
-function drawCenterSector(ctx, centerRowsStart, centerRowsEnd, centerColsStart, centerColsEnd,
-    totalCols, arcRadius, rowSpacing, circleCenter) {
-    const centerX = ctx.canvas.width / 2;
-    const centerY = circleCenter; // 使用传入的圆心位置参数
+function drawCenterSector(ctx, centerZoneInfo, totalCols, canvasWidth) {
+    const { 
+        CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_MARGIN,
+        ARC_RADIUS, ROW_SPACING, CIRCLE_CENTER, ANGLE_FACTOR
+    } = CANVAS_CONFIG;
+    
+    const centerX = canvasWidth / 2;
+    const centerY = CIRCLE_CENTER;
 
-    // 计算扇形的角度范围 - 注意角度需要调整，因为Canvas的0角度是水平向右，我们需要垂直向下
-    const baseStartAngle = (centerColsStart - 0.5 - totalCols / 2) * (Math.PI / 60);
-    const baseEndAngle = (centerColsEnd + 0.5 - totalCols / 2) * (Math.PI / 60);
-
-    // 调整角度，使其从垂直向下开始（Math.PI/2 是垂直向下）
-    // 弧线需要调整角度，但径向线使用原始角度
+    // 计算扇形的角度范围
+    const baseStartAngle = (centerZoneInfo.colStart - 0.5 - totalCols / 2) * ANGLE_FACTOR;
+    const baseEndAngle = (centerZoneInfo.colEnd + 0.5 - totalCols / 2) * ANGLE_FACTOR;
     const startAngleForArc = Math.PI / 2 + baseStartAngle;
     const endAngleForArc = Math.PI / 2 + baseEndAngle;
 
     // 计算扇形的半径范围
-    const innerRadius = arcRadius + (centerRowsStart - 1) * rowSpacing - 20;
-    const outerRadius = arcRadius + centerRowsEnd * rowSpacing + 20;
+    const innerRadius = ARC_RADIUS + (centerZoneInfo.rowStart - 1) * ROW_SPACING - CENTER_ZONE_MARGIN;
+    const outerRadius = ARC_RADIUS + centerZoneInfo.rowEnd * ROW_SPACING + CENTER_ZONE_MARGIN;
 
     // 设置扇形样式
     ctx.save();
-    ctx.strokeStyle = 'orange';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([10, 5]); // 虚线样式
+    ctx.strokeStyle = CENTER_ZONE_COLOR;
+    ctx.lineWidth = CENTER_ZONE_WIDTH;
+    ctx.setLineDash(CENTER_ZONE_DASH);
 
-    // 1. 绘制内弧
+    // 绘制扇形边界
+    drawSectorBoundaries(ctx, centerX, centerY, innerRadius, outerRadius, 
+                        startAngleForArc, endAngleForArc, baseStartAngle, baseEndAngle);
+
+    ctx.restore();
+}
+
+/**
+ * 绘制扇形边界
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D 上下文
+ * @param {number} centerX - 中心X坐标
+ * @param {number} centerY - 中心Y坐标
+ * @param {number} innerRadius - 内半径
+ * @param {number} outerRadius - 外半径
+ * @param {number} startAngleForArc - 弧线起始角度
+ * @param {number} endAngleForArc - 弧线结束角度
+ * @param {number} baseStartAngle - 基础起始角度
+ * @param {number} baseEndAngle - 基础结束角度
+ */
+function drawSectorBoundaries(ctx, centerX, centerY, innerRadius, outerRadius, 
+                            startAngleForArc, endAngleForArc, baseStartAngle, baseEndAngle) {
+    // 绘制内弧
     ctx.beginPath();
     ctx.arc(centerX, centerY, innerRadius, startAngleForArc, endAngleForArc);
     ctx.stroke();
 
-    // 2. 绘制外弧
+    // 绘制外弧
     ctx.beginPath();
     ctx.arc(centerX, centerY, outerRadius, startAngleForArc, endAngleForArc);
     ctx.stroke();
 
-    // 3. 绘制左侧径向线
-    ctx.beginPath();
-    // 使用与座位计算相同的公式
-    const leftInnerX = centerX + innerRadius * Math.sin(baseStartAngle);
-    const leftInnerY = centerY + innerRadius * Math.cos(baseStartAngle);
-    const leftOuterX = centerX + outerRadius * Math.sin(baseStartAngle);
-    const leftOuterY = centerY + outerRadius * Math.cos(baseStartAngle);
+    // 绘制径向线
+    const radialLines = [
+        { angle: baseStartAngle, label: '左径向线' },
+        { angle: baseEndAngle, label: '右径向线' }
+    ];
 
-    console.log('左径向线坐标（修正后）:', {
-        leftInnerX, leftInnerY, leftOuterX, leftOuterY,
-        baseStartAngle: baseStartAngle * 180 / Math.PI
+    radialLines.forEach(({ angle, label }) => {
+        const innerX = centerX + innerRadius * Math.sin(angle);
+        const innerY = centerY + innerRadius * Math.cos(angle);
+        const outerX = centerX + outerRadius * Math.sin(angle);
+        const outerY = centerY + outerRadius * Math.cos(angle);
+
+        console.log(`${label}坐标:`, { innerX, innerY, outerX, outerY, angle: angle * 180 / Math.PI });
+
+        ctx.beginPath();
+        ctx.moveTo(innerX, innerY);
+        ctx.lineTo(outerX, outerY);
+        ctx.stroke();
     });
-
-    ctx.moveTo(leftInnerX, leftInnerY);
-    ctx.lineTo(leftOuterX, leftOuterY);
-    ctx.stroke();
-
-    // 4. 绘制右侧径向线
-    ctx.beginPath();
-    const rightInnerX = centerX + innerRadius * Math.sin(baseEndAngle);
-    const rightInnerY = centerY + innerRadius * Math.cos(baseEndAngle);
-    const rightOuterX = centerX + outerRadius * Math.sin(baseEndAngle);
-    const rightOuterY = centerY + outerRadius * Math.cos(baseEndAngle);
-
-    console.log('右径向线坐标（修正后）:', {
-        rightInnerX, rightInnerY, rightOuterX, rightOuterY,
-        baseEndAngle: baseEndAngle * 180 / Math.PI
-    });
-
-    ctx.moveTo(rightInnerX, rightInnerY);
-    ctx.lineTo(rightOuterX, rightOuterY);
-    ctx.stroke();
-
-    ctx.restore();
 }
 
 /**
@@ -280,13 +388,9 @@ function drawCenterSector(ctx, centerRowsStart, centerRowsEnd, centerColsStart, 
  * @returns {Promise<Object>} - 一个Promise，解析后返回一个包含已加载图片的对象
  */
 function preloadSeatImages() {
-    const imageSources = {
-        available: 'img/available.PNG',
-        selected: 'img/selected.PNG',
-        sold: 'img/sold.PNG'
-    };
-
-    const promises = Object.entries(imageSources).map(([status, src]) => {
+    const { IMAGE_PATHS } = CANVAS_CONFIG;
+    
+    const promises = Object.entries(IMAGE_PATHS).map(([status, src]) => {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => resolve({ status, img });
@@ -312,39 +416,33 @@ function preloadSeatImages() {
  * 根据座位布局动态计算画布尺寸
  * @param {number} totalRows - 总行数
  * @param {number} totalCols - 总列数
- * @param {number} seatRadius - 座位半径
- * @param {number} rowSpacing - 行间距
- * @param {number} colSpacing - 列间距
- * @param {number} arcRadius - 弧形布局基准半径
- * @param {number} circleCenter - 圆心Y坐标
  * @param {string} layoutType - 布局类型
  * @returns {Object} 包含width和height的对象
  */
-function calculateCanvasSize(totalRows, totalCols, seatRadius, rowSpacing, colSpacing, arcRadius, circleCenter, layoutType) {
-    const padding = 50; // 画布边距
+function calculateCanvasSize(totalRows, totalCols, layoutType) {
+    const { 
+        CANVAS_PADDING, MIN_CANVAS_WIDTH, MIN_CANVAS_HEIGHT, MIN_ARC_HEIGHT,
+        SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR
+    } = CANVAS_CONFIG;
 
-    if (layoutType === 'parallel') {
+    if (layoutType === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
         // 平行布局的尺寸计算
-        const seatWidth = seatRadius * 2;
-        const totalWidth = totalCols * (seatWidth + colSpacing) - colSpacing + (padding * 2);
-        const totalHeight = totalRows * rowSpacing + 100 + (padding * 2); // 100是屏幕区域高度
+        const seatWidth = SEAT_RADIUS * 2;
+        const totalWidth = totalCols * (seatWidth + COL_SPACING) - COL_SPACING + (CANVAS_PADDING * 2);
+        const totalHeight = totalRows * ROW_SPACING + 100 + (CANVAS_PADDING * 2);
 
         return {
-            width: Math.max(800, totalWidth), // 最小宽度800
-            height: Math.max(600, totalHeight) // 最小高度600
+            width: Math.max(MIN_CANVAS_WIDTH, totalWidth),
+            height: Math.max(MIN_CANVAS_HEIGHT, totalHeight)
         };
     } else {
         // 弧形布局的尺寸计算
-        const maxRadius = arcRadius + (totalRows - 1) * rowSpacing;
-        const maxAngle = (totalCols / 2) * (Math.PI / 60);
-
-        // 计算最大宽度（左右两端的X坐标）
+        const maxRadius = ARC_RADIUS + (totalRows - 1) * ROW_SPACING;
+        const maxAngle = (totalCols / 2) * ANGLE_FACTOR;
         const maxX = maxRadius * Math.sin(maxAngle);
-        const width = Math.max(800, (maxX * 2) + (padding * 2));
-
-        const screenHeight = 50; // 屏幕区域高度
-        const effectiveHeight = circleCenter + arcRadius + (totalRows - 1) * rowSpacing + seatRadius + padding;
-        const height = Math.max(400, effectiveHeight); // 最小高度400
+        const width = Math.max(MIN_CANVAS_WIDTH, (maxX * 2) + (CANVAS_PADDING * 2));
+        const effectiveHeight = CIRCLE_CENTER + ARC_RADIUS + (totalRows - 1) * ROW_SPACING + SEAT_RADIUS + CANVAS_PADDING;
+        const height = Math.max(MIN_ARC_HEIGHT, effectiveHeight);
 
         return {
             width: Math.ceil(width),
@@ -353,7 +451,9 @@ function calculateCanvasSize(totalRows, totalCols, seatRadius, rowSpacing, colSp
     }
 }
 
-// --- 开发初期使用的虚拟数据 ---
+// ========================= 虚拟数据和初始化 =========================
+
+// 开发初期使用的虚拟数据
 const virtualSeatsData = [];
 const rows = 10;
 const cols = 20;
@@ -367,37 +467,29 @@ for (let i = 1; i <= rows; i++) {
     }
 }
 
-
-// --- 页面加载后执行 ---
+// 页面加载后执行
 window.onload = () => {
     const canvas = document.getElementById('cinema-canvas');
     const toggleBtn = document.getElementById('toggle-layout-btn');
 
     if (canvas && toggleBtn) {
-        // 移除固定尺寸设置，改为动态计算
-        // canvas.width = 1200;
-        // canvas.height = 800;
-
-        let currentLayout = 'arc'; // 初始布局为弧形
-        let loadedImages = {}; // 用于存储加载后的图片
+        let currentLayout = CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+        let loadedImages = {};
 
         // 预加载图片
         preloadSeatImages().then(seatImages => {
             loadedImages = seatImages;
-            // 初始绘制
             drawCinema(virtualSeatsData, loadedImages, currentLayout);
         }).catch(error => {
             console.error("图片预加载失败:", error);
-            // 即使失败，也进行一次初始绘制
             drawCinema(virtualSeatsData, {}, currentLayout);
         });
 
         // 为按钮添加点击事件
         toggleBtn.addEventListener('click', () => {
-            // 切换布局模式
-            currentLayout = (currentLayout === 'arc') ? 'parallel' : 'arc';
+            currentLayout = (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ? 
+                           CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
             console.log(`布局已切换为: ${currentLayout}`);
-            // 使用新的布局重新绘制
             drawCinema(virtualSeatsData, loadedImages, currentLayout);
         });
 
@@ -409,14 +501,15 @@ window.onload = () => {
 
 // ========================= 模块导出 =========================
 
-// 通过在 window 对象上挂载，让其他模块可以访问 Canvas 渲染相关的函数
 window.CanvasRenderer = {
-    drawSeat,          // 绘制单个座位
-    drawCinema,        // 绘制整个影厅布局
-    drawCenterZone,    // 绘制中心区域虚线框
-    drawCenterSector,  // 绘制弧形布局的中心扇形区域
-    preloadSeatImages, // 预加载座位状态图片
-    calculateCanvasSize // 动态计算画布尺寸
+    drawSeat,
+    drawCinema,
+    drawCenterZone,
+    drawCenterSector,
+    preloadSeatImages,
+    calculateCanvasSize,
+    // 新增配置对象导出
+    CANVAS_CONFIG
 };
 
 console.log('电影院Canvas渲染模块(canvas.js)已加载');
