@@ -467,37 +467,35 @@ for (let i = 1; i <= rows; i++) {
     }
 }
 
-// 页面加载后执行
-window.onload = () => {
-    const canvas = document.getElementById('cinema-canvas');
-    const toggleBtn = document.getElementById('toggle-layout-btn');
+// 在页面加载时预加载图片并绘制初始影厅
+const canvas = document.getElementById('cinema-canvas');
+const toggleBtn = document.getElementById('toggle-layout-btn');
 
-    if (canvas && toggleBtn) {
-        let currentLayout = CANVAS_CONFIG.LAYOUT_TYPES.ARC;
-        let loadedImages = {};
+if (canvas && toggleBtn) {
+    let currentLayout = CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+    let loadedImages = {};
 
-        // 预加载图片
-        preloadSeatImages().then(seatImages => {
-            loadedImages = seatImages;
-            drawCinema(virtualSeatsData, loadedImages, currentLayout);
-        }).catch(error => {
-            console.error("图片预加载失败:", error);
-            drawCinema(virtualSeatsData, {}, currentLayout);
-        });
+    // 预加载图片
+    preloadSeatImages().then(seatImages => {
+        loadedImages = seatImages;
+        drawCinema(virtualSeatsData, loadedImages, currentLayout);
+    }).catch(error => {
+        console.error("图片预加载失败:", error);
+        drawCinema(virtualSeatsData, {}, currentLayout);
+    });
 
-        // 为按钮添加点击事件
-        toggleBtn.addEventListener('click', () => {
-            currentLayout = (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ? 
-                           CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
-            console.log(`布局已切换为: ${currentLayout}`);
-            drawCinema(virtualSeatsData, loadedImages, currentLayout);
-        });
+    // 为按钮添加点击事件
+    toggleBtn.addEventListener('click', () => {
+        currentLayout = (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.ARC) ? 
+                        CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
+        console.log(`布局已切换为: ${currentLayout}`);
+        drawCinema(virtualSeatsData, loadedImages, currentLayout);
+    });
 
-    } else {
-        if (!canvas) console.error('未找到ID为 cinema-canvas 的 canvas 元素');
-        if (!toggleBtn) console.error('未找到ID为 toggle-layout-btn 的按钮元素');
-    }
-};
+} else {
+    if (!canvas) console.error('未找到ID为 cinema-canvas 的 canvas 元素');
+    if (!toggleBtn) console.error('未找到ID为 toggle-layout-btn 的按钮元素');
+}
 
 // ========================= 模块导出 =========================
 
