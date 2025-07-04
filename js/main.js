@@ -27,9 +27,9 @@ const AGE_GROUPS = {
 
 const SEAT_STATUS = {
     AVAILABLE: 'available', // 可用
+    SELECTED: 'selected',   // 已选中 (UI临时状态，由数据层管理)
     RESERVED: 'reserved',   // 已预订 (由本模块管理)
     SOLD: 'sold'            // 已售出 (由本模块管理)
-    // 'selected' 状态由 stateManager.js 在UI层面管理，不属于核心数据状态
 };
 
 // ========================= 数据结构定义 =========================
@@ -180,6 +180,55 @@ function findSeatForIndividual(age) {
     return null;
 }
 
+// ========================= 座位选择管理 =========================
+
+/**
+ * 选择一个座位
+ * @param {number} row - 行号
+ * @param {number} col - 列号
+ * @returns {boolean} 操作是否成功
+ */
+function selectSeat(row, col) {
+    const seat = getSeat(row, col);
+    if (seat && seat.status === SEAT_STATUS.AVAILABLE) {
+        seat.status = SEAT_STATUS.SELECTED;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * 取消选择一个座位
+ * @param {number} row - 行号
+ * @param {number} col - 列号
+ * @returns {boolean} 操作是否成功
+ */
+function deselectSeat(row, col) {
+    const seat = getSeat(row, col);
+    if (seat && seat.status === SEAT_STATUS.SELECTED) {
+        seat.status = SEAT_STATUS.AVAILABLE;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * 获取所有当前被选中的座位
+ * @returns {Array<Object>} 选中的座位对象数组
+ */
+function getSelectedSeats() {
+    return cinemaSeats.flat().filter(seat => seat.status === SEAT_STATUS.SELECTED);
+}
+
+/**
+ * 清除所有座位的选中状态，将它们恢复为可用
+ */
+function clearAllSelections() {
+    const selectedSeats = getSelectedSeats();
+    selectedSeats.forEach(seat => {
+        seat.status = SEAT_STATUS.AVAILABLE;
+    });
+}
 
 // ========================= 团体选座算法 =========================
 
@@ -427,6 +476,12 @@ window.CinemaData = {
     // 初始化函数
     initializeCinemaSeats,
     initializeTicketSystem,
+
+    // select相关：座位选择管理
+    selectSeat,
+    deselectSeat,
+    getSelectedSeats,
+    clearAllSelections,
 
     // 选座算法
     findSeatForIndividual,
