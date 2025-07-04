@@ -261,6 +261,14 @@
                 <input type="number" id="cols-input" value="20" min="10" max="30">
             </div>
             <button class="btn btn-secondary" id="apply-config">应用配置</button>
+
+            <!-- 快速配置预设 -->
+            <div style="margin-left: 20px; display: flex; gap: 10px; align-items: center;">
+                <label style="font-size: 12px; color: #666;">快速配置:</label>
+                <button class="btn btn-secondary" onclick="setConfig(8, 15)">小厅(8×15)</button>
+                <button class="btn btn-secondary" onclick="setConfig(12, 25)">中厅(12×25)</button>
+                <button class="btn btn-secondary" onclick="setConfig(15, 30)">大厅(15×30)</button>
+            </div>
         </div>
 
         <!-- 控制按钮 -->
@@ -483,15 +491,26 @@
                     return;
                 }
 
-                this.log(`应用新配置: ${rows}行 × ${cols}列`);
+                this.log(`🔄 开始应用新配置: ${rows}行 × ${cols}列`);
+
+                // 1. 重新初始化座位数据
                 this.setupCinemaData();
 
+                // 2. 清除所有选择
                 if (window.StateManager) {
+                    this.log('🧹 清除现有选择状态');
+                    window.StateManager.clearAllSelections();
                     window.StateManager.refreshSeatsData();
                 }
 
+                // 3. 重新初始化Canvas
+                this.log('🎨 重新初始化Canvas');
                 this.initializeCanvas();
+
+                // 4. 更新UI显示
                 this.updateUI();
+
+                this.log(`✅ 配置应用完成: ${rows}行 × ${cols}列`);
             }
 
             autoSelectIndividual() {
@@ -609,6 +628,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             new CanvasTest();
         });
+
+        // 全局函数：快速设置配置
+        function setConfig(rows, cols) {
+            console.log(`🔧 快速配置: ${rows}行 × ${cols}列`);
+
+            document.getElementById('rows-input').value = rows;
+            document.getElementById('cols-input').value = cols;
+
+            // 触发应用配置按钮的点击事件
+            document.getElementById('apply-config').click();
+
+            console.log(`✅ 配置已应用`);
+        }
     </script>
 </body>
 
