@@ -223,7 +223,7 @@ function handleKeyUp(event) {
  */
 function handleSeatClick(seat) {
     // 检查座位是否可点击
-    if (!isSeatClickable(seat)) {
+    if (seat.status !== 'available') {
         console.log(`座位 ${seat.row}-${seat.col} 不可选择（状态：${seat.status}）`);
         return;
     }
@@ -336,15 +336,18 @@ function performHitDetection(x, y) {
         const seatPos = window.CanvasRenderer.calculateSeatPosition(seat);
         const distance = Math.sqrt(Math.pow(x - seatPos.x, 2) + Math.pow(y - seatPos.y, 2));
 
-        // 使用座位半径进行命中检测
-        if (distance <= window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS) {
+        // 使用座位半径进行命中检测，考虑悬停时的放大效果
+        const detectionRadius = seat.isHovered ? 
+            window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS * 1.2 : 
+            window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS;
+            
+        if (distance <= detectionRadius) {
             return seat;
         }
     }
 
     return null;
 }
-
 // ========================= 业务逻辑接口 =========================
 
 /**
@@ -478,15 +481,6 @@ function getRelativeMousePosition(event) {
     };
 }
 
-/**
- * 检查座位是否可点击
- * @param {Object} seat - 座位对象
- * @returns {boolean} 是否可点击
- */
-function isSeatClickable(seat) {
-    // 只有available状态的座位才可以点击选择
-    return seat.status === 'available';
-}
 
 /**
  * 刷新座位数据状态
@@ -546,14 +540,6 @@ function getSelectedSeats() {
  */
 function getSelectedCount() {
     return globalState.selectedSeats.length;
-}
-
-/**
- * 检查是否有选中的座位
- * @returns {boolean} 是否有选中座位
- */
-function hasSelectedSeats() {
-    return globalState.selectedSeats.length > 0;
 }
 
 /**
@@ -631,7 +617,6 @@ if (typeof window !== 'undefined') {
         // 查询接口
         getSelectedSeats,
         getSelectedCount,
-        hasSelectedSeats,
         getCurrentState,
 
         // 工具函数

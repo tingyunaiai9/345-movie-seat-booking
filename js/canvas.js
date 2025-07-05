@@ -109,22 +109,34 @@ function drawSeat(x, y, seat) {
         displayStatus = 'selected';
     }
     
+    // 计算座位大小：如果是悬停状态，放大到120%
+    const scaleFactor = seat.isHovered ? 1.2 : 1.0;
+    const currentRadius = SEAT_RADIUS * scaleFactor;
+    
     const img = seatImages[displayStatus];
 
     if (img) {
         // 使用 drawImage 绘制贴图，坐标需要调整为左上角
-        ctx.drawImage(img, x - SEAT_RADIUS, y - SEAT_RADIUS, SEAT_RADIUS * 2, SEAT_RADIUS * 2);
+        // 根据缩放因子调整绘制尺寸
+        ctx.drawImage(
+            img, 
+            x - currentRadius, 
+            y - currentRadius, 
+            currentRadius * 2, 
+            currentRadius * 2
+        );
     } else {
         // 如果某个状态的图片加载失败或不存在，则回退到绘制灰色圆形
         ctx.fillStyle = 'gray';
         ctx.beginPath();
-        ctx.arc(x, y, SEAT_RADIUS, 0, Math.PI * 2);
+        ctx.arc(x, y, currentRadius, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    // 绘制座位号和排号
+    // 绘制座位号和排号，字体大小也根据缩放因子调整
     ctx.fillStyle = TEXT_COLOR;
-    ctx.font = SEAT_FONT;
+    const fontSize = parseInt(SEAT_FONT) * scaleFactor;
+    ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`${seat.row}-${seat.col}`, x, y);
