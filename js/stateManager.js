@@ -296,6 +296,8 @@ function clearAllSelections() {
     globalState.selectedSeats = [];
 
     console.log('已清除所有选择');
+    triggerRedraw();
+    notifySelectionChange();
 }
 
 /**
@@ -331,7 +333,7 @@ function performHitDetection(x, y) {
 
     // 遍历所有座位，检查鼠标点击位置
     for (const seat of globalState.currentSeatsData) {
-        const seatPos = calculateSeatPosition(seat);
+        const seatPos = window.CanvasRenderer.calculateSeatPosition(seat);
         const distance = Math.sqrt(Math.pow(x - seatPos.x, 2) + Math.pow(y - seatPos.y, 2));
 
         // 使用座位半径进行命中检测
@@ -341,38 +343,6 @@ function performHitDetection(x, y) {
     }
 
     return null;
-}
-
-/**
- * 计算座位在Canvas上的位置
- * @param {Object} seat - 座位对象
- * @returns {Object} 座位的x,y坐标
- */
-function calculateSeatPosition(seat) {
-    // 使用canvas.js中的座位位置计算逻辑
-    const { SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR } = window.CanvasRenderer.CANVAS_CONFIG;
-    const { currentLayout, totalRows, totalCols, canvasWidth } = window.CanvasRenderer.GLOBAL_STATE;
-
-    let x, y;
-
-    if (currentLayout === 'parallel') {
-        // 平行布局计算
-        const seatWidth = SEAT_RADIUS * 2;
-        const totalWidth = totalCols * (seatWidth + COL_SPACING) - COL_SPACING;
-        const xOffset = (canvasWidth - totalWidth) / 2;
-        const yOffset = 100; // 顶部留白
-
-        x = xOffset + (seat.col - 1) * (seatWidth + COL_SPACING) + SEAT_RADIUS;
-        y = yOffset + (seat.row - 1) * ROW_SPACING + SEAT_RADIUS;
-    } else {
-        // 弧形布局计算
-        const angle = (seat.col - totalCols / 2) * ANGLE_FACTOR;
-        const currentArcRadius = ARC_RADIUS + (seat.row - 1) * ROW_SPACING;
-        x = canvasWidth / 2 + currentArcRadius * Math.sin(angle);
-        y = CIRCLE_CENTER + currentArcRadius * Math.cos(angle);
-    }
-
-    return { x, y };
 }
 
 // ========================= 业务逻辑接口 =========================

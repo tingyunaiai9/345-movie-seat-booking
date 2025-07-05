@@ -597,6 +597,7 @@ window.CanvasRenderer = {
     drawCinema,
     drawCenterZone,
     preloadSeatImages,
+    calculateSeatPosition,
     calculateCanvasSize,
     CANVAS_CONFIG,
     GLOBAL_STATE,
