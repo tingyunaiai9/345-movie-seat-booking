@@ -44,7 +44,7 @@ const CANVAS_CONFIG = {
     CENTER_ZONE_DASH: [10, 5],
     CENTER_ZONE_PADDING: 5,
     CENTER_ZONE_MARGIN: 20,
-    CENTER_ZONE_RATIO: 0.2,
+    CENTER_ZONE_RATIO: 0.25,
 
     // 图片路径配置
     IMAGE_PATHS: {
@@ -403,6 +403,48 @@ function drawCenterZone() {
             ctx.beginPath();
             ctx.arc(centerX, centerY, outerRadius, startAngleForArc, endAngleForArc);
             ctx.stroke();
+
+            // 计算内弧起点和终点坐标
+            const innerStartX = centerX + innerRadius * Math.cos(startAngleForArc);
+            const innerStartY = centerY + innerRadius * Math.sin(startAngleForArc);
+            const innerEndX = centerX + innerRadius * Math.cos(endAngleForArc);
+            const innerEndY = centerY + innerRadius * Math.sin(endAngleForArc);
+
+            // 计算外弧起点和终点坐标
+            const outerStartX = centerX + outerRadius * Math.cos(startAngleForArc);
+            const outerStartY = centerY + outerRadius * Math.sin(startAngleForArc);
+            const outerEndX = centerX + outerRadius * Math.cos(endAngleForArc);
+            const outerEndY = centerY + outerRadius * Math.sin(endAngleForArc);
+
+            // 绘制连接内外弧线顶点的橙色虚线
+            ctx.save();
+            ctx.strokeStyle = CENTER_ZONE_COLOR; // 使用橙色
+            ctx.lineWidth = CENTER_ZONE_WIDTH;
+            ctx.setLineDash(CENTER_ZONE_DASH); // 使用虚线样式
+
+            // 绘制左侧连接线（连接内弧起点和外弧起点）
+            ctx.beginPath();
+            ctx.moveTo(innerStartX, innerStartY);
+            ctx.lineTo(outerStartX, outerStartY);
+            ctx.stroke();
+
+            // 绘制右侧连接线（连接内弧终点和外弧终点）
+            ctx.beginPath();
+            ctx.moveTo(innerEndX, innerEndY);
+            ctx.lineTo(outerEndX, outerEndY);
+            ctx.stroke();
+
+            ctx.restore();
+
+            // 在控制台输出调试信息
+            console.log('弧形区域标记点坐标:', {
+                innerStart: { x: innerStartX, y: innerStartY },
+                innerEnd: { x: innerEndX, y: innerEndY },
+                outerStart: { x: outerStartX, y: outerStartY },
+                outerEnd: { x: outerEndX, y: outerEndY },
+                angles: { start: startAngleForArc, end: endAngleForArc },
+                radii: { inner: innerRadius, outer: outerRadius }
+            });
         }
     }
 
