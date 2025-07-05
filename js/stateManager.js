@@ -14,7 +14,8 @@ const INTERACTION_CONFIG = {
 
     // 键盘按键
     KEYS: {
-        CTRL: 'Control'
+        CTRL: 'Control',      // Windows上的Ctrl键
+        META: 'Meta'          // Mac上的Command键
     },
 
     // 座位状态（UI层面的状态，与main.js中的业务状态配合使用）
@@ -199,7 +200,7 @@ function handleWindowResize() {
  * @param {KeyboardEvent} event - 键盘事件
  */
 function handleKeyDown(event) {
-    if (event.key === INTERACTION_CONFIG.KEYS.CTRL) {
+    if (event.key === INTERACTION_CONFIG.KEYS.CTRL || event.key === INTERACTION_CONFIG.KEYS.META) {
         globalState.isCtrlPressed = true;
     }
 }
@@ -209,7 +210,7 @@ function handleKeyDown(event) {
  * @param {KeyboardEvent} event - 键盘事件
  */
 function handleKeyUp(event) {
-    if (event.key === INTERACTION_CONFIG.KEYS.CTRL) {
+    if (event.key === INTERACTION_CONFIG.KEYS.CTRL || event.key === INTERACTION_CONFIG.KEYS.META) {
         globalState.isCtrlPressed = false;
     }
 }
