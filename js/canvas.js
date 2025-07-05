@@ -102,27 +102,27 @@ const GLOBAL_STATE = {
 function drawSeat(x, y, seat) {
     const { SEAT_RADIUS, SEAT_FONT, TEXT_COLOR } = CANVAS_CONFIG;
     const { ctx, seatImages } = GLOBAL_STATE;
-    
+
     // 确定显示状态：如果座位被选中，显示selected状态，否则显示原状态
     let displayStatus = seat.status;
     if (seat.isSelected && seat.status === 'available') {
         displayStatus = 'selected';
     }
-    
+
     // 计算座位大小：如果是悬停状态，放大到120%
     const scaleFactor = seat.isHovered ? 1.2 : 1.0;
     const currentRadius = SEAT_RADIUS * scaleFactor;
-    
+
     const img = seatImages[displayStatus];
 
     if (img) {
         // 使用 drawImage 绘制贴图，坐标需要调整为左上角
         // 根据缩放因子调整绘制尺寸
         ctx.drawImage(
-            img, 
-            x - currentRadius, 
-            y - currentRadius, 
-            currentRadius * 2, 
+            img,
+            x - currentRadius,
+            y - currentRadius,
+            currentRadius * 2,
             currentRadius * 2
         );
     } else {
@@ -229,12 +229,18 @@ function drawCinema() {
     });
 
     // ===== 绘制中心区域标识 =====
-    if (GLOBAL_STATE.centerSeatsCoords.length > 0) {
-        if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
-            drawCenterZone();
-        } else {
-            drawCenterZone();
-        }
+    console.log('中心区域调试信息:', {
+        centerSeatsCoords长度: GLOBAL_STATE.centerSeatsCoords.length,
+        centerZoneInfo: GLOBAL_STATE.centerZoneInfo,
+        currentLayout: currentLayout
+    });
+
+    // 无论是否有centerSeatsCoords，都尝试绘制中心区域（基于centerZoneInfo）
+    if (GLOBAL_STATE.centerZoneInfo) {
+        console.log('正在调用 drawCenterZone...');
+        drawCenterZone();
+    } else {
+        console.warn('centerZoneInfo 为空，无法绘制中心区域');
     }
 }
 
@@ -260,7 +266,21 @@ function calculateSeatPosition(seat) {
         y = yOffset + (seat.row - 1) * ROW_SPACING + SEAT_RADIUS;
     } else {
         // 弧形布局计算
-        const angle = (seat.col - totalCols / 2) * ANGLE_FACTOR;
+        // 调整角度计算以确保座位以中央虚线为中心对称分布
+        // 总列数为奇数时：中央虚线在中间列上
+        // 总列数为偶数时：中央虚线在中间两列之间
+        let columnOffset;
+        if (totalCols % 2 === 1) {
+            // 奇数列：以中间列为中心，第(totalCols+1)/2列的角度为0
+            const centerCol = (totalCols + 1) / 2;
+            columnOffset = seat.col - centerCol;
+        } else {
+            // 偶数列：以中间两列之间为中心
+            const centerPoint = (totalCols + 1) / 2;
+            columnOffset = seat.col - centerPoint;
+        }
+
+        const angle = columnOffset * ANGLE_FACTOR;
         const currentArcRadius = ARC_RADIUS + (seat.row - 1) * ROW_SPACING;
         x = canvasWidth / 2 + currentArcRadius * Math.sin(angle);
         y = CIRCLE_CENTER + currentArcRadius * Math.cos(angle);
@@ -283,13 +303,22 @@ function calculateCenterZone() {
     const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
 
     const middleRow = Math.ceil(totalRows / 2);
-    const middleCol = Math.ceil(totalCols / 2);
+
+    // 使用与座位位置计算相同的中心对齐逻辑
+    let middleCol;
+    if (totalCols % 2 === 1) {
+        // 奇数列：中心点是中间列
+        middleCol = (totalCols + 1) / 2;
+    } else {
+        // 偶数列：中心点是中间两列之间（使用非整数值）
+        middleCol = (totalCols + 1) / 2;
+    }
 
     return {
         rowStart: middleRow - Math.floor(numCenterRows / 2),
         rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
-        colStart: middleCol - Math.floor(numCenterCols / 2),
-        colEnd: middleCol - Math.floor(numCenterCols / 2) + numCenterCols - 1
+        colStart: Math.round(middleCol - numCenterCols / 2),
+        colEnd: Math.round(middleCol + numCenterCols / 2) - 1
     };
 }
 
@@ -297,11 +326,21 @@ function calculateCenterZone() {
  * 绘制中心区域标识（支持平行布局和弧形布局）
  */
 function drawCenterZone() {
+    console.log('🎯 drawCenterZone 函数被调用');
+
     const {
         CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_PADDING, CENTER_ZONE_MARGIN,
         SEAT_RADIUS, ARC_RADIUS, ROW_SPACING, CIRCLE_CENTER, ANGLE_FACTOR
     } = CANVAS_CONFIG;
     const { ctx, centerSeatsCoords, centerZoneInfo, totalCols, canvasWidth, currentLayout } = GLOBAL_STATE;
+
+    console.log('drawCenterZone 参数检查:', {
+        ctx: !!ctx,
+        centerZoneInfo: centerZoneInfo,
+        totalCols: totalCols,
+        canvasWidth: canvasWidth,
+        currentLayout: currentLayout
+    });
 
     // 设置通用样式
     ctx.save();
@@ -332,9 +371,22 @@ function drawCenterZone() {
             const centerX = canvasWidth / 2;
             const centerY = CIRCLE_CENTER;
 
-            // 计算扇形的角度范围
-            const baseStartAngle = (centerZoneInfo.colStart - 0.5 - totalCols / 2) * ANGLE_FACTOR;
-            const baseEndAngle = (centerZoneInfo.colEnd + 0.5 - totalCols / 2) * ANGLE_FACTOR;
+            // 计算扇形的角度范围 - 使用与座位位置计算相同的逻辑
+            let startColumnOffset, endColumnOffset;
+            if (totalCols % 2 === 1) {
+                // 奇数列：以中间列为中心
+                const centerCol = (totalCols + 1) / 2;
+                startColumnOffset = (centerZoneInfo.colStart - 0.5) - centerCol;
+                endColumnOffset = (centerZoneInfo.colEnd + 0.5) - centerCol;
+            } else {
+                // 偶数列：以中间两列之间为中心
+                const centerPoint = (totalCols + 1) / 2;
+                startColumnOffset = (centerZoneInfo.colStart - 0.5) - centerPoint;
+                endColumnOffset = (centerZoneInfo.colEnd + 0.5) - centerPoint;
+            }
+
+            const baseStartAngle = startColumnOffset * ANGLE_FACTOR;
+            const baseEndAngle = endColumnOffset * ANGLE_FACTOR;
             const startAngleForArc = Math.PI / 2 + baseStartAngle;
             const endAngleForArc = Math.PI / 2 + baseEndAngle;
 
@@ -351,26 +403,6 @@ function drawCenterZone() {
             ctx.beginPath();
             ctx.arc(centerX, centerY, outerRadius, startAngleForArc, endAngleForArc);
             ctx.stroke();
-
-            // 绘制径向线
-            const radialLines = [
-                { angle: baseStartAngle, label: '左径向线' },
-                { angle: baseEndAngle, label: '右径向线' }
-            ];
-
-            radialLines.forEach(({ angle, label }) => {
-                const innerX = centerX + innerRadius * Math.sin(angle);
-                const innerY = centerY + innerRadius * Math.cos(angle);
-                const outerX = centerX + outerRadius * Math.sin(angle);
-                const outerY = centerY + outerRadius * Math.cos(angle);
-
-                console.log(`${label}坐标:`, { innerX, innerY, outerX, outerY, angle: angle * 180 / Math.PI });
-
-                ctx.beginPath();
-                ctx.moveTo(innerX, innerY);
-                ctx.lineTo(outerX, outerY);
-                ctx.stroke();
-            });
         }
     }
 
