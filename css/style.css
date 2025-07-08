@@ -523,6 +523,48 @@ body {
     box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
 }
 
+/* 选座说明样式 */
+.seat-instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.1) 0%, rgba(152, 204, 187, 0.1) 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(194, 212, 214, 0.3);
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    border: 1px solid rgba(194, 212, 214, 0.2);
+    transition: all 0.3s ease;
+}
+
+.instruction-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #68a530;
+    transform: translateX(3px);
+}
+
+.instruction-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.instruction-text {
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+}
 /* 选座偏好区域 */
 .seat-preference,
 .group-preference {
@@ -533,9 +575,38 @@ body {
     height: fit-content;
 }
 
-.seat-preference h3::after,
-.group-preference h3::after {
+/* 确保h3本身有正确的position */
+.group-controls .group-preference h3 {
+    margin: 0 0 15px 0 !important;
+    color: #2c3e50 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #e9ecef !important;
+    position: relative !important;
+}
+
+.group-controls .group-preference h3::after {
+    content: ''!important;
+    position: absolute!important;
+    bottom: -2px!important;
+    left: 0!important;
+    width: 40px!important;
+    height: 2px!important;
+    background: linear-gradient(135deg, #80bc6b 0%, #68a530 100%)!important;
+    border-radius: 2px;
+}
+
+/* 同时确保个人票也有 */
+.individual-controls  .seat-preference h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
     background: linear-gradient(135deg, #80bc6b 0%, #68a530 100%);
+    border-radius: 2px;
 }
 
 .seat-preference select,
@@ -1576,7 +1647,10 @@ body {
 
 /* 团体成员管理 */
 .group-members {
-    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
 }
 
 .member-list {
@@ -2800,5 +2874,335 @@ body {
     
     .order-detail-modal .modal-footer {
         flex-direction: column;
+    }
+}
+
+/* ========================= 个人票成员管理样式 ========================= */
+.individual-members {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.individual-members .member-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fafbfc;
+    min-height: 60px;
+}
+
+.individual-members .member-list:empty::after {
+    content: "暂无成员，请在下方添加";
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    display: block;
+    padding: 20px;
+}
+
+.individual-members .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+    transition: all 0.2s ease;
+}
+
+.individual-members .member-item:hover {
+    border-color: #68a530;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.1);
+}
+
+.individual-members .member-item:last-child {
+    margin-bottom: 0;
+}
+
+.individual-members .member-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.individual-members .member-name {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 60px;
+}
+
+.individual-members .member-age {
+    color: #6c757d;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.individual-members .member-type {
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.1) 0%, rgba(57, 141, 55, 0.1) 100%);
+    color: #398d37;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(104, 165, 48, 0.3);
+}
+
+.individual-members .remove-member {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.individual-members .remove-member:hover {
+    background: #c82333;
+}
+
+.individual-members .add-member {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+.individual-members .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.individual-members .input-row input {
+    padding: 8px 12px;
+    border: 1px solid #c2d4d6;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.individual-members .input-row input:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+.individual-members .input-row input[type="text"] {
+    flex: 2;
+}
+
+.individual-members .input-row input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+}
+
+.individual-members .input-row button {
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.individual-members .member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.individual-members .member-count span {
+    font-weight: 600;
+    color: #398d37;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .individual-members .input-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .individual-members .input-row input,
+    .individual-members .input-row button {
+        width: 100%;
+    }
+    
+    .individual-members .member-info {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+}
+
+/* ========================= 团体票成员管理样式（与个人票一致）========================= */
+.group-members {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.group-members .member-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fafbfc;
+    min-height: 60px;
+}
+
+.group-members .member-list:empty::after {
+    content: "暂无成员，请在下方添加";
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    display: block;
+    padding: 20px;
+}
+
+.group-members .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+    transition: all 0.2s ease;
+}
+
+.group-members .member-item:hover {
+    border-color: #68a530;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.1);
+}
+
+.group-members .member-item:last-child {
+    margin-bottom: 0;
+}
+
+.group-members .member-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.group-members .member-name {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 60px;
+}
+
+.group-members .member-age {
+    color: #6c757d;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.group-members .member-type {
+    background: linear-gradient(135deg, rgba(152, 204, 187, 0.2) 0%, rgba(128, 188, 107, 0.2) 100%);
+    color: #80bc6b;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(152, 204, 187, 0.5);
+}
+
+.group-members .remove-member {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.group-members .remove-member:hover {
+    background: #c82333;
+}
+
+.group-members .add-member {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+.group-members .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.group-members .input-row input {
+    padding: 8px 12px;
+    border: 1px solid #c2d4d6;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.group-members .input-row input:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+.group-members .input-row input[type="text"] {
+    flex: 2;
+}
+
+.group-members .input-row input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+}
+
+.group-members .input-row button {
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.group-members .member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.group-members .member-count span {
+    font-weight: 600;
+    color: #80bc6b;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .group-members .input-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .group-members .input-row input,
+    .group-members .input-row button {
+        width: 100%;
+    }
+    
+    .group-members .member-info {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
     }
 }

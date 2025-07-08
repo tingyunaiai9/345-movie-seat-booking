@@ -161,18 +161,21 @@
                             <div class="top-controls-grid">
                                 <div class="customer-info">
                                     <h3>客户信息</h3>
-                                    <div class="info-grid">
-                                        <div class="input-group">
-                                            <label for="customer-name">姓名:</label>
-                                            <input type="text" id="customer-name" placeholder="请输入姓名">
+                                    <!-- 修改为类似团体票的成员管理模式 -->
+                                    <div class="individual-members">
+                                        <div class="member-list" id="individual-member-list">
+                                            <!-- 动态生成个人票成员列表 -->
                                         </div>
-                                        <div class="input-group">
-                                            <label for="customer-age">年龄:</label>
-                                            <input type="number" id="customer-age" min="1" max="120" value="25">
-                                        </div>
-                                        <div class="input-group">
-                                            <label for="customer-phone">手机号:</label>
-                                            <input type="tel" id="customer-phone" placeholder="请输入手机号">
+                                        
+                                        <div class="add-member">
+                                            <div class="input-row">
+                                                <input type="text" id="individual-member-name" placeholder="姓名" maxlength="20">
+                                                <input type="number" id="individual-member-age" placeholder="年龄" min="1" max="120">
+                                                <button class="btn btn-add" id="add-individual-member">添加</button>
+                                            </div>
+                                            <div class="member-count">
+                                                已添加 <span id="individual-member-count">0</span> 人 (最多10人)
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -190,19 +193,21 @@
                                     </div>
                                 </div>
 
+                                <!-- 个人票控制中的手动控制部分 -->
                                 <div class="manual-controls">
-                                    <h3>手动选座</h3>
-                                    <div class="manual-options">
-                                        <label class="manual-option">
-                                            <input type="radio" name="manual-mode" value="single" checked>
-                                            <span>单选模式</span>
-                                        </label>
-                                        <label class="manual-option">
-                                            <input type="radio" name="manual-mode" value="multi">
-                                            <span>多选模式 (Ctrl+点击)</span>
-                                        </label>
+                                    <h3>选座说明</h3>
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon">👆</span>
+                                        <span class="instruction-text">直接点击座位进行选择</span>
                                     </div>
-                                    <button class="btn btn-clear" id="clear-selection">清除选择</button>
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon">⌨️</span>
+                                        <span class="instruction-text">按住 Ctrl 点击可多选</span>
+                                    </div>
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon">🎯</span>
+                                        <span class="instruction-text">建议选择相邻座位以获得更好体验</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -213,15 +218,13 @@
                                 <div class="group-info">
                                     <h3>团体信息</h3>
                                     <div class="group-members">
-                                        <div class="member-list">
-                                            <!-- 动态生成团体成员列表 -->
+                                        <div class="member-list" id="group-member-list">
+                                            <!-- 动态生成团体票成员列表 -->
                                         </div>
                                         <div class="add-member">
                                             <div class="input-row">
-                                                <div class="input-container">
-                                                    <input type="text" id="member-name" placeholder="成员姓名">
-                                                    <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
-                                                </div>
+                                                <input type="text" id="member-name" placeholder="成员姓名">
+                                                <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
                                                 <button class="btn btn-add" id="add-member">添加</button>
                                             </div>
                                             <div class="member-count">
@@ -244,19 +247,21 @@
                                     </div>
                                 </div>
 
+                                <!-- 团体票控制中的手动控制部分 -->
                                 <div class="manual-controls">
-                                    <h3>手动选座</h3>
-                                    <div class="manual-options">
-                                        <label class="manual-option">
-                                            <input type="radio" name="manual-mode" value="single" checked>
-                                            <span>单选模式</span>
-                                        </label>
-                                        <label class="manual-option">
-                                            <input type="radio" name="manual-mode" value="multi">
-                                            <span>多选模式 (Ctrl+点击)</span>
-                                        </label>
+                                    <h3>选座说明</h3>
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon">👥</span>
+                                        <span class="instruction-text">团体建议选择连续座位</span>
                                     </div>
-                                    <button class="btn btn-clear" id="clear-selection">清除选择</button>
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon">⌨️</span>
+                                        <span class="instruction-text">按住 Ctrl 点击可多选</span>
+                                    </div>
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon">🎪</span>
+                                        <span class="instruction-text">中间区域视野最佳</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -613,7 +618,7 @@
     <!-- 页面底部 -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 电影院选座系统 - 基于Canvas技术实现</p>
+            <p>&copy; 2024 电影院选座系统 - 三四五组</p>
         </div>
     </footer>
 
