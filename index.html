@@ -18,6 +18,11 @@
                     <span class="step" data-step="seat">选座</span>
                     <span class="step" data-step="payment">支付</span>
                     <span class="step" data-step="confirm">确认</span>
+                    <!-- 移动我的订单按钮到确认后面，并改为圆形图标 -->
+                    <button class="btn-my-orders-circle" id="my-orders-btn" title="我的订单">
+                        <span class="icon">📋
+                        </span>
+                    </button>
                 </div>
             </nav>
         </div>
@@ -364,7 +369,7 @@
                             <h3>订单详情</h3>
                             <div class="movie-info-summary">
                                 <div class="movie-poster">
-                                    <img src="https://via.placeholder.com/100x150?text=电影海报" alt="电影海报">
+                                    <img src="img/LUOXIAOHEI.webp" alt="电影海报">
                                 </div>
                                 <div class="movie-details">
                                     <h4 id="payment-movie-title">复仇者联盟：终局之战</h4>
@@ -519,6 +524,59 @@
                 </div>
             </section>
 
+            <!-- 我的订单视图 -->
+            <section id="my-orders-view" class="view">
+                <div class="my-orders-panel">
+                    <div class="my-orders-header">
+                        <h2>我的订单</h2>
+                        <button class="btn btn-secondary" id="close-my-orders">返回</button>
+                    </div>
+
+                    <!-- 订单筛选器 -->
+                    <div class="orders-filter">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">全部订单</button>
+                            <button class="filter-tab" data-filter="reserved">预约订单</button>
+                            <button class="filter-tab" data-filter="paid">已支付</button>
+                        </div>
+                        
+                        <div class="search-box">
+                            <input type="text" id="order-search" placeholder="搜索订单号或电影名称...">
+                            <button class="btn btn-primary" id="search-orders">搜索</button>
+                        </div>
+                    </div>
+
+                    <!-- 订单列表 -->
+                    <div class="orders-container">
+                        <div class="orders-list" id="orders-list">
+                            <!-- 订单项将通过 JavaScript 动态生成 -->
+                            <div class="no-orders" id="no-orders">
+                                <div class="no-orders-icon">🎬</div>
+                                <h3>暂无订单</h3>
+                                <p>您还没有任何订单记录</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 订单详情模态框 -->
+                    <div class="order-detail-modal" id="order-detail-modal" style="display: none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>订单详情</h3>
+                                <button class="modal-close" id="close-order-detail">×</button>
+                            </div>
+                            <div class="modal-body" id="order-detail-content">
+                                <!-- 订单详情内容将动态生成 -->
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" id="cancel-order" style="display: none;">取消订单</button>
+                                <button class="btn btn-primary" id="pay-reserved-order" style="display: none;">立即支付</button>
+                                <button class="btn btn-refund" id="refund-order" style="display: none;">申请退款</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -566,6 +624,5 @@
     <script src="js/canvas.js"></script>
     <script src="js/stateManager.js"></script>
     <script src="js/ui.js"></script>
-
 </body>
 </html>
