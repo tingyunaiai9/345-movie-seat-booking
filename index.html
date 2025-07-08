@@ -216,15 +216,13 @@
                                 <div class="group-info">
                                     <h3>团体信息</h3>
                                     <div class="group-members">
-                                        <div class="member-list">
-                                            <!-- 动态生成团体成员列表 -->
+                                        <div class="member-list" id="group-member-list">
+                                            <!-- 动态生成团体票成员列表 -->
                                         </div>
                                         <div class="add-member">
                                             <div class="input-row">
-                                                <div class="input-container">
-                                                    <input type="text" id="member-name" placeholder="成员姓名">
-                                                    <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
-                                                </div>
+                                                <input type="text" id="member-name" placeholder="成员姓名">
+                                                <input type="number" id="member-age" placeholder="年龄" min="1" max="120">
                                                 <button class="btn btn-add" id="add-member">添加</button>
                                             </div>
                                             <div class="member-count">

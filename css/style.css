@@ -1576,7 +1576,10 @@ body {
 
 /* 团体成员管理 */
 .group-members {
-    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
 }
 
 .member-list {
@@ -2960,6 +2963,192 @@ body {
     }
     
     .individual-members .member-info {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+}
+
+/* ========================= 团体票成员管理样式（与个人票一致）========================= */
+.group-members {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.group-members .member-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fafbfc;
+    min-height: 60px;
+}
+
+.group-members .member-list:empty::after {
+    content: "暂无成员，请在下方添加";
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    display: block;
+    padding: 20px;
+}
+
+.group-members .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+    transition: all 0.2s ease;
+}
+
+.group-members .member-item:hover {
+    border-color: #68a530;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.1);
+}
+
+.group-members .member-item:last-child {
+    margin-bottom: 0;
+}
+
+.group-members .member-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.group-members .member-name {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 60px;
+}
+
+.group-members .member-age {
+    color: #6c757d;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.group-members .member-type {
+    background: linear-gradient(135deg, rgba(152, 204, 187, 0.2) 0%, rgba(128, 188, 107, 0.2) 100%);
+    color: #80bc6b;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(152, 204, 187, 0.5);
+}
+
+.group-members .remove-member {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.group-members .remove-member:hover {
+    background: #c82333;
+}
+
+.group-members .add-member {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+.group-members .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.group-members .input-row input {
+    padding: 8px 12px;
+    border: 1px solid #c2d4d6;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.group-members .input-row input:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+.group-members .input-row input[type="text"] {
+    flex: 2;
+}
+
+.group-members .input-row input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+}
+
+.group-members .input-row button {
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.group-members .member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.group-members .member-count span {
+    font-weight: 600;
+    color: #80bc6b;
+}
+
+/* 团体偏好区域样式调整 */
+.group-preference {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+    height: fit-content;
+}
+
+.group-preference h3::after {
+    background: linear-gradient(135deg, #98ccbb 0%, #80bc6b 100%);
+}
+
+.group-preference select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #c2d4d6;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .group-members .input-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .group-members .input-row input,
+    .group-members .input-row button {
+        width: 100%;
+    }
+    
+    .group-members .member-info {
         flex-direction: column;
         gap: 4px;
         align-items: flex-start;
