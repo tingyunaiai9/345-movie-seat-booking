@@ -468,19 +468,26 @@ function performPurchase(customerInfo) {
 // ========================= 工具函数 =========================
 
 /**
- * 获取鼠标相对于Canvas的位置
+ * 获取鼠标相对于Canvas的位置（考虑缩放）
  * @param {MouseEvent} event - 鼠标事件
  * @returns {Object} 相对位置 {x, y}
  */
 function getRelativeMousePosition(event) {
-    updateCanvasRect(); // 确保位置信息是最新的
+    updateCanvasRect();
 
-    return {
-        x: event.clientX - globalState.canvasRect.left,
-        y: event.clientY - globalState.canvasRect.top
-    };
+    const rect = globalState.canvasRect;
+    const canvas = globalState.canvasElement;
+    
+    // 计算Canvas的实际尺寸与显示尺寸的比例
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // 获取相对于Canvas的坐标
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+
+    return { x, y };
 }
-
 
 /**
  * 刷新座位数据状态
