@@ -46,6 +46,7 @@ function initializeUI() {
     
     // 初始化页面导航
     initializeNavigation();
+    initializeCinemaSeats();
     
     // 初始化支付方式选择
     initializePaymentMethods();
@@ -140,6 +141,30 @@ function initializeTicketTypeControl() {
             }
         });
     });
+}
+
+/**
+ * 启用自动选座按钮
+ */
+function enableAutoSeatButtons() {
+    const autoSelectIndividualBtn = document.getElementById('auto-select-individual');
+    const autoSelectGroupBtn = document.getElementById('auto-select-group');
+    
+    if (autoSelectIndividualBtn) {
+        autoSelectIndividualBtn.disabled = false;
+        autoSelectIndividualBtn.style.backgroundColor = '#68a530';
+        autoSelectIndividualBtn.style.color = 'white';
+        autoSelectIndividualBtn.style.cursor = 'pointer';
+        console.log('✅ 个人票自动选座按钮已启用');
+    }
+    
+    if (autoSelectGroupBtn) {
+        autoSelectGroupBtn.disabled = false;
+        autoSelectGroupBtn.style.backgroundColor = '#68a530';
+        autoSelectGroupBtn.style.color = 'white';
+        autoSelectGroupBtn.style.cursor = 'pointer';
+        console.log('✅ 团体票自动选座按钮已启用');
+    }
 }
 
 /**
@@ -338,9 +363,29 @@ function bindNavigationButtons() {
         nextToPaymentBtn.disabled = false;
         nextToPaymentBtn.addEventListener('click', function() {
             console.log('跳转到支付页面');
+            // handleDirectPurchase();
             switchView(UI_CONFIG.VIEWS.PAYMENT);
         });
     }
+
+    // 🔑 修正：直接购票按钮（使用正确的ID）
+    const purchaseSeatsBtn = document.getElementById('purchase-seats');
+    if (purchaseSeatsBtn) {
+        purchaseSeatsBtn.addEventListener('click', function() {
+            console.log('点击直接购票按钮');
+            handleDirectPurchase();
+        });
+    }
+    
+    // 🔑 修正：预订座位按钮
+    const reserveSeatsBtn = document.getElementById('reserve-seats');
+    if (reserveSeatsBtn) {
+        reserveSeatsBtn.addEventListener('click', function() {
+            console.log('点击预订座位按钮');
+            handleReservation();
+        });
+    }
+    
     
     // 支付页面 -> 确认页面
     const confirmPaymentBtn = document.getElementById('confirm-payment');
@@ -362,6 +407,51 @@ function bindNavigationButtons() {
     }
 }
 
+/**
+ * 处理直接购票
+ */
+function handleDirectPurchase() {
+    console.log('开始处理直接购票...');
+    
+    // 检查StateManager是否可用
+    if (!window.StateManager || !window.StateManager.performPurchase) {
+        console.error('StateManager未加载或performPurchase函数不存在');
+        alert('购票功能暂不可用，请稍后再试');
+        return;
+    }
+    
+    // 获取客户信息
+    const customerInfo = getMyCustomerDataEnhanced();
+    
+    console.log('客户信息:', customerInfo);
+    
+    try {
+        // 调用StateManager的购票函数
+        const result = window.StateManager.performPurchase(customerInfo);
+        
+        console.log('购票结果:', result);
+        
+        // 根据返回结果处理
+        if (result && result.success) {
+            // 购票成功 - 跳转到支付页面
+            console.log('✅ 购票成功，跳转到支付页面');
+            alert('购票成功！');
+            
+            // 跳转到支付页面
+            switchView(UI_CONFIG.VIEWS.PAYMENT);
+            
+        } else {
+            // 购票失败 - 显示错误信息
+            const errorMessage = result && result.message ? result.message : '购票失败，请重试';
+            console.error('❌ 购票失败:', errorMessage);
+            alert('购票失败：' + errorMessage);
+        }
+        
+    } catch (error) {
+        console.error('购票过程中发生错误:', error);
+        alert('购票过程中发生错误，请重试');
+    }
+}
 /**
  * 绑定返回按钮
  */
@@ -447,14 +537,20 @@ function setDefaultStates() {
 // ========================= 业务逻辑处理 =========================
 
 /**
- * 处理最终支付
+ * 处理最终支付（确认页面使用）
  */
 function handleFinalPayment() {
-    showMessage('支付成功！订单已确认。', 'success');
-    console.log('支付完成');
+    console.log('处理最终支付确认...');
     
-    // TODO: 这里可以添加实际的支付处理逻辑
-    // 例如调用支付API、更新订单状态等
+    // 这里可以调用支付API或显示支付成功
+    alert('支付成功！订单已确认。');
+    
+    // 创建购票订单记录
+    if (window.CinemaUI && window.CinemaUI.MyOrders && window.CinemaUI.MyOrders.createMyPurchaseOrder) {
+        window.CinemaUI.MyOrders.createMyPurchaseOrder();
+    }
+    
+    console.log('支付完成');
 }
 
 // ========================= 工具函数 =========================
@@ -554,12 +650,94 @@ async function setSafeImageSrc(imgElement, src, alt) {
 function bindUIEvents() {
     // 初始化团体成员管理
     initializeGroupMemberManagement();
+
+    // 初始化个人成员管理
+    initializeIndividualMemberManagement();
     
     // 绑定窗口大小变化事件
     window.addEventListener('resize', handleWindowResize);
     
     // 绑定键盘事件
     document.addEventListener('keydown', handleKeyboardEvents);
+
+    // 🔑 新增：绑定自动选座按钮事件
+    bindAutoSeatButtons();
+    
+}
+
+/**
+ * 绑定自动选座按钮事件
+ */
+function bindAutoSeatButtons() {
+    // 个人票自动选座按钮
+    enableAutoSeatButtons();
+
+    const autoSelectIndividualBtn = document.getElementById('auto-select-individual');
+    if (autoSelectIndividualBtn) {
+        autoSelectIndividualBtn.addEventListener('click', function() {
+            console.log('🎯 个人票自动选座');
+            
+            // 获取个人票成员信息
+            const members = getIndividualMembersList();
+            if (members.length > 0) {
+                members.forEach(member => {
+                const userInfo = {
+                    age: member.age,
+                    name: member.name
+                };
+                
+                // 直接调用StateManager的函数
+                if (window.StateManager && window.StateManager.performAutoIndividualSelection) {
+                    window.StateManager.performAutoIndividualSelection(userInfo);
+                } else {
+                    console.error('StateManager未加载或函数不存在');
+                }
+            });
+            } else {
+                alert('请先添加成员信息');
+            }
+        });
+    }
+
+    // 团体票自动选座按钮
+    const autoSelectGroupBtn = document.getElementById('auto-select-group');
+    if (autoSelectGroupBtn) {
+        autoSelectGroupBtn.addEventListener('click', function() {
+            console.log('🎯 团体票自动选座');
+            
+            // 获取团体成员信息
+            const groupInfo = getGroupMembersList();
+            if (groupInfo.length > 0) {
+                // 直接调用StateManager的函数
+                if (window.StateManager && window.StateManager.performAutoGroupSelection) {
+                    window.StateManager.performAutoGroupSelection(groupInfo);
+                } else {
+                    console.error('StateManager未加载或函数不存在');
+                }
+            } else {
+                alert('请先添加团体成员信息');
+            }
+        });
+    }
+}
+
+/**
+ * 获取团体成员列表（如果不存在则创建简单版本）
+ */
+function getGroupMembersList() {
+    // 如果全局函数存在，使用它
+    // if (typeof window.getGroupMembersList === 'function') {
+    //     return window.getGroupMembersList();
+    // }
+    
+    // 否则直接从DOM获取
+    const memberItems = document.querySelectorAll('#group-member-list .member-item');
+    return Array.from(memberItems).map(item => {
+        const name = item.querySelector('.member-name').textContent;
+        const ageText = item.querySelector('.member-age').textContent;
+        const age = parseInt(ageText.replace('岁', ''));
+        return { name, age };
+    });
 }
 
 /**
@@ -1883,73 +2061,44 @@ function getIndividualMembersList() {
  * 扩展现有的getMyCustomerData函数（保持向后兼容）
  */
 const originalGetMyCustomerData = window.getMyCustomerData;
-
+/**
+ * 获取客户数据（增强版，兼容StateManager）
+ */
 function getMyCustomerDataEnhanced() {
-    // 如果是个人票，返回新的成员列表数据
     if (uiState && uiState.ticketType === 'individual') {
+        // 个人票逻辑
         const members = getIndividualMembersList();
         if (members.length > 0) {
             return {
                 type: 'individual',
                 members: members,
                 count: members.length,
-                // 保持向后兼容
+                // StateManager需要的基本字段
                 name: members[0].name,
                 age: members[0].age,
-                phone: '未填写' // 个人票不需要手机号
+                phone: '未填写'
+            };
+        }
+    } else if (uiState && uiState.ticketType === 'group') {
+        // 团体票逻辑
+        const members = getGroupMembersList();
+        if (members.length > 0) {
+            return {
+                type: 'group',
+                members: members,
+                count: members.length,
+                // StateManager需要的基本字段
+                name: members[0].name,
+                age: members[0].age,
+                phone: '未填写'
             };
         }
     }
     
-    // 否则使用原来的函数或默认值
-    if (originalGetMyCustomerData) {
-        return originalGetMyCustomerData();
-    }
-    
-    // 默认返回
+    // 默认返回（从输入框获取）
     return {
-        name: '未填写',
-        age: '未填写',
-        phone: '未填写'
+        name: document.getElementById('customer-name')?.value || '未填写',
+        age: document.getElementById('customer-age')?.value || '未填写',
+        phone: document.getElementById('customer-phone')?.value || '未填写'
     };
 }
-
-// ========================= 扩展现有的UI初始化 =========================
-
-/**
- * 扩展现有的UI初始化（不影响现有逻辑）
- */
-const originalInitializeUI = window.initializeUI;
-
-function enhancedInitializeUI() {
-    // 调用原有的初始化函数
-    if (originalInitializeUI) {
-        originalInitializeUI();
-    }
-    
-    // 延迟初始化个人票成员管理
-    setTimeout(() => {
-        initializeIndividualMemberManagement();
-    }, 100);
-}
-
-// ========================= 安全地替换全局函数 =========================
-
-// 只在需要时替换，保持向后兼容
-if (typeof window !== 'undefined') {
-    // 如果getMyCustomerData已存在，保存原版本
-    if (window.getMyCustomerData) {
-        window.getMyCustomerData = getMyCustomerDataEnhanced;
-    }
-    
-    // 如果initializeUI已存在，增强它
-    if (window.initializeUI) {
-        window.initializeUI = enhancedInitializeUI;
-    }
-    
-    // 暴露个人票成员管理函数到全局
-    window.removeIndividualMember = removeIndividualMember;
-    window.getIndividualMembersList = getIndividualMembersList;
-}
-
-console.log('个人票成员管理功能已加载');
