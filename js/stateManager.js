@@ -521,14 +521,120 @@ function triggerRedraw() {
  * 通知选座状态变化
  */
 function notifySelectionChange() {
+    // 计算总价格
+    const ticketPrice = getCurrentMoviePrice();
+    const totalPrice = globalState.selectedSeats.length * ticketPrice;
+
     // 发送自定义事件，供其他模块监听
     const event = new CustomEvent('seatSelectionChange', {
         detail: {
             selectedSeats: globalState.selectedSeats,
-            selectedCount: globalState.selectedSeats.length
+            selectedCount: globalState.selectedSeats.length,
+            totalPrice: totalPrice
         }
     });
     document.dispatchEvent(event);
+    
+    // 直接更新UI显示
+    const selectedList = document.getElementById('selected-seats-list');
+    const selectedCount = document.getElementById('selected-count');
+    const totalPriceElement = document.getElementById('total-price');
+    
+    if (!selectedList || !selectedCount || !totalPriceElement) return;
+    
+    // 更新已选座位列表
+    if (globalState.selectedSeats.length === 0) {
+        selectedList.innerHTML = '<p class="no-selection">暂未选择座位</p>';
+    } else {
+        const seatsHtml = globalState.selectedSeats.map(seat => 
+            `<div class="seat-tag" data-seat-id="${seat.id}">
+                <span class="seat-number">${seat.row}排${seat.col}座</span>
+                <button class="seat-remove" onclick="StateManager.deselectSeat(${JSON.stringify(seat).replace(/"/g, '&quot;')})">×</button>
+            </div>`
+        ).join('');
+        selectedList.innerHTML = seatsHtml;
+    }
+    
+    // 更新统计信息
+    selectedCount.textContent = globalState.selectedSeats.length;
+    totalPriceElement.textContent = `¥${totalPrice}`;
+    
+    // 更新下一步按钮状态
+    const nextButton = document.getElementById('next-to-payment');
+    if (nextButton) {
+        nextButton.disabled = globalState.selectedSeats.length === 0;
+    }
+    
+    // 更新座位操作按钮状态
+    const reserveButton = document.getElementById('reserve-seats');
+    const purchaseButton = document.getElementById('purchase-seats');
+    
+    if (reserveButton) {
+        reserveButton.disabled = globalState.selectedSeats.length === 0;
+    }
+    if (purchaseButton) {
+        purchaseButton.disabled = globalState.selectedSeats.length === 0;
+    }
+}
+
+/**
+ * 获取当前电影价格（保留为独立函数，供其他地方调用）
+ * @returns {number} 电影价格
+ */
+function getCurrentMoviePrice() {
+    // 从UI中获取当前选中的电影价格
+    const activeMovie = document.querySelector('.movie-item.active');
+    if (activeMovie) {
+        const priceText = activeMovie.querySelector('.movie-price').textContent;
+        const price = priceText.match(/¥(\d+)/);
+        return price ? parseInt(price[1]) : 45;
+    }
+    return 45; // 默认价格
+}
+
+/**
+ * 更新已选座位显示
+ */
+function updateSelectedSeatsDisplay() {
+    const selectedList = document.getElementById('selected-seats-list');
+    const selectedCount = document.getElementById('selected-count');
+    const totalPrice = document.getElementById('total-price');
+    
+    if (!selectedList || !selectedCount || !totalPrice) return;
+    
+    // 更新已选座位列表
+    if (globalState.selectedSeats.length === 0) {
+        selectedList.innerHTML = '<p class="no-selection">暂未选择座位</p>';
+    } else {
+        const seatsHtml = globalState.selectedSeats.map(seat => 
+            `<div class="seat-tag" data-seat-id="${seat.id}">
+                <span class="seat-number">${seat.row}排${seat.col}座</span>
+                <button class="seat-remove" onclick="StateManager.deselectSeat(${JSON.stringify(seat).replace(/"/g, '&quot;')})">×</button>
+            </div>`
+        ).join('');
+        selectedList.innerHTML = seatsHtml;
+    }
+    
+    // 更新统计信息
+    selectedCount.textContent = globalState.selectedSeats.length;
+    totalPrice.textContent = `¥${calculateTotalPrice()}`;
+    
+    // 更新下一步按钮状态
+    const nextButton = document.getElementById('next-to-payment');
+    if (nextButton) {
+        nextButton.disabled = globalState.selectedSeats.length === 0;
+    }
+    
+    // 更新座位操作按钮状态
+    const reserveButton = document.getElementById('reserve-seats');
+    const purchaseButton = document.getElementById('purchase-seats');
+    
+    if (reserveButton) {
+        reserveButton.disabled = globalState.selectedSeats.length === 0;
+    }
+    if (purchaseButton) {
+        purchaseButton.disabled = globalState.selectedSeats.length === 0;
+    }
 }
 
 // ========================= 查询接口 =========================
@@ -628,7 +734,8 @@ if (typeof window !== 'undefined') {
 
         // 工具函数
         refreshSeatsData,
-        triggerRedraw
+        triggerRedraw,
+        updateSelectedSeatsDisplay,
     };
 }
 
