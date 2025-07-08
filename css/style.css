@@ -523,6 +523,48 @@ body {
     box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
 }
 
+/* 选座说明样式 */
+.seat-instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.1) 0%, rgba(152, 204, 187, 0.1) 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(194, 212, 214, 0.3);
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    border: 1px solid rgba(194, 212, 214, 0.2);
+    transition: all 0.3s ease;
+}
+
+.instruction-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #68a530;
+    transform: translateX(3px);
+}
+
+.instruction-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.instruction-text {
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+}
 /* 选座偏好区域 */
 .seat-preference,
 .group-preference {
@@ -533,9 +575,38 @@ body {
     height: fit-content;
 }
 
-.seat-preference h3::after,
-.group-preference h3::after {
+/* 确保h3本身有正确的position */
+.group-controls .group-preference h3 {
+    margin: 0 0 15px 0 !important;
+    color: #2c3e50 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #e9ecef !important;
+    position: relative !important;
+}
+
+.group-controls .group-preference h3::after {
+    content: ''!important;
+    position: absolute!important;
+    bottom: -2px!important;
+    left: 0!important;
+    width: 40px!important;
+    height: 2px!important;
+    background: linear-gradient(135deg, #80bc6b 0%, #68a530 100%)!important;
+    border-radius: 2px;
+}
+
+/* 同时确保个人票也有 */
+.individual-controls  .seat-preference h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
     background: linear-gradient(135deg, #80bc6b 0%, #68a530 100%);
+    border-radius: 2px;
 }
 
 .seat-preference select,
@@ -3113,27 +3184,6 @@ body {
 .group-members .member-count span {
     font-weight: 600;
     color: #80bc6b;
-}
-
-/* 团体偏好区域样式调整 */
-.group-preference {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 10px;
-    padding: 20px;
-    border: 1px solid #c2d4d6;
-    height: fit-content;
-}
-
-.group-preference h3::after {
-    background: linear-gradient(135deg, #98ccbb 0%, #80bc6b 100%);
-}
-
-.group-preference select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #c2d4d6;
-    border-radius: 6px;
-    margin-bottom: 15px;
 }
 
 /* 响应式调整 */
