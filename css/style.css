@@ -87,12 +87,12 @@ body {
 }
 
 .btn-auto {
-    background: linear-gradient(135deg, #98ccbb 0%, #80bc6b 100%);
+    background: rgb(132, 213, 177);
     color: white;
 }
 
 .btn-auto:hover {
-    background: linear-gradient(135deg, #85b8a8 0%, #70a85d 100%);
+    background: rgb(4, 125, 51);
 }
 
 .btn-reserve {
