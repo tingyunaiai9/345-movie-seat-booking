@@ -1713,19 +1713,21 @@ body {
     color: #68a530;
 }
 
-/* 放大的Canvas */
+/* 简化Canvas样式，避免复杂的边框和变换 */
 #cinema-canvas {
     display: block !important;
-    border-radius: 10px;
-    width: 1200px;
-    height: 800px;
-    max-width: 100%;
+    margin: 0 auto;
     cursor: crosshair;
     background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    border-radius: 10px;
+    /* 移除边框，避免影响位置计算 */
+    /* border: 2px solid rgba(255, 255, 255, 0.1); */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    object-fit: contain;
-    aspect-ratio: 4/3;
+    /* 让Canvas根据实际尺寸显示，避免CSS尺寸覆盖 */
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 /* 放大的图例 */
