@@ -184,7 +184,7 @@ function showGroupControls(individualControls, groupControls) {
  * 初始化团体成员管理
  */
 function initializeGroupMemberManagement() {
-    const memberList = document.querySelector('.member-list');
+    const memberList = document.querySelector('.group-controls .member-list');
     const addMemberBtn = document.getElementById('add-member');
     const memberNameInput = document.getElementById('member-name');
     const memberAgeInput = document.getElementById('member-age');
@@ -194,6 +194,8 @@ function initializeGroupMemberManagement() {
         addMemberBtn.addEventListener('click', function() {
             const name = memberNameInput.value.trim();
             const age = memberAgeInput.value.trim();
+
+            console.log(`添加成员: 姓名=${name}, 年龄=${age}`);
             
             if (!validateMemberInput(name, age)) {
                 return;
@@ -209,6 +211,24 @@ function initializeGroupMemberManagement() {
             // 更新计数
             uiState.memberCount++;
             updateMemberCount(memberCountSpan);
+
+            console.log('团体成员添加成功:', name, age);
+        });
+
+        // 支持回车键添加
+        if (memberNameInput && memberAgeInput) {
+            [memberNameInput, memberAgeInput].forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addMemberBtn.click();
+                    }
+                });
+            });
+        }
+    } else {
+        console.error('团体票成员管理初始化失败:', {
+            memberList: !!memberList,
+            addMemberBtn: !!addMemberBtn
         });
     }
 }
@@ -251,10 +271,12 @@ function addMemberToList(memberList, name, age) {
         <div class="member-info">
             <span class="member-name">${name}</span>
             <span class="member-age">${age}岁</span>
+            <span class="member-type">团体票</span>
         </div>
         <button class="remove-member" onclick="CinemaUI.removeMember(this)">删除</button>
     `;
     memberList.appendChild(memberItem);
+    console.log('添加成员到列表:', name, age);
 }
 
 /**
@@ -678,29 +700,98 @@ function updatePaymentPriceInfo() {
 /**
  * 更新支付页面中的客户信息
  */
+/**
+ * 更新支付页面中的客户信息（增强版）
+ */
 function updatePaymentCustomerInfo() {
     const customerInfoEl = document.getElementById('payment-customer-info');
     if (!customerInfoEl) return;
     
-    // 获取客户信息
-    const customerName = document.getElementById('customer-name')?.value || '未填写';
-    const customerAge = document.getElementById('customer-age')?.value || '未填写';
-    const customerPhone = document.getElementById('customer-phone')?.value || '未填写';
+    let infoHtml = '';
     
-    customerInfoEl.innerHTML = `
-        <div class="customer-info-item">
-            <span class="label">姓名:</span>
-            <span class="value">${customerName}</span>
-        </div>
-        <div class="customer-info-item">
-            <span class="label">年龄:</span>
-            <span class="value">${customerAge}</span>
-        </div>
-        <div class="customer-info-item">
-            <span class="label">电话:</span>
-            <span class="value">${customerPhone}</span>
-        </div>
-    `;
+    // 根据票务类型获取数据
+    if (uiState && uiState.ticketType === 'individual') {
+        const members = getIndividualMembersList();
+        if (members.length > 0) {
+            infoHtml = `
+                <div class="customer-info-item">
+                    <span class="label">票务类型:</span>
+                    <span class="value">个人票</span>
+                </div>
+                <div class="customer-info-item">
+                    <span class="label">人数:</span>
+                    <span class="value">${members.length}人</span>
+                </div>
+            `;
+            
+            members.forEach((member, index) => {
+                infoHtml += `
+                    <div class="customer-info-item">
+                        <span class="label">${index + 1}. ${member.name}:</span>
+                        <span class="value">${member.age}岁</span>
+                    </div>
+                `;
+            });
+        } else {
+            infoHtml = `
+                <div class="customer-info-item">
+                    <span class="label">客户信息:</span>
+                    <span class="value">请添加成员信息</span>
+                </div>
+            `;
+        }
+    } else {
+        // 团体票逻辑保持不变
+        const customerName = document.getElementById('customer-name')?.value || '未填写';
+        const customerAge = document.getElementById('customer-age')?.value || '未填写';
+        
+        infoHtml = `
+            <div class="customer-info-item">
+                <span class="label">姓名:</span>
+                <span class="value">${customerName}</span>
+            </div>
+            <div class="customer-info-item">
+                <span class="label">年龄:</span>
+                <span class="value">${customerAge}</span>
+            </div>
+        `;
+    }
+    
+    customerInfoEl.innerHTML = infoHtml;
+}
+
+/**
+ * 更新确认页面中的客户信息（增强版）
+ */
+function updateConfirmCustomerInfo() {
+    const customerNameEl = document.getElementById('confirm-customer-name');
+    const customerAgeEl = document.getElementById('confirm-customer-age');
+    const customerPhoneEl = document.getElementById('confirm-customer-phone');
+    const ticketTypeEl = document.getElementById('confirm-ticket-type');
+    
+    if (uiState && uiState.ticketType === 'individual') {
+        const members = getIndividualMembersList();
+        if (members.length > 0) {
+            if (customerNameEl) customerNameEl.textContent = `${members[0].name} 等${members.length}人`;
+            if (customerAgeEl) customerAgeEl.textContent = `${members[0].age}岁 (主要联系人)`;
+            if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+            if (ticketTypeEl) ticketTypeEl.textContent = `个人票 (${members.length}人)`;
+        } else {
+            if (customerNameEl) customerNameEl.textContent = '未添加成员';
+            if (customerAgeEl) customerAgeEl.textContent = '未填写';
+            if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+            if (ticketTypeEl) ticketTypeEl.textContent = '个人票';
+        }
+    } else {
+        // 团体票逻辑保持不变
+        const customerName = document.getElementById('customer-name')?.value || '未填写';
+        const customerAge = document.getElementById('customer-age')?.value || '未填写';
+        
+        if (customerNameEl) customerNameEl.textContent = customerName;
+        if (customerAgeEl) customerAgeEl.textContent = customerAge;
+        if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+        if (ticketTypeEl) ticketTypeEl.textContent = uiState.ticketType === 'group' ? '团体票' : '个人票';
+    }
 }
 
 // ========================= 确认页面管理 =========================
@@ -791,30 +882,7 @@ function updateConfirmPriceInfo() {
 /**
  * 更新确认页面中的客户信息
  */
-function updateConfirmCustomerInfo() {
-    const customerInfoEl = document.getElementById('confirm-customer-info');
-    if (!customerInfoEl) return;
-    
-    // 获取客户信息
-    const customerName = document.getElementById('customer-name')?.value || '未填写';
-    const customerAge = document.getElementById('customer-age')?.value || '未填写';
-    const customerPhone = document.getElementById('customer-phone')?.value || '未填写';
-    
-    customerInfoEl.innerHTML = `
-        <div class="customer-info-item">
-            <span class="label">姓名:</span>
-            <span class="value">${customerName}</span>
-        </div>
-        <div class="customer-info-item">
-            <span class="label">年龄:</span>
-            <span class="value">${customerAge}</span>
-        </div>
-        <div class="customer-info-item">
-            <span class="label">电话:</span>
-            <span class="value">${customerPhone}</span>
-        </div>
-    `;
-}
+
 
 // ========================= 模块导出 =========================
 
@@ -1679,3 +1747,209 @@ document.addEventListener('DOMContentLoaded', function() {
         checkCanvasEventBinding();
     }, 500);
 });
+
+// ========================= 个人票成员管理功能（独立模块）=========================
+// 在 ui.js 文件末尾添加以下代码，不修改任何现有函数
+
+/**
+ * 个人票成员管理状态
+ */
+const IndividualMemberState = {
+    memberCount: 0,
+    maxMembers: 10
+};
+
+/**
+ * 初始化个人票成员管理
+ */
+function initializeIndividualMemberManagement() {
+    const addMemberBtn = document.getElementById('add-individual-member');
+    const memberNameInput = document.getElementById('individual-member-name');
+    const memberAgeInput = document.getElementById('individual-member-age');
+    
+    if (addMemberBtn && memberNameInput && memberAgeInput) {
+        addMemberBtn.addEventListener('click', function() {
+            const name = memberNameInput.value.trim();
+            const age = memberAgeInput.value.trim();
+            
+            if (validateIndividualMemberInput(name, age)) {
+                addIndividualMember(name, age);
+                memberNameInput.value = '';
+                memberAgeInput.value = '';
+                updateIndividualMemberCount();
+            }
+        });
+        
+        // 支持回车键添加
+        [memberNameInput, memberAgeInput].forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addMemberBtn.click();
+                }
+            });
+        });
+    }
+}
+
+/**
+ * 验证个人票成员输入
+ */
+function validateIndividualMemberInput(name, age) {
+    if (!name) {
+        alert('请输入姓名');
+        return false;
+    }
+    
+    if (name.length > 20) {
+        alert('姓名不能超过20个字符');
+        return false;
+    }
+    
+    if (!age || age < 1 || age > 120) {
+        alert('请输入有效年龄（1-120）');
+        return false;
+    }
+    
+    if (IndividualMemberState.memberCount >= IndividualMemberState.maxMembers) {
+        alert(`个人票最多只能添加${IndividualMemberState.maxMembers}名成员`);
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * 添加个人票成员
+ */
+function addIndividualMember(name, age) {
+    const memberList = document.getElementById('individual-member-list');
+    if (!memberList) return;
+    
+    const memberItem = document.createElement('div');
+    memberItem.className = 'member-item';
+    memberItem.innerHTML = `
+        <div class="member-info">
+            <span class="member-name">${name}</span>
+            <span class="member-age">${age}岁</span>
+            <span class="member-type">个人票</span>
+        </div>
+        <button class="remove-member" onclick="removeIndividualMember(this)">删除</button>
+    `;
+    
+    memberList.appendChild(memberItem);
+    IndividualMemberState.memberCount++;
+}
+
+/**
+ * 删除个人票成员
+ */
+function removeIndividualMember(button) {
+    const memberItem = button.parentElement;
+    const memberName = memberItem.querySelector('.member-name').textContent;
+    
+    memberItem.remove();
+    IndividualMemberState.memberCount--;
+    updateIndividualMemberCount();
+    
+    console.log(`已删除成员：${memberName}`);
+}
+
+/**
+ * 更新个人票成员计数显示
+ */
+function updateIndividualMemberCount() {
+    const memberCountSpan = document.getElementById('individual-member-count');
+    if (memberCountSpan) {
+        memberCountSpan.textContent = IndividualMemberState.memberCount;
+    }
+}
+
+/**
+ * 获取个人票成员列表
+ */
+function getIndividualMembersList() {
+    const memberItems = document.querySelectorAll('#individual-member-list .member-item');
+    return Array.from(memberItems).map(item => {
+        const name = item.querySelector('.member-name').textContent;
+        const ageText = item.querySelector('.member-age').textContent;
+        const age = parseInt(ageText.replace('岁', ''));
+        return { name, age };
+    });
+}
+
+// ========================= 扩展现有getMyCustomerData函数 =========================
+
+/**
+ * 扩展现有的getMyCustomerData函数（保持向后兼容）
+ */
+const originalGetMyCustomerData = window.getMyCustomerData;
+
+function getMyCustomerDataEnhanced() {
+    // 如果是个人票，返回新的成员列表数据
+    if (uiState && uiState.ticketType === 'individual') {
+        const members = getIndividualMembersList();
+        if (members.length > 0) {
+            return {
+                type: 'individual',
+                members: members,
+                count: members.length,
+                // 保持向后兼容
+                name: members[0].name,
+                age: members[0].age,
+                phone: '未填写' // 个人票不需要手机号
+            };
+        }
+    }
+    
+    // 否则使用原来的函数或默认值
+    if (originalGetMyCustomerData) {
+        return originalGetMyCustomerData();
+    }
+    
+    // 默认返回
+    return {
+        name: '未填写',
+        age: '未填写',
+        phone: '未填写'
+    };
+}
+
+// ========================= 扩展现有的UI初始化 =========================
+
+/**
+ * 扩展现有的UI初始化（不影响现有逻辑）
+ */
+const originalInitializeUI = window.initializeUI;
+
+function enhancedInitializeUI() {
+    // 调用原有的初始化函数
+    if (originalInitializeUI) {
+        originalInitializeUI();
+    }
+    
+    // 延迟初始化个人票成员管理
+    setTimeout(() => {
+        initializeIndividualMemberManagement();
+    }, 100);
+}
+
+// ========================= 安全地替换全局函数 =========================
+
+// 只在需要时替换，保持向后兼容
+if (typeof window !== 'undefined') {
+    // 如果getMyCustomerData已存在，保存原版本
+    if (window.getMyCustomerData) {
+        window.getMyCustomerData = getMyCustomerDataEnhanced;
+    }
+    
+    // 如果initializeUI已存在，增强它
+    if (window.initializeUI) {
+        window.initializeUI = enhancedInitializeUI;
+    }
+    
+    // 暴露个人票成员管理函数到全局
+    window.removeIndividualMember = removeIndividualMember;
+    window.getIndividualMembersList = getIndividualMembersList;
+}
+
+console.log('个人票成员管理功能已加载');

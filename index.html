@@ -161,18 +161,21 @@
                             <div class="top-controls-grid">
                                 <div class="customer-info">
                                     <h3>客户信息</h3>
-                                    <div class="info-grid">
-                                        <div class="input-group">
-                                            <label for="customer-name">姓名:</label>
-                                            <input type="text" id="customer-name" placeholder="请输入姓名">
+                                    <!-- 修改为类似团体票的成员管理模式 -->
+                                    <div class="individual-members">
+                                        <div class="member-list" id="individual-member-list">
+                                            <!-- 动态生成个人票成员列表 -->
                                         </div>
-                                        <div class="input-group">
-                                            <label for="customer-age">年龄:</label>
-                                            <input type="number" id="customer-age" min="1" max="120" value="25">
-                                        </div>
-                                        <div class="input-group">
-                                            <label for="customer-phone">手机号:</label>
-                                            <input type="tel" id="customer-phone" placeholder="请输入手机号">
+                                        
+                                        <div class="add-member">
+                                            <div class="input-row">
+                                                <input type="text" id="individual-member-name" placeholder="姓名" maxlength="20">
+                                                <input type="number" id="individual-member-age" placeholder="年龄" min="1" max="120">
+                                                <button class="btn btn-add" id="add-individual-member">添加</button>
+                                            </div>
+                                            <div class="member-count">
+                                                已添加 <span id="individual-member-count">0</span> 人 (最多10人)
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
