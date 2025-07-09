@@ -130,7 +130,7 @@ function bindEventListeners() {
     document.addEventListener('keyup', handleKeyUp);
 
     // 窗口大小变化事件
-    window.addEventListener('resize', handleWindowResize);
+    window.addEventListener('resize', updateCanvasRect);
 }
 
 /**
@@ -145,7 +145,7 @@ function unbindEventListeners() {
 
     document.removeEventListener('keydown', handleKeyDown);
     document.removeEventListener('keyup', handleKeyUp);
-    window.removeEventListener('resize', handleWindowResize);
+    window.removeEventListener('resize', updateCanvasRect);
 }
 
 // ========================= 鼠标事件处理函数 =========================
@@ -186,12 +186,6 @@ function handleCanvasMouseLeave() {
     updateHoverState(null);
 }
 
-/**
- * 处理窗口大小变化事件
- */
-function handleWindowResize() {
-    updateCanvasRect();
-}
 
 // ========================= 键盘事件处理函数 =========================
 
