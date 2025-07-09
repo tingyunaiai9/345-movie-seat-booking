@@ -186,7 +186,9 @@ function handleCanvasClick(event) {
         }
 
         // 触发界面重绘和状态变化通知
-        triggerRedraw();
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            window.CanvasRenderer.drawCinema();
+        }
         notifySelectionChange();
     }
 }
@@ -212,8 +214,13 @@ function handleCanvasMouseMove(event) {
     if (hitSeat) {
         hitSeat.isHovered = true;
     }
-    triggerRedraw();
+    
+    // 直接调用Canvas重绘
+    if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+        window.CanvasRenderer.drawCinema();
+    }
 }
+
 /**
  * 处理Canvas鼠标离开事件
  */
@@ -223,7 +230,11 @@ function handleCanvasMouseLeave() {
         globalState.hoveredSeat.isHovered = false;
     }
     globalState.hoveredSeat = null;
-    triggerRedraw();
+    
+    // 直接调用Canvas重绘
+    if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+        window.CanvasRenderer.drawCinema();
+    }
 }
 
 // ========================= 键盘事件处理函数 =========================
@@ -277,7 +288,9 @@ function deselectSeat(seat) {
         console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
         
         // 立即更新UI和重绘
-        triggerRedraw();
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            window.CanvasRenderer.drawCinema();
+        }
         notifySelectionChange();
     }
 }
@@ -290,7 +303,9 @@ function clearAllSelections() {
     window.CinemaData.clearAllSelections();
     
     console.log('已清除所有选择');
-    triggerRedraw();
+    if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+        window.CanvasRenderer.drawCinema();
+    }
     notifySelectionChange();
 }
 
@@ -313,7 +328,9 @@ function performAutoIndividualSelection(userInfo) {
         recommendedSeat.forEach(seat => {
             selectSeat(seat);
         });
-        triggerRedraw();
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            window.CanvasRenderer.drawCinema();
+        }
         notifySelectionChange();
         console.log(`自动选座成功：${recommendedSeat.length}个座位`);
     } else {
@@ -339,7 +356,9 @@ function performAutoGroupSelection(groupInfo) {
             selectSeat(seat);
         });
 
-        triggerRedraw();
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            window.CanvasRenderer.drawCinema();
+        }
         notifySelectionChange();
         console.log(`自动团体选座成功：${recommendedSeats.length}个座位`);
     } else {
@@ -367,7 +386,9 @@ function performReservation(customerInfo) {
     const result = window.CinemaData.reserveTickets(selectedSeats, customerInfo);
 
     if (result.success) {
-        triggerRedraw();
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            window.CanvasRenderer.drawCinema();
+        }
         notifySelectionChange();
     }
 
@@ -394,25 +415,16 @@ function performPurchase(customerInfo) {
     const result = window.CinemaData.purchaseTickets(selectedSeats, customerInfo);
 
     if (result.success) {
-        triggerRedraw();
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            window.CanvasRenderer.drawCinema();
+        }
         notifySelectionChange();
     }
 
     return result;
 }
 
-// ========================= 工具函数 =========================
-
-/**
- * 触发Canvas重绘
- */
-function triggerRedraw() {
-    if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-        // 直接使用main.js的座位数据，无需本地缓存
-        window.CanvasRenderer.GLOBAL_STATE.seatsArray = getAllSeats();
-        window.CanvasRenderer.drawCinema();
-    }
-}
+// ========================= 通知函数 =========================
 
 /**
  * 通知选座状态变化
@@ -519,7 +531,9 @@ function resetStateManager() {
     globalState.hoveredSeat = null;
     globalState.isCtrlPressed = false;
 
-    triggerRedraw();
+    if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+        window.CanvasRenderer.drawCinema();
+    }
     notifySelectionChange();
     console.log('状态管理器已重置');
 }

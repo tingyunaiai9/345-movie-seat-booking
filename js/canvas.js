@@ -109,8 +109,18 @@ function drawSeat(x, y, seat) {
         displayStatus = 'selected';
     }
 
-    // 计算座位大小：如果是悬停状态，放大到120%
-    const scaleFactor = seat.isHovered ? 1.2 : 1.0;
+    // 计算座位大小：直接从StateManager的globalState获取悬停状态
+    let isHovered = false;
+    if (window.StateManager && window.StateManager.getCurrentState) {
+        const stateManagerState = window.StateManager.getCurrentState();
+        const hoveredSeatInfo = stateManagerState.hoveredSeat;
+        if (hoveredSeatInfo) {
+            const [hoveredRow, hoveredCol] = hoveredSeatInfo.split('-').map(Number);
+            isHovered = (seat.row === hoveredRow && seat.col === hoveredCol);
+        }
+    }
+    
+    const scaleFactor = isHovered ? 1.2 : 1.0;
     const currentRadius = SEAT_RADIUS * scaleFactor;
 
     const img = seatImages[displayStatus];
@@ -141,7 +151,6 @@ function drawSeat(x, y, seat) {
     ctx.textBaseline = 'middle';
     ctx.fillText(`${seat.row}-${seat.col}`, x, y);
 }
-
 /**
  * 核心函数：绘制整个影厅的座位布局
  * 包含屏幕绘制、过道绘制、座位绘制和中心区域标识
