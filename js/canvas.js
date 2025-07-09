@@ -165,7 +165,6 @@ function drawCinema() {
     GLOBAL_STATE.canvasWidth = canvasDimensions.width;
     GLOBAL_STATE.canvasHeight = canvasDimensions.height;
 
-    console.log(`画布尺寸已调整为: ${canvas.width} x ${canvas.height}`);
 
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -228,16 +227,9 @@ function drawCinema() {
         drawSeat(coords.x, coords.y, seat);
     });
 
-    // ===== 绘制中心区域标识 =====
-    console.log('中心区域调试信息:', {
-        centerSeatsCoords长度: GLOBAL_STATE.centerSeatsCoords.length,
-        centerZoneInfo: GLOBAL_STATE.centerZoneInfo,
-        currentLayout: currentLayout
-    });
-
+    // ===== 绘制中心区域标识 ======
     // 无论是否有centerSeatsCoords，都尝试绘制中心区域（基于centerZoneInfo）
     if (GLOBAL_STATE.centerZoneInfo) {
-        console.log('正在调用 drawCenterZone...');
         drawCenterZone();
     } else {
         console.warn('centerZoneInfo 为空，无法绘制中心区域');
@@ -326,21 +318,12 @@ function calculateCenterZone() {
  * 绘制中心区域标识（支持平行布局和弧形布局）
  */
 function drawCenterZone() {
-    console.log('🎯 drawCenterZone 函数被调用');
 
     const {
         CENTER_ZONE_COLOR, CENTER_ZONE_WIDTH, CENTER_ZONE_DASH, CENTER_ZONE_PADDING, CENTER_ZONE_MARGIN,
         SEAT_RADIUS, ARC_RADIUS, ROW_SPACING, CIRCLE_CENTER, ANGLE_FACTOR
     } = CANVAS_CONFIG;
     const { ctx, centerSeatsCoords, centerZoneInfo, totalCols, canvasWidth, currentLayout } = GLOBAL_STATE;
-
-    console.log('drawCenterZone 参数检查:', {
-        ctx: !!ctx,
-        centerZoneInfo: centerZoneInfo,
-        totalCols: totalCols,
-        canvasWidth: canvasWidth,
-        currentLayout: currentLayout
-    });
 
     // 设置通用样式
     ctx.save();
@@ -436,15 +419,6 @@ function drawCenterZone() {
 
             ctx.restore();
 
-            // 在控制台输出调试信息
-            console.log('弧形区域标记点坐标:', {
-                innerStart: { x: innerStartX, y: innerStartY },
-                innerEnd: { x: innerEndX, y: innerEndY },
-                outerStart: { x: outerStartX, y: outerStartY },
-                outerEnd: { x: outerEndX, y: outerEndY },
-                angles: { start: startAngleForArc, end: endAngleForArc },
-                radii: { inner: innerRadius, outer: outerRadius }
-            });
         }
     }
 
@@ -538,9 +512,16 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
 
     // 首先尝试初始化main.js中的座位数据
     if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
-        // 使用默认配置初始化座位数据
-        window.CinemaData.initializeCinemaSeats(10, 20);
-        console.log('已初始化main.js中的座位数据');
+        // 不在这里初始化，因为配置应该在影厅配置界面确定
+        // 如果没有初始化过，使用默认配置
+        if (window.CinemaData) {
+            const currentConfig = window.CinemaData.getCurrentConfig();
+            if (!currentConfig || currentConfig.TOTAL_SEATS === 0) {
+                // 只有在没有配置时才使用默认值
+                window.CinemaData.initializeCinemaSeats(10, 20);
+                console.log('使用默认配置初始化座位数据');
+            }
+        }
     }
 
     // ===== 获取实际座位数据 =====
