@@ -138,7 +138,7 @@ function isSeatAvailable(row, col) {
  * @param {number} col - 座位号 (1-based)
  * @returns {boolean} 座位是否可用于自动选座
  */
-function isSeatAvailableForAutoSelect(row, col) {
+function isSeatAvailableOrSelected(row, col) {
     if (!validateSeatParams(row, col)) return false;
     const seat = cinemaSeats[row - 1][col - 1];
     return seat && (seat.status === SEAT_STATUS.AVAILABLE || seat.status === SEAT_STATUS.SELECTED);
@@ -221,7 +221,7 @@ function findConsecutiveSeatsInRowForIndividual(row, count) {
         const rightStart = midSeat - Math.floor(count / 2) + offset;
         if (rightStart >= 0 && rightStart <= maxStartPos) {
             const rightChunk = rowSeats.slice(rightStart, rightStart + count);
-            if (rightChunk.every(seat => isSeatAvailableForAutoSelect(seat.row, seat.col))) {
+            if (rightChunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) {
                 return rightChunk;
             }
         }
@@ -231,7 +231,7 @@ function findConsecutiveSeatsInRowForIndividual(row, count) {
             const leftStart = midSeat - Math.floor(count / 2) - offset;
             if (leftStart >= 0 && leftStart <= maxStartPos) {
                 const leftChunk = rowSeats.slice(leftStart, leftStart + count);
-                if (leftChunk.every(seat => isSeatAvailableForAutoSelect(seat.row, seat.col))) {
+                if (leftChunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) {
                     return leftChunk;
                 }
             }
@@ -267,7 +267,7 @@ function findScatteredSeatsForIndividual(members, validRows) {
                 if (col < 1 || col > currentCinemaConfig.SEATS_PER_ROW) continue;
 
                 // 检查座位是否可用且没有被本次选择占用
-                if (isSeatAvailableForAutoSelect(row, col) &&
+                if (isSeatAvailableOrSelected(row, col) &&
                     !selectedSeats.some(seat => seat.row === row && seat.col === col)) {
                     selectedSeats.push(cinemaSeats[row - 1][col - 1]);
                     seatFound = true;
@@ -324,7 +324,7 @@ function findConsecutiveSeatsInRow(row, count) {
     if (!rowSeats) return null;
     for (let i = 0; i <= rowSeats.length - count; i++) {
         const chunk = rowSeats.slice(i, i + count);
-        if (chunk.every(seat => isSeatAvailableForAutoSelect(seat.row, seat.col))) return chunk;
+        if (chunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) return chunk;
     }
     return null;
 }
@@ -369,7 +369,7 @@ function reserveTickets(seats, customerInfo) {
     }
 
     if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
-    if (!fullSeatObjects.every(s => isSeatAvailable(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
+    if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
     const expiresAt = new Date(currentCinemaConfig.movieStartTime.getTime() - currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
     if (new Date() > expiresAt) return { success: false, message: `已超过预订时间，请直接购票。` };
@@ -394,7 +394,7 @@ function purchaseTickets(seats, customerInfo) {
     }
 
     if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
-    if (!fullSeatObjects.every(s => isSeatAvailable(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
+    if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
     const ticketId = `s-${Date.now()}`;
     ticketRecords.push({ ticketId, status: SEAT_STATUS.SOLD, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), paidAt: new Date() });
@@ -611,6 +611,7 @@ window.CinemaData = {
     // 工具函数
     getAgeGroup,
     isSeatAvailable,
+    isSeatAvailableOrSelected,
     canSitInRow,
     validateSeatParams,
     validateCustomerInfo
