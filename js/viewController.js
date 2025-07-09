@@ -316,38 +316,59 @@ class ViewController {
     }
 
     onSeatViewActivated() {
-        console.log('选座视图已激活');
+        console.log('选座视图已激活，开始执行初始化流程...');
 
-        // 等待DOM完全渲染后再初始化Canvas
+        // 使用 requestAnimationFrame 确保在下一次浏览器重绘前执行初始化，
+        // 这能保证视图（DOM元素）已经可见。
         requestAnimationFrame(() => {
-            setTimeout(() => {
-                this.initializeCanvasDrawing();
-            }, 100);
+            this.initializeSeatView();
         });
     }
 
-    initializeCanvasDrawing() {
-        const canvas = document.getElementById('cinema-canvas');
-        if (!canvas) {
-            console.error('未找到Canvas元素');
+    initializeSeatView() {
+        // 1. 检查核心依赖是否存在
+        if (!window.CinemaData || !window.CanvasRenderer || !window.StateManager) {
+            console.error('错误：一个或多个核心模块 (CinemaData, CanvasRenderer, StateManager) 未加载！');
+            this.showMessage('核心模块加载失败，请刷新页面重试。', 'error');
             return;
         }
 
-        console.log('Canvas元素已找到，开始初始化绘制');
+        console.log('✅ 核心模块已确认加载。');
 
-        // 使用当前配置初始化Canvas
-        if (window.initializeAndDrawCinema && typeof window.initializeAndDrawCinema === 'function') {
-            window.initializeAndDrawCinema();
+        // 2. 初始化或刷新Canvas绘图 (canvas.js)
+        //    initializeAndDrawCinema 会从 CinemaData 获取最新配置来绘制。
+        console.log('正在初始化 Canvas...');
+        try {
+            // 注意：我们调用的是 CanvasRenderer 命名空间下的函数，更规范
+            window.CanvasRenderer.initializeAndDrawCinema();
+            console.log('✅ Canvas 初始化并绘制完成。');
+        } catch (e) {
+            console.error('Canvas 绘制失败:', e);
+            this.showMessage('影厅座位图绘制失败！', 'error');
+            return; // 如果绘制失败，则中断后续步骤
         }
 
-        // 初始化状态管理器
-        if (window.StateManager && typeof window.StateManager.initializeStateManager === 'function') {
-            window.StateManager.initializeStateManager('cinema-canvas');
+        // 3. 初始化或重置交互状态管理器 (stateManager.js)
+        //    StateManager 会读取 CinemaData 和 Canvas 的状态。
+        console.log('正在初始化 StateManager...');
+        try {
+            // 使用 reset 而不是 initialize，避免重复绑定事件监听器。
+            // 如果需要更复杂的逻辑，可以为 StateManager 增加一个 dedicated 的 refresh 方法。
+            // 在这里，我们假设 resetStateManager 能够安全地重置状态并重新加载数据。
+            window.StateManager.resetStateManager();
+            console.log('✅ StateManager 初始化/重置完成。');
+        } catch (e) {
+            console.error('StateManager 初始化失败:', e);
+            this.showMessage('座位交互系统初始化失败！', 'error');
         }
 
-        // 移除有问题的Canvas内容检查
-        console.log('Canvas初始化完成');
+        // 4. 更新UI上的统计信息（可选，但推荐）
+        //    确保右下角的影厅状态是最新的。
+        this.updateCinemaStatusDisplay();
+
+        console.log('🚀 选座视图所有组件已准备就绪！');
     }
+
 
     onPaymentViewActivated() {
         console.log('支付视图已激活');
