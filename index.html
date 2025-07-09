@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>电影院在线选座系统</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <!-- 页面头部 -->
     <header class="header">
@@ -31,7 +33,7 @@
     <!-- 主要内容区域 -->
     <main class="main">
         <div class="container">
-            
+
             <!-- 配置视图 -->
             <section id="config-view" class="view active">
                 <div class="config-panel">
@@ -43,11 +45,11 @@
                                 <input type="radio" name="cinema-preset" value="small">
                                 <span class="preset-info">
                                     <strong>小厅</strong>
-                                    <span class="preset-details">8排 × 15座 = 120个座位</span>
+                                    <span class="preset-details">10排 × 10座 = 100个座位</span>
                                 </span>
                             </label>
                             <label class="preset-option">
-                                <input type="radio" name="cinema-preset" value="medium" checked>
+                                <input type="radio" name="cinema-preset" value="medium">
                                 <span class="preset-info">
                                     <strong>中厅</strong>
                                     <span class="preset-details">10排 × 20座 = 200个座位</span>
@@ -166,11 +168,13 @@
                                         <div class="member-list" id="individual-member-list">
                                             <!-- 动态生成个人票成员列表 -->
                                         </div>
-                                        
+
                                         <div class="add-member">
                                             <div class="input-row">
-                                                <input type="text" id="individual-member-name" placeholder="姓名" maxlength="20">
-                                                <input type="number" id="individual-member-age" placeholder="年龄" min="1" max="120">
+                                                <input type="text" id="individual-member-name" placeholder="姓名"
+                                                    maxlength="20">
+                                                <input type="number" id="individual-member-age" placeholder="年龄" min="1"
+                                                    max="120">
                                                 <button class="btn btn-add" id="add-individual-member">添加</button>
                                             </div>
                                             <div class="member-count">
@@ -273,18 +277,18 @@
                             <div class="screen-large">
                                 <div class="screen-label">银幕</div>
                             </div>
-                            
+
                             <!-- 布局切换按钮 -->
                             <div class="canvas-controls">
                                 <button id="toggle-layout-btn" class="btn btn-secondary" data-layout="arc">
                                     切换布局
                                 </button>
                             </div>
-                            
+
                             <canvas id="cinema-canvas" width="1400" height="933">
                                 您的浏览器不支持Canvas，请升级浏览器
                             </canvas>
-                            
+
                             <div class="legend-large">
                                 <div class="legend-item">
                                     <span class="legend-color available"></span>
@@ -382,7 +386,7 @@
                                     <p id="payment-cinema-info">中厅 (10排×20座)</p>
                                 </div>
                             </div>
-                            
+
                             <div class="seats-summary">
                                 <h4>选中座位</h4>
                                 <div id="payment-seats-list">
@@ -544,7 +548,7 @@
                             <button class="filter-tab" data-filter="reserved">预约订单</button>
                             <button class="filter-tab" data-filter="paid">已支付</button>
                         </div>
-                        
+
                         <div class="search-box">
                             <input type="text" id="order-search" placeholder="搜索订单号或电影名称...">
                             <button class="btn btn-primary" id="search-orders">搜索</button>
@@ -575,7 +579,8 @@
                             </div>
                             <div class="modal-footer">
                                 <button class="btn btn-secondary" id="cancel-order" style="display: none;">取消订单</button>
-                                <button class="btn btn-primary" id="pay-reserved-order" style="display: none;">立即支付</button>
+                                <button class="btn btn-primary" id="pay-reserved-order"
+                                    style="display: none;">立即支付</button>
                                 <button class="btn btn-refund" id="refund-order" style="display: none;">申请退款</button>
                             </div>
                         </div>
@@ -630,4 +635,5 @@
     <script src="js/stateManager.js"></script>
     <script src="js/ui.js"></script>
 </body>
+
 </html>
