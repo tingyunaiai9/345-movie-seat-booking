@@ -121,7 +121,7 @@ function getAgeGroup(age) {
 }
 
 /**
- * 检查座位是否可用
+ * 检查座位是否可用（仅允许AVAILABLE状态）
  * @param {number} row - 行号 (1-based)
  * @param {number} col - 座位号 (1-based)
  * @returns {boolean} 座位是否可用
@@ -129,7 +129,19 @@ function getAgeGroup(age) {
 function isSeatAvailable(row, col) {
     if (!validateSeatParams(row, col)) return false;
     const seat = cinemaSeats[row - 1][col - 1];
-    return seat && seat.status === SEAT_STATUS.AVAILABLE;
+    return seat && (seat.status === SEAT_STATUS.AVAILABLE);
+}
+
+/**
+ * 检查座位是否可用于自动选座（允许AVAILABLE和SELECTED状态）
+ * @param {number} row - 行号 (1-based)
+ * @param {number} col - 座位号 (1-based)
+ * @returns {boolean} 座位是否可用于自动选座
+ */
+function isSeatAvailableForAutoSelect(row, col) {
+    if (!validateSeatParams(row, col)) return false;
+    const seat = cinemaSeats[row - 1][col - 1];
+    return seat && (seat.status === SEAT_STATUS.AVAILABLE || seat.status === SEAT_STATUS.SELECTED);
 }
 
 /**
@@ -157,77 +169,122 @@ function getSeatId(row, col) {
 // ========================= 个人选座算法 =========================
 
 /**
- * 为个人自动选座
- * @param {number} age - 年龄
- * @returns {Object|null} 选中的座位对象或 null
+ * 为个人（单选/多选）自动选座
+ * @param {Array} members - 成员信息 [{age: number, name: string}, ...]
+ * @returns {Array|null} 选中的座位对象列表或 null
  */
-function findSeatForIndividual(age) {
-    const ageGroup = getAgeGroup(age);
-    const midRow = Math.ceil(currentCinemaConfig.TOTAL_ROWS / 2);
-    for (let i = 0; i < currentCinemaConfig.TOTAL_ROWS; i++) {
-        const offset = Math.ceil(i / 2) * (i % 2 === 0 ? 1 : -1);
-        const row = midRow + offset;
-        if (row < 1 || row > currentCinemaConfig.TOTAL_ROWS || !canSitInRow(ageGroup, row)) continue;
+function findSeatForIndividual(members) {
+    if (!members || members.length === 0 || members.length > currentCinemaConfig.MAX_GROUP_SIZE) return null;
 
-        const midSeat = Math.ceil(currentCinemaConfig.SEATS_PER_ROW / 2);
-        for (let j = 0; j < currentCinemaConfig.SEATS_PER_ROW; j++) {
-            const seatOffset = Math.ceil(j / 2) * (j % 2 === 0 ? 1 : -1);
-            const col = midSeat + seatOffset;
-            if (col < 1 || col > currentCinemaConfig.SEATS_PER_ROW) continue;
-            if (isSeatAvailable(row, col)) return cinemaSeats[row - 1][col - 1];
+    // 获取所有成员能坐的行
+    const validRows = [];
+    for (let i = 1; i <= currentCinemaConfig.TOTAL_ROWS; i++) {
+        if (members.every(member => canSitInRow(getAgeGroup(member.age), i))) {
+            validRows.push(i);
         }
     }
+
+    if (validRows.length === 0) return null;
+
+    // 按照距离中间的远近排序行
+    const midRow = Math.ceil(currentCinemaConfig.TOTAL_ROWS / 2);
+    validRows.sort((a, b) => Math.abs(a - midRow) - Math.abs(b - midRow));
+
+    // 策略1：优先尝试在同一行找到连续座位
+    for (const row of validRows) {
+        const consecutiveSeats = findConsecutiveSeatsInRowForIndividual(row, members.length);
+        if (consecutiveSeats) {
+            return consecutiveSeats;
+        }
+    }
+
+    // 策略2：如果无法找到连续座位，则分散选择最优座位
+    return findScatteredSeatsForIndividual(members, validRows);
+}
+
+/**
+ * 在指定行查找连续座位（个人选座专用，优先选择中间位置）
+ * @param {number} row - 行号 (1-based)
+ * @param {number} count - 需要的座位数
+ * @returns {Array|null} 连续座位对象列表或 null
+ */
+function findConsecutiveSeatsInRowForIndividual(row, count) {
+    const rowSeats = cinemaSeats[row - 1];
+    if (!rowSeats) return null;
+
+    const midSeat = Math.ceil(currentCinemaConfig.SEATS_PER_ROW / 2);
+    const maxStartPos = rowSeats.length - count;
+
+    // 从中间位置开始，向两边扩散寻找连续座位
+    for (let offset = 0; offset <= Math.max(midSeat - 1, maxStartPos - midSeat + 1); offset++) {
+        // 先尝试中间偏右的位置
+        const rightStart = midSeat - Math.floor(count / 2) + offset;
+        if (rightStart >= 0 && rightStart <= maxStartPos) {
+            const rightChunk = rowSeats.slice(rightStart, rightStart + count);
+            if (rightChunk.every(seat => isSeatAvailableForAutoSelect(seat.row, seat.col))) {
+                return rightChunk;
+            }
+        }
+
+        // 再尝试中间偏左的位置
+        if (offset > 0) {
+            const leftStart = midSeat - Math.floor(count / 2) - offset;
+            if (leftStart >= 0 && leftStart <= maxStartPos) {
+                const leftChunk = rowSeats.slice(leftStart, leftStart + count);
+                if (leftChunk.every(seat => isSeatAvailableForAutoSelect(seat.row, seat.col))) {
+                    return leftChunk;
+                }
+            }
+        }
+    }
+
     return null;
 }
 
-// ========================= 座位选择管理 =========================
-
 /**
- * 选择一个座位
- * @param {number} row - 行号
- * @param {number} col - 列号
- * @returns {boolean} 操作是否成功
+ * 为个人选座分散选择座位（当无法连续坐时）
+ * @param {Array} members - 成员信息
+ * @param {Array} validRows - 有效行号列表
+ * @returns {Array|null} 选中的座位对象列表或 null
  */
-function selectSeat(row, col) {
-    const seat = getSeat(row, col);
-    if (seat && seat.status === SEAT_STATUS.AVAILABLE) {
-        seat.status = SEAT_STATUS.SELECTED;
-        return true;
+function findScatteredSeatsForIndividual(members, validRows) {
+    const selectedSeats = [];
+    const midSeat = Math.ceil(currentCinemaConfig.SEATS_PER_ROW / 2);
+
+    for (const member of members) {
+        const ageGroup = getAgeGroup(member.age);
+        let seatFound = false;
+
+        // 为每个成员在有效行中寻找最佳座位
+        for (const row of validRows) {
+            if (!canSitInRow(ageGroup, row)) continue;
+
+            // 从中间位置开始螺旋式搜索
+            for (let j = 0; j < currentCinemaConfig.SEATS_PER_ROW; j++) {
+                const seatOffset = Math.ceil(j / 2) * (j % 2 === 0 ? 1 : -1);
+                const col = midSeat + seatOffset;
+
+                if (col < 1 || col > currentCinemaConfig.SEATS_PER_ROW) continue;
+
+                // 检查座位是否可用且没有被本次选择占用
+                if (isSeatAvailableForAutoSelect(row, col) &&
+                    !selectedSeats.some(seat => seat.row === row && seat.col === col)) {
+                    selectedSeats.push(cinemaSeats[row - 1][col - 1]);
+                    seatFound = true;
+                    break;
+                }
+            }
+
+            if (seatFound) break;
+        }
+
+        // 如果某个成员找不到座位，则整个选座失败
+        if (!seatFound) {
+            return null;
+        }
     }
-    return false;
-}
 
-/**
- * 取消选择一个座位
- * @param {number} row - 行号
- * @param {number} col - 列号
- * @returns {boolean} 操作是否成功
- */
-function deselectSeat(row, col) {
-    const seat = getSeat(row, col);
-    if (seat && seat.status === SEAT_STATUS.SELECTED) {
-        seat.status = SEAT_STATUS.AVAILABLE;
-        return true;
-    }
-    return false;
-}
-
-/**
- * 获取所有当前被选中的座位
- * @returns {Array<Object>} 选中的座位对象数组
- */
-function getSelectedSeats() {
-    return cinemaSeats.flat().filter(seat => seat.status === SEAT_STATUS.SELECTED);
-}
-
-/**
- * 清除所有座位的选中状态，将它们恢复为可用
- */
-function clearAllSelections() {
-    const selectedSeats = getSelectedSeats();
-    selectedSeats.forEach(seat => {
-        seat.status = SEAT_STATUS.AVAILABLE;
-    });
+    return selectedSeats;
 }
 
 // ========================= 团体选座算法 =========================
@@ -267,7 +324,7 @@ function findConsecutiveSeatsInRow(row, count) {
     if (!rowSeats) return null;
     for (let i = 0; i <= rowSeats.length - count; i++) {
         const chunk = rowSeats.slice(i, i + count);
-        if (chunk.every(seat => seat.status === SEAT_STATUS.AVAILABLE)) return chunk;
+        if (chunk.every(seat => isSeatAvailableForAutoSelect(seat.row, seat.col))) return chunk;
     }
     return null;
 }
@@ -441,6 +498,57 @@ function getCinemaStatus() {
  */
 function getCurrentConfig() {
     return { ...currentCinemaConfig };
+}
+
+
+// ========================= 座位选择管理 =========================
+
+/**
+ * 选择一个座位
+ * @param {number} row - 行号
+ * @param {number} col - 列号
+ * @returns {boolean} 操作是否成功
+ */
+function selectSeat(row, col) {
+    const seat = getSeat(row, col);
+    if (seat && seat.status === SEAT_STATUS.AVAILABLE) {
+        seat.status = SEAT_STATUS.SELECTED;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * 取消选择一个座位
+ * @param {number} row - 行号
+ * @param {number} col - 列号
+ * @returns {boolean} 操作是否成功
+ */
+function deselectSeat(row, col) {
+    const seat = getSeat(row, col);
+    if (seat && seat.status === SEAT_STATUS.SELECTED) {
+        seat.status = SEAT_STATUS.AVAILABLE;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * 获取所有当前被选中的座位
+ * @returns {Array<Object>} 选中的座位对象数组
+ */
+function getSelectedSeats() {
+    return cinemaSeats.flat().filter(seat => seat.status === SEAT_STATUS.SELECTED);
+}
+
+/**
+ * 清除所有座位的选中状态，将它们恢复为可用
+ */
+function clearAllSelections() {
+    const selectedSeats = getSelectedSeats();
+    selectedSeats.forEach(seat => {
+        seat.status = SEAT_STATUS.AVAILABLE;
+    });
 }
 
 // ========================= 数据验证函数 =========================
