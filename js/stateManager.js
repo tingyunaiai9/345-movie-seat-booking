@@ -262,29 +262,49 @@ function handleKeyUp(event) {
 // ========================= 核心交互逻辑 =========================
 
 /**
- * 选择座位（直接使用main.js的selectSeat函数）
- * @param {Object} seat - 要选择的座位
+ * 选择一个座位
+ * @param {number|Object} row - 行号或座位对象
+ * @param {number} col - 列号（当第一个参数为行号时使用）
+ * @returns {boolean} 操作是否成功
  */
-function selectSeat(seat) {
-    if (!seat || seat.status === 'selected') return;
-
-    // 直接调用main.js的selectSeat函数来修改cinemaSeats
-    const success = window.CinemaData.selectSeat(seat.row, seat.col);
-    if (success) {
-        console.log(`座位 ${seat.row}-${seat.col} 已选择`);
+function selectSeat(row, col) {
+    // 支持两种调用方式：selectSeat(seat) 或 selectSeat(row, col)
+    let seat;
+    if (typeof row === 'object' && row !== null) {
+        // 第一个参数是座位对象
+        seat = window.CinemaData.getSeat(row.row, row.col);
+    } else {
+        // 第一个参数是行号，第二个参数是列号
+        seat = window.CinemaData.getSeat(row, col);
     }
+
+    if (seat && seat.status === 'available') {
+        seat.status = 'selected';
+        console.log(`座位 ${seat.row}-${seat.col} 已选择`);
+        return true;
+    }
+    return false;
 }
 
 /**
- * 取消选择座位（直接使用main.js的deselectSeat函数）
- * @param {Object} seat - 要取消选择的座位
+ * 取消选择一个座位
+ * @param {number|Object} row - 行号或座位对象
+ * @param {number} col - 列号（当第一个参数为行号时使用）
+ * @returns {boolean} 操作是否成功
  */
-function deselectSeat(seat) {
-    if (!seat || seat.status !== 'selected') return;
+function deselectSeat(row, col) {
+    // 支持两种调用方式：deselectSeat(seat) 或 deselectSeat(row, col)
+    let seat;
+    if (typeof row === 'object' && row !== null) {
+        // 第一个参数是座位对象
+        seat = window.CinemaData.getSeat(row.row, row.col);
+    } else {
+        // 第一个参数是行号，第二个参数是列号
+        seat = window.CinemaData.getSeat(row, col);
+    }
 
-    // 直接调用main.js的deselectSeat函数来修改cinemaSeats
-    const success = window.CinemaData.deselectSeat(seat.row, seat.col);
-    if (success) {
+    if (seat && seat.status === 'selected') {
+        seat.status = 'available';
         console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
         
         // 立即更新UI和重绘
@@ -292,15 +312,43 @@ function deselectSeat(seat) {
             window.CanvasRenderer.drawCinema();
         }
         notifySelectionChange();
+        return true;
     }
+    return false;
 }
 
 /**
- * 清除所有选择（直接使用main.js的clearAllSelections函数）
+ * 获取所有当前被选中的座位
+ * @returns {Array<Object>} 选中的座位对象数组
+ */
+function getSelectedSeats() {
+    if (!window.CinemaData) return [];
+    
+    const config = window.CinemaData.getCurrentConfig();
+    const selectedSeats = [];
+    
+    for (let row = 1; row <= config.TOTAL_ROWS; row++) {
+        for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
+            const seat = window.CinemaData.getSeat(row, col);
+            if (seat && seat.status === 'selected') {
+                selectedSeats.push(seat);
+            }
+        }
+    }
+    
+    return selectedSeats;
+}
+
+/**
+ * 清除所有座位的选中状态，将它们恢复为可用
  */
 function clearAllSelections() {
-    // 直接调用main.js的clearAllSelections函数
-    window.CinemaData.clearAllSelections();
+    if (!window.CinemaData) return;
+    
+    const selectedSeats = getSelectedSeats();
+    selectedSeats.forEach(seat => {
+        seat.status = 'available';
+    });
     
     console.log('已清除所有选择');
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
@@ -377,8 +425,8 @@ function performReservation(customerInfo) {
         return { success: false, message: 'CinemaData模块未加载' };
     }
 
-    // 获取选中的座位（从main.js）
-    const selectedSeats = window.CinemaData.getSelectedSeats();
+    // 获取选中的座位（从本模块获取）
+    const selectedSeats = getSelectedSeats();
     if (selectedSeats.length === 0) {
         return { success: false, message: '请先选择座位' };
     }
@@ -406,8 +454,8 @@ function performPurchase(customerInfo) {
         return { success: false, message: 'CinemaData模块未加载' };
     }
 
-    // 获取选中的座位（从main.js）
-    const selectedSeats = window.CinemaData.getSelectedSeats();
+    // 获取选中的座位（从本模块获取）
+    const selectedSeats = getSelectedSeats();
     if (selectedSeats.length === 0) {
         return { success: false, message: '请先选择座位' };
     }
@@ -430,8 +478,8 @@ function performPurchase(customerInfo) {
  * 通知选座状态变化
  */
 function notifySelectionChange() {
-    // 获取选中的座位（从main.js）
-    const selectedSeats = window.CinemaData ? window.CinemaData.getSelectedSeats() : [];
+    // 获取选中的座位（直接从本模块获取）
+    const selectedSeats = getSelectedSeats();
     
     // 获取当前电影价格
     const activeMovie = document.querySelector('.movie-item.active');
@@ -488,16 +536,7 @@ function notifySelectionChange() {
     if (reserveButton) reserveButton.disabled = !hasSelection;
     if (purchaseButton) purchaseButton.disabled = !hasSelection;
 }
-
 // ========================= 查询接口 =========================
-
-/**
- * 获取当前选中的座位（从main.js获取）
- * @returns {Array} 选中的座位列表
- */
-function getSelectedSeats() {
-    return window.CinemaData ? window.CinemaData.getSelectedSeats() : [];
-}
 
 /**
  * 获取选中座位的数量
