@@ -267,17 +267,7 @@ function handleKeyUp(event) {
  * @param {number} col - 列号（当第一个参数为行号时使用）
  * @returns {boolean} 操作是否成功
  */
-function selectSeat(row, col) {
-    // 支持两种调用方式：selectSeat(seat) 或 selectSeat(row, col)
-    let seat;
-    if (typeof row === 'object' && row !== null) {
-        // 第一个参数是座位对象
-        seat = window.CinemaData.getSeat(row.row, row.col);
-    } else {
-        // 第一个参数是行号，第二个参数是列号
-        seat = window.CinemaData.getSeat(row, col);
-    }
-
+function selectSeat(seat) {
     if (seat && seat.status === 'available') {
         seat.status = 'selected';
         console.log(`座位 ${seat.row}-${seat.col} 已选择`);
@@ -292,17 +282,7 @@ function selectSeat(row, col) {
  * @param {number} col - 列号（当第一个参数为行号时使用）
  * @returns {boolean} 操作是否成功
  */
-function deselectSeat(row, col) {
-    // 支持两种调用方式：deselectSeat(seat) 或 deselectSeat(row, col)
-    let seat;
-    if (typeof row === 'object' && row !== null) {
-        // 第一个参数是座位对象
-        seat = window.CinemaData.getSeat(row.row, row.col);
-    } else {
-        // 第一个参数是行号，第二个参数是列号
-        seat = window.CinemaData.getSeat(row, col);
-    }
-
+function deselectSeat(seat) {
     if (seat && seat.status === 'selected') {
         seat.status = 'available';
         console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
