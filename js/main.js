@@ -27,9 +27,9 @@ const AGE_GROUPS = {
 
 const SEAT_STATUS = {
     AVAILABLE: 'available', // 可用
-    SELECTED: 'selected',   // 已选中 (UI临时状态，由数据层管理)
     RESERVED: 'reserved',   // 已预订 (由本模块管理)
-    SOLD: 'sold'            // 已售出 (由本模块管理)
+    SOLD: 'sold',            // 已售出 (由本模块管理)
+    SELECTED: 'selected',   // 已选中 (UI临时状态，由数据层管理)
 };
 
 // ========================= 数据结构定义 =========================
