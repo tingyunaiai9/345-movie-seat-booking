@@ -326,8 +326,8 @@ function handleFinalPayment() {
             window.UIOrders.createMyPurchaseOrder();
         }
 
-        // 切换到 final-view
-        if (window.UICoreModule && window.UICoreModule.switchView) {
+        // 切换到 final-view，优先用UICoreModule.switchView
+        if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
             window.UICoreModule.switchView('final-view');
         } else {
             // 兜底：直接用DOM切换

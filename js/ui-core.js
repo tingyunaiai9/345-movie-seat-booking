@@ -11,7 +11,8 @@ const UI_CONFIG = {
         MOVIE: 'movie-view',
         SEAT: 'seat-view',
         PAYMENT: 'payment-view',
-        CONFIRM: 'confirm-view'
+        CONFIRM: 'confirm-view',
+        FINAL: 'final-view' // 最终展示的页面
     },
 
     // 票务类型
