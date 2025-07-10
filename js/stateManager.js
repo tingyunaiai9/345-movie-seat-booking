@@ -515,10 +515,24 @@ function notifySelectionChange() {
         const seatsHtml = selectedSeats.map(seat => 
             `<div class="seat-tag" data-seat-id="${seat.id}">
                 <span class="seat-number">${seat.row}排${seat.col}座</span>
-                <button class="seat-remove" onclick="StateManager.deselectSeat(${JSON.stringify(seat).replace(/"/g, '&quot;')})">×</button>
+                <button class="seat-remove" data-row="${seat.row}" data-col="${seat.col}">×</button>
             </div>`
         ).join('');
         selectedList.innerHTML = seatsHtml;
+        
+        // 为删除按钮添加点击事件
+        const removeButtons = selectedList.querySelectorAll('.seat-remove');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const row = parseInt(this.getAttribute('data-row'));
+                const col = parseInt(this.getAttribute('data-col'));
+                const seat = window.CinemaData.getSeat(row, col);
+                if (seat) {
+                    deselectSeat(seat);
+                    // 更新UI已在deselectSeat函数中通过调用notifySelectionChange实现
+                }
+            });
+        });
     }
     
     // 更新统计信息
