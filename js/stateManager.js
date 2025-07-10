@@ -173,16 +173,18 @@ function handleCanvasClick(event) {
 
         // 根据Ctrl键状态决定选择模式
         if (globalState.isCtrlPressed) {
-            // 多选模式：切换选择状态
+            // 多选模式：直接切换当前座位的状态
+            toggleSeatSelection(hitSeat);
+        } else {
+            // 单选模式：如果点击的是已选中的座位，则取消选择；否则清除其他选择，选择当前座位
             if (hitSeat.status === 'selected') {
+                // 直接取消选择当前座位
                 deselectSeat(hitSeat);
             } else {
+                // 清除其他选择，选择当前座位
+                clearAllSelections();
                 selectSeat(hitSeat);
             }
-        } else {
-            // 单选模式：清除其他选择，只选择当前座位
-            clearAllSelections();
-            selectSeat(hitSeat);
         }
 
         // 触发界面重绘和状态变化通知
@@ -294,6 +296,23 @@ function deselectSeat(seat) {
         notifySelectionChange();
         return true;
     }
+    return false;
+}
+
+/**
+ * 切换座位的选择状态
+ * @param {Object} seat - 座位对象
+ * @returns {boolean} 操作是否成功
+ */
+function toggleSeatSelection(seat) {
+    if (!seat) return false;
+
+    if (seat.status === 'available') {
+        return selectSeat(seat);
+    } else if (seat.status === 'selected') {
+        return deselectSeat(seat);
+    }
+
     return false;
 }
 
