@@ -405,7 +405,7 @@ class ViewController {
 
         // 预设配置映射
         const presetConfigs = {
-            small: { rows: 10, cols: 10, name: '小厅' },
+            small: { rows: 8, cols: 12, name: '小厅' },
             medium: { rows: 10, cols: 20, name: '中厅' },
             large: { rows: 12, cols: 25, name: '大厅' }
         };

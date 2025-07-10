@@ -119,7 +119,7 @@ function drawSeat(x, y, seat) {
             isHovered = (seat.row === hoveredRow && seat.col === hoveredCol);
         }
     }
-    
+
     const scaleFactor = isHovered ? 1.2 : 1.0;
     const currentRadius = SEAT_RADIUS * scaleFactor;
 
@@ -178,20 +178,7 @@ function drawCinema() {
 
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // ===== 绘制屏幕 =====
-    const { SCREEN_COLOR, SCREEN_WIDTH_RATIO, SCREEN_MARGIN, TEXT_COLOR, SCREEN_FONT } = CANVAS_CONFIG;
     const { canvasWidth, canvasHeight } = GLOBAL_STATE;
-
-    // 绘制屏幕背景
-    ctx.fillStyle = SCREEN_COLOR;
-    ctx.fillRect(canvasWidth * (1 - SCREEN_WIDTH_RATIO) / 2, SCREEN_MARGIN, canvasWidth * SCREEN_WIDTH_RATIO, 30);
-
-    // 绘制屏幕文字
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = SCREEN_FONT;
-    ctx.textAlign = 'center';
-    ctx.fillText('屏幕', canvasWidth / 2, 30);
 
     // ===== 绘制中央过道虚线 =====
     const { AISLE_LINE_COLOR, AISLE_LINE_WIDTH, AISLE_DASH_PATTERN } = CANVAS_CONFIG;
