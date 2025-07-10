@@ -180,13 +180,6 @@ function areSeatsConsecutive(seats) {
 function handleDirectPurchase() {
     console.log('开始处理直接购票...');
 
-    // 检查StateManager是否可用
-    if (!window.StateManager || !window.StateManager.performPurchase) {
-        console.error('StateManager未加载或performPurchase函数不存在');
-        alert('购票功能暂不可用，请稍后再试');
-        return;
-    }
-
     // 验证选座规则
     if (!validateSeatSelection()) {
         return; // 验证失败，函数内部已处理提示
@@ -200,29 +193,10 @@ function handleDirectPurchase() {
     console.log('客户信息:', customerInfo);
 
     try {
-        // 调用StateManager的购票函数
-        const result = window.StateManager.performPurchase(customerInfo);
-
-        console.log('购票结果:', result);
-
-        // 根据返回结果处理
-        if (result && result.success) {
-            // 购票成功 - 跳转到支付页面
-            console.log('✅ 购票成功，跳转到支付页面');
-            alert('购票成功！');
-
-            // 跳转到支付页面
-            if (window.UICoreModule && window.UICoreModule.switchView) {
-                window.UICoreModule.switchView(window.UICoreModule.UI_CONFIG.VIEWS.PAYMENT);
-            }
-
-        } else {
-            // 购票失败 - 显示错误信息
-            const errorMessage = result && result.message ? result.message : '购票失败，请重试';
-            console.error('❌ 购票失败:', errorMessage);
-            alert('购票失败：' + errorMessage);
-        }
-
+        // 跳转到支付页面
+        if (window.UICoreModule && window.UICoreModule.switchView) {
+            window.UICoreModule.switchView(window.UICoreModule.UI_CONFIG.VIEWS.PAYMENT);
+        } 
     } catch (error) {
         console.error('购票过程中发生错误:', error);
         alert('购票过程中发生错误，请重试');

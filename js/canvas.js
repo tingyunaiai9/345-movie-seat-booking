@@ -151,6 +151,7 @@ function drawSeat(x, y, seat) {
     ctx.textBaseline = 'middle';
     ctx.fillText(`${seat.row}-${seat.col}`, x, y);
 }
+
 /**
  * 核心函数：绘制整个影厅的座位布局
  * 包含屏幕绘制、过道绘制、座位绘制和中心区域标识
