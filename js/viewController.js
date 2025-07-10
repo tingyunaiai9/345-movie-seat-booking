@@ -6,9 +6,10 @@ class ViewController {
         this.currentView = 'config';
         this.viewHistory = ['config'];
         this.selectedMovie = null;
+        this.cinemaConfigSelected = false; // 新增：影厅配置选择状态
         this.initializeEventListeners();
-        // 新增：初始化影厅配置选择器
         this.initializeCinemaConfigSelector();
+        this.initializeButtonStates(); // 新增：初始化按钮状态
     }
 
     /**
@@ -157,20 +158,29 @@ class ViewController {
         const basicNavigation = targetIndex <= currentIndex || targetIndex === currentIndex + 1;
 
         if (!basicNavigation) {
+            this.showMessage('请按顺序进行操作', 'warning');
             return false;
         }
 
         // 特殊验证规则
         switch (viewName) {
+            case 'movie':
+                // 进入电影选择页面需要先配置影厅
+                if (!this.cinemaConfigSelected) {
+                    this.showMessage('请先选择影厅规模', 'warning');
+                    return false;
+                }
+                break;
             case 'seat':
                 // 进入选座页面需要先选择电影
-                if (window.movieSelector && !window.movieSelector.getSelectedMovie()) {
+                if (!this.selectedMovie) {
                     this.showMessage('请先选择电影', 'warning');
                     return false;
                 }
                 break;
             case 'payment':
                 // 进入支付页面需要选择座位
+                // 这里可以添加座位选择的验证
                 break;
         }
 
@@ -311,8 +321,280 @@ class ViewController {
         }
     }
 
+    /**
+     * 初始化按钮状态管理
+     */
+    initializeButtonStates() {
+        // 初始化时设置按钮为禁用状态
+        this.updateConfigNextButton();
+        this.updateMovieNextButton();
+
+        // 监听电影选择变化
+        this.initializeMovieSelection();
+    }
+
+    /**
+     * 更新配置页面的下一步按钮状态
+     */
+    updateConfigNextButton() {
+        const nextButton = document.getElementById('next-to-movie');
+        if (!nextButton) return;
+
+        if (this.cinemaConfigSelected) {
+            nextButton.disabled = false;
+            nextButton.classList.remove('btn-disabled');
+            nextButton.textContent = '下一步：选择电影';
+        } else {
+            nextButton.disabled = true;
+            nextButton.classList.add('btn-disabled');
+            nextButton.textContent = '请先选择影厅规模';
+        }
+    }
+
+    /**
+     * 更新电影页面的下一步按钮状态
+     */
+    updateMovieNextButton() {
+        const nextButton = document.getElementById('next-to-seat');
+        if (!nextButton) return;
+
+        if (this.selectedMovie) {
+            nextButton.disabled = false;
+            nextButton.classList.remove('btn-disabled');
+            nextButton.textContent = '下一步：选择座位';
+        } else {
+            nextButton.disabled = true;
+            nextButton.classList.add('btn-disabled');
+            nextButton.textContent = '请先选择电影';
+        }
+    }
+
+    /**
+     * 初始化电影选择监听
+     */
+    initializeMovieSelection() {
+        // 监听电影项点击
+        document.addEventListener('click', (e) => {
+            const movieItem = e.target.closest('.movie-item');
+            if (movieItem) {
+                // 移除所有电影的选中状态
+                document.querySelectorAll('.movie-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // 为当前电影添加选中状态
+                movieItem.classList.add('active');
+
+                // 更新选中的电影
+                this.selectedMovie = movieItem.dataset.movie;
+
+                // 更新按钮状态
+                this.updateMovieNextButton();
+
+                console.log(`选择了电影: ${this.selectedMovie}`);
+            }
+        });
+    }
+
+    /**
+     * 修改后的影厅配置选择器初始化
+     */
+    initializeCinemaConfigSelector() {
+        const presetRadios = document.querySelectorAll('input[name="cinema-preset"]');
+        const customConfig = document.querySelector('.custom-config');
+
+        // 预设配置映射
+        const presetConfigs = {
+            small: { rows: 10, cols: 10, name: '小厅' },
+            medium: { rows: 10, cols: 20, name: '中厅' },
+            large: { rows: 12, cols: 25, name: '大厅' }
+        };
+
+        // 监听预设选项变化
+        presetRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    const selectedPreset = e.target.value;
+
+                    // 标记影厅配置已选择
+                    this.cinemaConfigSelected = true;
+
+                    if (selectedPreset === 'custom') {
+                        // 显示自定义配置
+                        if (customConfig) {
+                            customConfig.style.display = 'block';
+                        }
+                        // 检查自定义配置是否有效
+                        this.validateCustomConfig();
+                    } else {
+                        // 隐藏自定义配置
+                        if (customConfig) {
+                            customConfig.style.display = 'none';
+                        }
+
+                        // 应用预设配置
+                        const config = presetConfigs[selectedPreset];
+                        if (config) {
+                            this.applyConfigToModules(config.rows, config.cols, config.name);
+                        }
+                    }
+
+                    // 更新按钮状态
+                    this.updateConfigNextButton();
+                }
+            });
+        });
+
+        // 监听自定义配置变化
+        const customRowsInput = document.getElementById('custom-rows');
+        const customSeatsInput = document.getElementById('custom-seats');
+        const totalSeatsSpan = document.getElementById('total-seats');
+
+        const updateCustomConfig = () => {
+            const rows = parseInt(customRowsInput?.value) || 10;
+            const cols = parseInt(customSeatsInput?.value) || 20;
+            const total = rows * cols;
+
+            if (totalSeatsSpan) {
+                totalSeatsSpan.textContent = total;
+            }
+
+            // 如果当前选中的是自定义配置，则应用更改
+            const selectedPreset = document.querySelector('input[name="cinema-preset"]:checked');
+            if (selectedPreset && selectedPreset.value === 'custom') {
+                this.validateCustomConfig();
+                if (this.cinemaConfigSelected) {
+                    this.applyConfigToModules(rows, cols, '自定义');
+                }
+            }
+        };
+
+        if (customRowsInput) {
+            customRowsInput.addEventListener('input', updateCustomConfig);
+        }
+        if (customSeatsInput) {
+            customSeatsInput.addEventListener('input', updateCustomConfig);
+        }
+
+        // 初始状态：没有选择任何配置
+        this.cinemaConfigSelected = false;
+        this.updateConfigNextButton();
+    }
+
+    /**
+     * 验证自定义配置
+     */
+    validateCustomConfig() {
+        const customRowsInput = document.getElementById('custom-rows');
+        const customSeatsInput = document.getElementById('custom-seats');
+
+        const rows = parseInt(customRowsInput?.value) || 0;
+        const cols = parseInt(customSeatsInput?.value) || 0;
+
+        // 验证自定义配置是否有效
+        const isValid = rows >= 5 && rows <= 20 && cols >= 10 && cols <= 30;
+
+        if (isValid) {
+            this.cinemaConfigSelected = true;
+            this.applyConfigToModules(rows, cols, '自定义');
+        } else {
+            this.cinemaConfigSelected = false;
+        }
+
+        this.updateConfigNextButton();
+    }
+
+    /**
+     * 生成订单信息
+     */
+    generateOrderInfo() {
+        const orderNumber = 'ORD' + Date.now();
+        const purchaseTime = new Date().toLocaleString('zh-CN');
+
+        const orderNumberElement = document.getElementById('order-number');
+        if (orderNumberElement) {
+            orderNumberElement.textContent = orderNumber;
+        }
+
+        const purchaseTimeElement = document.getElementById('purchase-time');
+        if (purchaseTimeElement) {
+            purchaseTimeElement.textContent = purchaseTime;
+        }
+    }
+
+    /**
+     * 重置到开始状态
+     */
+    resetToStart() {
+        this.currentView = 'config';
+        this.viewHistory = ['config'];
+
+        // 重置背景为田野背景
+        if (window.movieSelector) {
+            window.movieSelector.restoreConfigBackground();
+        }
+
+        this.switchToView('config');
+        this.resetAllForms();
+        this.showMessage('已重置，可以开始新的订单', 'info');
+    }
+
+    /**
+     * 重置所有表单数据
+     */
+    resetAllForms() {
+        // 重置电影选择为第一个
+        const allMovieItems = document.querySelectorAll('.movie-item');
+        allMovieItems.forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const firstMovie = document.querySelector('.movie-item');
+        if (firstMovie) {
+            firstMovie.classList.add('active');
+            if (window.movieSelector) {
+                window.movieSelector.selectMovie(firstMovie);
+            }
+        }
+    }
+
+    /**
+     * 视图切换后的回调函数
+     * @param {string} viewName - 新视图名称
+     */
+    onViewChanged(viewName) {
+        switch (viewName) {
+            case 'config':
+                this.onConfigViewActivated();
+                break;
+            case 'movie':
+                this.onMovieViewActivated();
+                break;
+            case 'seat':
+                this.onSeatViewActivated();
+                break;
+            case 'payment':
+                this.onPaymentViewActivated();
+                break;
+            case 'confirm':
+                this.onConfirmViewActivated();
+                break;
+        }
+    }
+
+    onConfigViewActivated() {
+        console.log('配置视图已激活');
+        // 确保配置选择器已初始化
+        if (!this.configSelectorInitialized) {
+            this.initializeCinemaConfigSelector();
+            this.configSelectorInitialized = true;
+        }
+    }
+
     onMovieViewActivated() {
         console.log('电影选择视图已激活');
+        // 确保按钮状态正确
+        this.updateMovieNextButton();
     }
 
     onSeatViewActivated() {
@@ -376,87 +658,6 @@ class ViewController {
 
     onConfirmViewActivated() {
         console.log('确认视图已激活');
-    }
-
-    /**
-     * 初始化影厅配置选择器
-     */
-    initializeCinemaConfigSelector() {
-        const presetRadios = document.querySelectorAll('input[name="cinema-preset"]');
-        const customConfig = document.querySelector('.custom-config');
-
-        // 预设配置映射
-        const presetConfigs = {
-            small: { rows: 8, cols: 12, name: '小厅' },
-            medium: { rows: 10, cols: 20, name: '中厅' },
-            large: { rows: 12, cols: 25, name: '大厅' }
-        };
-
-        // 监听预设选项变化
-        presetRadios.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    const selectedPreset = e.target.value;
-
-                    if (selectedPreset === 'custom') {
-                        // 显示自定义配置
-                        if (customConfig) {
-                            customConfig.style.display = 'block';
-                        }
-                    } else {
-                        // 隐藏自定义配置
-                        if (customConfig) {
-                            customConfig.style.display = 'none';
-                        }
-
-                        // 应用预设配置
-                        const config = presetConfigs[selectedPreset];
-                        if (config) {
-                            this.applyConfigToModules(config.rows, config.cols, config.name);
-                        }
-                    }
-                }
-            });
-        });
-
-        // 监听自定义配置变化
-        const customRowsInput = document.getElementById('custom-rows');
-        const customSeatsInput = document.getElementById('custom-seats');
-        const totalSeatsSpan = document.getElementById('total-seats');
-
-        const updateCustomConfig = () => {
-            const rows = parseInt(customRowsInput?.value) || 10;
-            const cols = parseInt(customSeatsInput?.value) || 20;
-            const total = rows * cols;
-
-            if (totalSeatsSpan) {
-                totalSeatsSpan.textContent = total;
-            }
-
-            // 如果当前选中的是自定义配置，则应用更改
-            const selectedPreset = document.querySelector('input[name="cinema-preset"]:checked');
-            if (selectedPreset && selectedPreset.value === 'custom') {
-                this.applyConfigToModules(rows, cols, '自定义');
-            }
-        };
-
-        if (customRowsInput) {
-            customRowsInput.addEventListener('input', updateCustomConfig);
-        }
-        if (customSeatsInput) {
-            customSeatsInput.addEventListener('input', updateCustomConfig);
-        }
-
-        // 初始化时应用默认选中的配置
-        setTimeout(() => {
-            const defaultSelected = document.querySelector('input[name="cinema-preset"]:checked');
-            if (defaultSelected && defaultSelected.value !== 'custom') {
-                const config = presetConfigs[defaultSelected.value];
-                if (config) {
-                    this.applyConfigToModules(config.rows, config.cols, config.name);
-                }
-            }
-        }, 100);
     }
 
     /**

@@ -157,6 +157,38 @@
     background: #2f7a2f;
 }
 
+/* 禁用按钮样式 */
+.btn-disabled,
+.btn:disabled {
+    background: #e9ecef !important;
+    color: #6c757d !important;
+    border-color: #e9ecef !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.btn-disabled:hover,
+.btn:disabled:hover {
+    background: #e9ecef !important;
+    color: #6c757d !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 禁用状态的主要按钮 */
+.btn-primary:disabled,
+.btn-primary.btn-disabled {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%) !important;
+    color: #6c757d !important;
+    border-color: #dee2e6 !important;
+}
+
+/* 禁用状态的动画效果 */
+.btn:disabled {
+    animation: none !important;
+}
+
 /* 输入框样式 */
 .input-group {
     margin-bottom: 15px;
