@@ -1,0 +1,39 @@
+/* ========================= 基础样式重置 ========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Noto Sans CJK SC', sans-serif;
+    line-height: 1.6;
+    color: #2c3e50;
+    /* background: rgba(95, 240, 143, 0.5); */
+    background: url("../img/background-field.png") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+
+    transition: background 0.3s ease-in-out;
+}
+
+/* ========================= 页面视图控制 ========================= */
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+/* ========================= 通用组件样式 ========================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}

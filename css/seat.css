@@ -1,0 +1,756 @@
+/* ========================= 选座视图样式 ========================= */
+.seat-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.seat-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #c2d4d6;
+}
+
+.seat-header h2 {
+    color: #2c3e50;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* 票务类型选择器 */
+.ticket-type-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.ticket-type {
+    padding: 10px 20px;
+    border: 2px solid #c2d4d6;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.ticket-type.active {
+    border-color: #68a530;
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.1) 0%, rgba(57, 141, 55, 0.1) 100%);
+    color: #398d37;
+}
+
+.ticket-type input[type="radio"] {
+    display: none;
+}
+
+/* ========================= 第一部分：顶部控制区域 ========================= */
+
+.seat-top-section {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(152, 204, 187, 0.2) 100%);
+    border-radius: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+/* 顶部控制网格布局 */
+.top-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+/* 客户信息区域 */
+.customer-info,
+.group-info {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+    height: fit-content;
+}
+
+.customer-info h3,
+.group-info h3,
+.seat-preference h3,
+.manual-controls h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+}
+
+.customer-info h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(135deg, #98ccbb 0%, #329363 100%);
+    border-radius: 2px;
+}
+
+/* 客户信息网格 */
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.input-group input,
+.input-group select {
+    padding: 8px 12px;
+    border: 1px solid #c2d4d6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+/* 选座说明样式 */
+.seat-instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.1) 0%, rgba(152, 204, 187, 0.1) 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(194, 212, 214, 0.3);
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    border: 1px solid rgba(194, 212, 214, 0.2);
+    transition: all 0.3s ease;
+}
+
+.instruction-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #68a530;
+    transform: translateX(3px);
+}
+
+.instruction-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.instruction-text {
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+}
+
+/* 选座偏好区域 */
+.seat-preference,
+.group-preference {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+    height: fit-content;
+}
+
+/* 确保h3本身有正确的position */
+.group-controls .group-preference h3 {
+    margin: 0 0 15px 0 !important;
+    color: #2c3e50 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #e9ecef !important;
+    position: relative !important;
+}
+
+.group-controls .group-preference h3::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    width: 40px !important;
+    height: 2px !important;
+    background: linear-gradient(135deg, #80bc6b 0%, #68a530 100%) !important;
+    border-radius: 2px;
+}
+
+/* 同时确保个人票也有 */
+.individual-controls .seat-preference h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(135deg, #80bc6b 0%, #68a530 100%);
+    border-radius: 2px;
+}
+
+.seat-preference select,
+.group-preference select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #c2d4d6;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.auto-seat-actions {
+    margin-top: 15px;
+}
+
+.btn-auto {
+    width: 100%;
+    background: linear-gradient(135deg, #98ccbb 0%, #80bc6b 100%);
+    color: white;
+    border: 2px solid transparent;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-auto:hover {
+    background: linear-gradient(135deg, #85b8a8 0%, #70a85d 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(152, 204, 187, 0.4);
+}
+
+/* 手动选座控制 */
+.manual-controls {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+    height: fit-content;
+}
+
+.manual-controls h3::after {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+}
+
+.manual-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.manual-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(194, 212, 214, 0.3);
+    border: 2px solid #c2d4d6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.manual-option:hover {
+    border-color: #68a530;
+}
+
+.manual-option:has(input[type="radio"]:checked) {
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.1) 0%, rgba(57, 141, 55, 0.1) 100%);
+    border-color: #68a530;
+}
+
+.manual-option input[type="radio"] {
+    margin-right: 8px;
+}
+
+.btn-clear {
+    width: 100%;
+    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
+    color: #2c3e50;
+    border: 2px solid transparent;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-clear:hover {
+    background: linear-gradient(135deg, #a8c5c8 0%, #85b8a8 100%);
+    transform: translateY(-1px);
+}
+
+
+.seat-canvas-section {
+    margin-bottom: 30px;
+    padding: 30px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.seat-canvas-container-large {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 放大的银幕 */
+.screen-large {
+    width: 80%;
+    max-width: 800px;
+    height: 50px;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    border-radius: 15px 15px 80px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 25px rgba(104, 165, 48, 0.5);
+    position: relative;
+}
+
+.screen-large::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.3) 0%, rgba(57, 141, 55, 0.3) 100%);
+    border-radius: 20px 20px 90px 90px;
+    z-index: -1;
+}
+
+.screen-large .screen-label {
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+}
+
+/* Canvas控制按钮 */
+.canvas-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.canvas-controls .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.canvas-controls .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: #68a530;
+    color: #68a530;
+}
+
+/* 简化Canvas样式，避免复杂的边框和变换 */
+#cinema-canvas {
+    display: block !important;
+    margin: 0 auto;
+    cursor: crosshair;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    border-radius: 10px;
+    /* 移除边框，避免影响位置计算 */
+    /* border: 2px solid rgba(255, 255, 255, 0.1); */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    /* 让Canvas根据实际尺寸显示，避免CSS尺寸覆盖 */
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 放大的图例 */
+.legend-large {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px 25px;
+    backdrop-filter: blur(10px);
+}
+
+.legend-large .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.legend-large .legend-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.legend-large .legend-color {
+    width: 16px;
+    height: 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 为不同座位状态设置颜色 */
+.legend-color.available {
+    background: #80bc6b;
+    /* 可用座位 */
+}
+
+.legend-color.selected {
+    background: #68a530;
+    /* 已选座位 */
+}
+
+.legend-color.sold {
+    background: #dc3545;
+    /* 已售座位 */
+}
+
+.legend-color.reserved {
+    background: #98ccbb;
+    /* 已预订座位 */
+}
+
+/* ========================= 第三部分：底部控制区域 ========================= */
+
+.seat-bottom-section {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(152, 204, 187, 0.2) 100%);
+    border-radius: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+/* 底部控制网格布局 */
+.bottom-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+/* 已选座位 */
+.selected-seats {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+}
+
+.selected-seats h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+}
+
+.selected-seats h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(135deg, #80bc6b 0%, #329363 100%);
+    border-radius: 2px;
+}
+
+.selected-list {
+    min-height: 80px;
+    padding: 15px;
+    background: rgba(194, 212, 214, 0.3);
+    border: 2px dashed #98ccbb;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.no-selection {
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    width: 100%;
+    margin: 0;
+    padding: 20px 0;
+}
+
+.selection-summary {
+    background: rgba(194, 212, 214, 0.3);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    color: #398d37;
+    padding-top: 10px;
+    margin-top: 6px;
+    border-top: 2px solid #c2d4d6;
+    font-size: 16px;
+}
+
+/* 座位操作 */
+.seat-operations {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+}
+
+.seat-operations h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+}
+
+.seat-operations h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    border-radius: 2px;
+}
+
+.operation-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-reserve {
+    width: 100%;
+    background: linear-gradient(135deg, #98ccbb 0%, #80bc6b 100%);
+    color: white;
+    border: 2px solid transparent;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-reserve:hover {
+    background: linear-gradient(135deg, #85b8a8 0%, #70a85d 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(152, 204, 187, 0.4);
+}
+
+.btn-purchase {
+    width: 100%;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    border: 2px solid transparent;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-purchase:hover {
+    background: linear-gradient(135deg, #5a8f2a 0%, #2f7a2f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(104, 165, 48, 0.4);
+}
+
+/* 影厅状态 */
+.cinema-status {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #c2d4d6;
+}
+
+.cinema-status h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+    position: relative;
+}
+
+.cinema-status h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
+    border-radius: 2px;
+}
+
+.cinema-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item span:first-child {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.stat-item span:last-child {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* 控制面板显示切换 */
+.individual-controls,
+.group-controls {
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.individual-controls.hidden,
+.group-controls.hidden {
+    display: none !important;
+}
+
+.individual-controls.active,
+.group-controls.active {
+    display: block !important;
+}
+
+/* 底部操作按钮 */
+.seat-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding-top: 25px;
+    border-top: 2px solid #c2d4d6;
+}
+
+.seat-actions .btn {
+    min-width: 140px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+/*.btn-secondary {
+    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
+    color: #2c3e50;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #a8c5c8 0%, #85b8a8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(194, 212, 214, 0.4);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a8f2a 0%, #2f7a2f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(104, 165, 48, 0.4);
+}
+
+.btn-primary:disabled {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}*/

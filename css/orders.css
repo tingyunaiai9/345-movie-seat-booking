@@ -1,0 +1,494 @@
+/* ========================= 圆形我的订单按钮 ========================= */
+.btn-my-orders-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 20px;
+    position: relative;
+    font-size: 16px;
+}
+
+.btn-my-orders-circle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-my-orders-circle .icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* 可选：添加一个小的脉冲动画效果 */
+.btn-my-orders-circle::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* 导航步骤容器调整 */
+.nav-steps {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    /* 确保圆形按钮与步骤对齐 */
+}
+
+/* 如果想让圆形按钮更突出，可以添加这个样式 */
+.btn-my-orders-circle:hover::before {
+    animation-duration: 1s;
+}
+
+/* ========================= 我的订单页面样式 ========================= */
+.my-orders-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+    backdrop-filter: blur(10px);
+    min-height: 70vh;
+}
+
+.my-orders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #c2d4d6;
+}
+
+.my-orders-header h2 {
+    color: #398d37;
+    font-size: 26px;
+    margin: 0;
+    font-weight: 600;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 订单筛选器 */
+.orders-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(152, 204, 187, 0.2) 100%);
+    border-radius: 10px;
+    border: 1px solid #c2d4d6;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-tab {
+    padding: 8px 16px;
+    border: 2px solid #c2d4d6;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.filter-tab.active {
+    border-color: #68a530;
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.1) 0%, rgba(57, 141, 55, 0.1) 100%);
+    color: #398d37;
+    font-weight: 600;
+}
+
+.filter-tab:hover:not(.active) {
+    border-color: #98ccbb;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-box input {
+    padding: 8px 12px;
+    border: 2px solid #c2d4d6;
+    border-radius: 6px;
+    width: 200px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+.search-box .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: auto;
+}
+
+/* 订单列表容器 */
+.orders-container {
+    min-height: 400px;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 无订单状态 */
+.no-orders {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.no-orders-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.no-orders h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: #6c757d;
+}
+
+.no-orders p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* 订单项样式 */
+.order-item {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: #68a530;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.3s ease;
+}
+
+.order-item:hover::before {
+    transform: scaleY(1);
+}
+
+.order-item:hover {
+    border-color: #68a530;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 6px 20px rgba(104, 165, 48, 0.15);
+    transform: translateY(-2px);
+}
+
+.order-item.reserved {
+    border-left: 4px solid #98ccbb;
+}
+
+.order-item.paid {
+    border-left: 4px solid #68a530;
+}
+
+.order-item.cancelled {
+    border-left: 4px solid #dc3545;
+    opacity: 0.7;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.order-number {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.order-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.order-status.reserved {
+    background: linear-gradient(135deg, rgba(152, 204, 187, 0.2) 0%, rgba(128, 188, 107, 0.2) 100%);
+    color: #80bc6b;
+    border: 1px solid #98ccbb;
+}
+
+.order-status.paid {
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.2) 0%, rgba(57, 141, 55, 0.2) 100%);
+    color: #398d37;
+    border: 1px solid #68a530;
+}
+
+.order-status.cancelled {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.2) 100%);
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.order-content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+}
+
+.order-movie {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.order-movie img {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.movie-info h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.movie-info p {
+    margin: 2px 0;
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.order-details {
+    flex: 1;
+}
+
+.order-details h5 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.seat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.seat-tag {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.order-meta {
+    color: #6c757d;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.order-price {
+    text-align: right;
+}
+
+.price-amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: #398d37;
+    margin-bottom: 5px;
+}
+
+.price-details {
+    font-size: 12px;
+    color: #6c757d;
+    line-height: 1.3;
+}
+
+/* 订单详情模态框 */
+.order-detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.order-detail-modal .modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.order-detail-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 2px solid #e9ecef;
+    background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(152, 204, 187, 0.2) 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.order-detail-modal .modal-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.order-detail-modal .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.order-detail-modal .modal-close:hover {
+    color: #dc3545;
+}
+
+.order-detail-modal .modal-body {
+    padding: 25px;
+}
+
+.order-detail-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.order-detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.order-detail-section h4 {
+    margin: 0 0 10px 0;
+    color: #398d37;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.detail-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.detail-value {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.order-detail-modal .modal-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    padding: 20px 25px;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+.order-detail-modal .btn {
+    min-width: 100px;
+    padding: 10px 20px;
+    font-size: 14px;
+}

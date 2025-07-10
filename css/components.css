@@ -1,0 +1,678 @@
+/* ========================= 通用组件样式 ========================= */
+
+/* 按钮样式 */
+.btn {
+    display: inline-block;
+    padding: 14px 28px;
+    /* 从 10px 20px 更改，用于更大的尺寸 */
+    border: none;
+    /* 保持不变 */
+    border-radius: 10px;
+    /* 从 6px 更改，用于更圆的边角 */
+    font-size: 16px;
+    /* 从 14px 更改，用于更大的字体 */
+    font-weight: 600;
+    /* 从 500 更改，用于更粗的字体 */
+    text-align: center;
+    /* 保持不变 */
+    text-decoration: none;
+    /* 保持不变 */
+    cursor: pointer;
+    /* 保持不变 */
+    transition: all 0.3s ease;
+    /* 保持不变 */
+    outline: none;
+    /* 保持不变 */
+    min-width: 140px;
+    /* 从 100px 更改，用于统一的最小宽度 */
+    border: 2px solid transparent;
+    /* 添加此行以匹配选座界面按钮的边框 */
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 统一的 btn-primary 样式 */
+.btn-primary {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a8f2a 0%, #2f7a2f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(104, 165, 48, 0.4);
+}
+
+.btn-primary:disabled {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: #adb5bd;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
+    color: #2c3e50;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #a8c5c8 0%, #85b8a8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(194, 212, 214, 0.4);
+}
+
+/*.seat-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding-top: 25px;
+    border-top: 2px solid #c2d4d6;
+}*/
+
+/*.seat-actions .btn {
+    min-width: 140px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}*/
+
+.btn-success {
+    background: linear-gradient(135deg, #80bc6b 0%, #329363 100%);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #70a85d 0%, #2a7d55 100%);
+}
+
+.btn-auto {
+    background: rgb(132, 213, 177);
+    color: white;
+}
+
+.btn-auto:hover {
+    background: rgb(4, 125, 51);
+}
+
+.btn-reserve {
+    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
+    color: #2c3e50;
+}
+
+.btn-reserve:hover {
+    background: linear-gradient(135deg, #b0c8ca 0%, #85b8a8 100%);
+}
+
+.btn-purchase {
+    background: linear-gradient(135deg, #68a530 0%, #329363 100%);
+    color: white;
+}
+
+.btn-purchase:hover {
+    background: linear-gradient(135deg, #5a8f2a 0%, #2a7d55 100%);
+}
+
+.btn-cancel {
+    background: #dc3545;
+    color: white;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-refund {
+    background: #fd7e14;
+    color: white;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-clear {
+    background: #c2d4d6;
+    color: #2c3e50;
+}
+
+.btn-clear:hover {
+    background: #a8c5c8;
+}
+
+.btn-add {
+    background: #398d37;
+    color: white;
+    min-width: 60px;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.btn-add:hover {
+    background: #2f7a2f;
+}
+
+/* 输入框样式 */
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #c2d4d6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 3px rgba(104, 165, 48, 0.1);
+}
+
+/* ========================= 消息提示组件 ========================= */
+.message-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ========================= 加载状态遮罩 ========================= */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    backdrop-filter: blur(5px);
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #68a530;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* ========================= 确认对话框 ========================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-dialog {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.modal-body {
+    padding: 20px;
+    line-height: 1.7;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+.btn-clear {
+    width: 100%;
+    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
+    color: #2c3e50;
+    border: 2px solid transparent;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-clear:hover {
+    background: linear-gradient(135deg, #a8c5c8 0%, #85b8a8 100%);
+    transform: translateY(-1px);
+}
+
+/* 团体成员管理 */
+.group-members {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.member-list {
+    min-height: 60px;
+    max-height: 120px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(194, 212, 214, 0.2);
+    border-radius: 6px;
+    border: 1px dashed #98ccbb;
+}
+
+.add-member {
+    border-top: 1px solid #e9ecef;
+    padding-top: 15px;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input-container {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+}
+
+.input-container input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #c2d4d6;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.btn-add {
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: linear-gradient(135deg, #5a8f2a 0%, #2f7a2f 100%);
+}
+
+.member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+/* ========================= 个人票成员管理样式 ========================= */
+.individual-members {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.individual-members .member-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fafbfc;
+    min-height: 60px;
+}
+
+.individual-members .member-list:empty::after {
+    content: "暂无成员，请在下方添加";
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    display: block;
+    padding: 20px;
+}
+
+.individual-members .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+    transition: all 0.2s ease;
+}
+
+.individual-members .member-item:hover {
+    border-color: #68a530;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.1);
+}
+
+.individual-members .member-item:last-child {
+    margin-bottom: 0;
+}
+
+.individual-members .member-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.individual-members .member-name {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 60px;
+}
+
+.individual-members .member-age {
+    color: #6c757d;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.individual-members .member-type {
+    background: linear-gradient(135deg, rgba(104, 165, 48, 0.1) 0%, rgba(57, 141, 55, 0.1) 100%);
+    color: #398d37;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(104, 165, 48, 0.3);
+}
+
+.individual-members .remove-member {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.individual-members .remove-member:hover {
+    background: #c82333;
+}
+
+.individual-members .add-member {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+.individual-members .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.individual-members .input-row input {
+    padding: 8px 12px;
+    border: 1px solid #c2d4d6;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.individual-members .input-row input:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+.individual-members .input-row input[type="text"] {
+    flex: 2;
+}
+
+.individual-members .input-row input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+}
+
+.individual-members .input-row button {
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.individual-members .member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.individual-members .member-count span {
+    font-weight: 600;
+    color: #398d37;
+}
+
+/* ========================= 团体票成员管理样式（与个人票一致）========================= */
+.group-members {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.group-members .member-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fafbfc;
+    min-height: 60px;
+}
+
+.group-members .member-list:empty::after {
+    content: "暂无成员，请在下方添加";
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    display: block;
+    padding: 20px;
+}
+
+.group-members .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+    transition: all 0.2s ease;
+}
+
+.group-members .member-item:hover {
+    border-color: #68a530;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.1);
+}
+
+.group-members .member-item:last-child {
+    margin-bottom: 0;
+}
+
+.group-members .member-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.group-members .member-name {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 60px;
+}
+
+.group-members .member-age {
+    color: #6c757d;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.group-members .member-type {
+    background: linear-gradient(135deg, rgba(152, 204, 187, 0.2) 0%, rgba(128, 188, 107, 0.2) 100%);
+    color: #80bc6b;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(152, 204, 187, 0.5);
+}
+
+.group-members .remove-member {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.group-members .remove-member:hover {
+    background: #c82333;
+}
+
+.group-members .add-member {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+    padding: 12px;
+    border: 1px solid #c2d4d6;
+}
+
+.group-members .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.group-members .input-row input {
+    padding: 8px 12px;
+    border: 1px solid #c2d4d6;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.group-members .input-row input:focus {
+    outline: none;
+    border-color: #68a530;
+    box-shadow: 0 0 0 2px rgba(104, 165, 48, 0.2);
+}
+
+.group-members .input-row input[type="text"] {
+    flex: 2;
+}
+
+.group-members .input-row input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+}
+
+.group-members .input-row button {
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.group-members .member-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+}
+
+.group-members .member-count span {
+    font-weight: 600;
+    color: #80bc6b;
+}
