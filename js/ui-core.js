@@ -435,6 +435,7 @@ function bindAutoSeatButtons() {
             if (members.length > 0) {
                 if (window.StateManager && window.StateManager.performAutoIndividualSelection) {
                     window.StateManager.performAutoIndividualSelection(members);
+                    alert('自动选座成功！');
                 } else {
                     console.error('StateManager未加载或函数不存在');
                     alert('自动选座功能暂不可用，请手动选择座位');
@@ -456,6 +457,7 @@ function bindAutoSeatButtons() {
             if (groupInfo.length > 0) {
                 if (window.StateManager && window.StateManager.performAutoGroupSelection) {
                     window.StateManager.performAutoGroupSelection(groupInfo);
+                    alert('团体票自动选座成功！');
                 } else {
                     console.error('StateManager未加载或函数不存在');
                 }
