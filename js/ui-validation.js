@@ -56,16 +56,8 @@ function validateIndividualSeatSelection(selectedSeats, customerInfo) {
     }
 
     // 验证年龄限制
-    if (!validateAgeRestriction(customerInfo.members)) {
+    if (!validateAgeRestriction(customerInfo.members, selectedSeats)) {
         return false;
-    }
-
-    // 个人票允许分散座位，但建议连续
-    if (selectedSeats.length > 1 && !areSeatsConsecutive(selectedSeats)) {
-        const confirmScatter = confirm('您选择的座位不连续，这可能影响观影体验。是否继续？');
-        if (!confirmScatter) {
-            return false;
-        }
     }
 
     return true;
@@ -94,7 +86,7 @@ function validateGroupSeatSelection(selectedSeats, customerInfo) {
     }
 
     // 验证年龄限制
-    if (!validateAgeRestriction(customerInfo.members)) {
+    if (!validateAgeRestriction(customerInfo.members, selectedSeats)) {
         return false;
     }
 
@@ -104,36 +96,32 @@ function validateGroupSeatSelection(selectedSeats, customerInfo) {
         return false;
     }
 
-    // 团体票最少3人
-    if (memberCount < 3) {
-        alert('团体票最少需要3人');
-        return false;
-    }
-
     return true;
 }
 
 /**
  * 验证年龄限制
  * @param {Array} members - 成员列表
+ * @param {Array} seats - 座位数组
  * @returns {boolean} 是否通过验证
  */
-function validateAgeRestriction(members) {
+function validateAgeRestriction(members, seats) {
     if (!members || members.length === 0) {
         return true;
     }
-
-    // 检查是否有未成年人（18岁以下）
-    const minors = members.filter(member => member.age < 18);
-
-    if (minors.length > 0) {
-        // 这里可以根据电影分级制度进行更详细的验证
-        const confirmMinor = confirm(`检测到${minors.length}名未成年人，请确认已获得监护人同意。是否继续？`);
-        if (!confirmMinor) {
+    if (!seats || seats.length !== members.length) {
+        alert('成员数量与座位数量不一致，无法进行年龄限制验证');
+        return false;
+    }
+    for (let i = 0; i < members.length; i++) {
+        const member = members[i];
+        const seat = seats[i];
+        const ageGroup = window.CinemaData.getAgeGroup(member.age);
+        if (!window.CinemaData.canSitInRow(ageGroup, seat.row)) {
+            alert(`成员“${member.name || ''}”年龄为${member.age}岁，不能坐在第${seat.row}排，请重新选择座位或调整成员顺序。`);
             return false;
         }
     }
-
     return true;
 }
 
