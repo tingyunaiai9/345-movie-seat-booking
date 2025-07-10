@@ -434,16 +434,7 @@ function bindAutoSeatButtons() {
             const members = window.UIMemberManagement ? window.UIMemberManagement.getIndividualMembersList() : [];
             if (members.length > 0) {
                 if (window.StateManager && window.StateManager.performAutoIndividualSelection) {
-                    const result = window.StateManager.performAutoIndividualSelection(members);
-
-                    if (result && result.success) {
-                        console.log('✅ 个人票自动选座成功');
-                        alert('自动选座成功！');
-                    } else {
-                        const errorMessage = result && result.message ? result.message : '自动选座失败，请手动选择座位';
-                        console.error('❌ 个人票自动选座失败:', errorMessage);
-                        alert('自动选座失败：' + errorMessage);
-                    }
+                    window.StateManager.performAutoIndividualSelection(members);
                 } else {
                     console.error('StateManager未加载或函数不存在');
                     alert('自动选座功能暂不可用，请手动选择座位');

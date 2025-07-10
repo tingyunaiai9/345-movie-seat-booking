@@ -43,23 +43,23 @@ let globalState = {
  */
 function getAllSeats() {
     if (!window.CinemaData) return [];
-    
+
     const config = window.CinemaData.getCurrentConfig();
     const seats = [];
-    
+
     for (let row = 1; row <= config.TOTAL_ROWS; row++) {
         for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
             const seat = window.CinemaData.getSeat(row, col);
             if (seat) {
                 // 为UI添加悬停状态
-                seat.isHovered = (globalState.hoveredSeat && 
-                    globalState.hoveredSeat.row === seat.row && 
+                seat.isHovered = (globalState.hoveredSeat &&
+                    globalState.hoveredSeat.row === seat.row &&
                     globalState.hoveredSeat.col === seat.col);
                 seats.push(seat);
             }
         }
     }
-    
+
     return seats;
 }
 
@@ -121,7 +121,7 @@ function getMousePosition(event) {
     const canvas = globalState.canvasElement;
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    
+
     return {
         x: (event.clientX - rect.left) * scaleX,
         y: (event.clientY - rect.top) * scaleY
@@ -135,19 +135,19 @@ function getMousePosition(event) {
  */
 function performSeatHitDetection(mousePos) {
     const allSeats = getAllSeats();
-    
+
     for (const seat of allSeats) {
         const seatPos = window.CanvasRenderer.calculateSeatPosition(seat);
         const distance = Math.sqrt(Math.pow(mousePos.x - seatPos.x, 2) + Math.pow(mousePos.y - seatPos.y, 2));
-        const detectionRadius = seat.isHovered ? 
-            window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS * 1.2 : 
+        const detectionRadius = seat.isHovered ?
+            window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS * 1.2 :
             window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS;
-            
+
         if (distance <= detectionRadius) {
             return seat;
         }
     }
-    
+
     return null;
 }
 
@@ -216,7 +216,7 @@ function handleCanvasMouseMove(event) {
     if (hitSeat) {
         hitSeat.isHovered = true;
     }
-    
+
     // 直接调用Canvas重绘
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
         window.CanvasRenderer.drawCinema();
@@ -232,7 +232,7 @@ function handleCanvasMouseLeave() {
         globalState.hoveredSeat.isHovered = false;
     }
     globalState.hoveredSeat = null;
-    
+
     // 直接调用Canvas重绘
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
         window.CanvasRenderer.drawCinema();
@@ -288,7 +288,7 @@ function deselectSeat(seat) {
     if (seat && seat.status === 'selected') {
         seat.status = 'available';
         console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
-        
+
         // 立即更新UI和重绘
         if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
             window.CanvasRenderer.drawCinema();
@@ -322,10 +322,10 @@ function toggleSeatSelection(seat) {
  */
 function getSelectedSeats() {
     if (!window.CinemaData) return [];
-    
+
     const config = window.CinemaData.getCurrentConfig();
     const selectedSeats = [];
-    
+
     for (let row = 1; row <= config.TOTAL_ROWS; row++) {
         for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
             const seat = window.CinemaData.getSeat(row, col);
@@ -334,7 +334,7 @@ function getSelectedSeats() {
             }
         }
     }
-    
+
     return selectedSeats;
 }
 
@@ -343,12 +343,12 @@ function getSelectedSeats() {
  */
 function clearAllSelections() {
     if (!window.CinemaData) return;
-    
+
     const selectedSeats = getSelectedSeats();
     selectedSeats.forEach(seat => {
         seat.status = 'available';
     });
-    
+
     console.log('已清除所有选择');
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
         window.CanvasRenderer.drawCinema();
@@ -360,7 +360,7 @@ function clearAllSelections() {
 
 /**
  * 执行自动选座（个人）
- * @param {Object} userInfo - 用户信息 {age: number, name: string}
+ * @param {Object} userInfo - 用户信息 [{age: number, name: string}, ...]
  */
 function performAutoIndividualSelection(userInfo) {
     if (!window.CinemaData) {
@@ -370,7 +370,7 @@ function performAutoIndividualSelection(userInfo) {
 
     clearAllSelections();
 
-    const recommendedSeat = window.CinemaData.findSeatForIndividual([userInfo]);
+    const recommendedSeat = window.CinemaData.findSeatForIndividual(userInfo);
     if (recommendedSeat && recommendedSeat.length > 0) {
         recommendedSeat.forEach(seat => {
             selectSeat(seat);
@@ -479,7 +479,7 @@ function performPurchase(customerInfo) {
 function notifySelectionChange() {
     // 获取选中的座位（直接从本模块获取）
     const selectedSeats = getSelectedSeats();
-    
+
     // 获取当前电影价格
     const activeMovie = document.querySelector('.movie-item.active');
     let ticketPrice = 45; // 默认价格
@@ -488,7 +488,7 @@ function notifySelectionChange() {
         const price = priceText.match(/¥(\d+)/);
         if (price) ticketPrice = parseInt(price[1]);
     }
-    
+
     const totalPrice = selectedSeats.length * ticketPrice;
 
     // 发送自定义事件
@@ -500,26 +500,26 @@ function notifySelectionChange() {
         }
     });
     document.dispatchEvent(event);
-    
+
     // 直接更新UI显示
     const selectedList = document.getElementById('selected-seats-list');
     const selectedCount = document.getElementById('selected-count');
     const totalPriceElement = document.getElementById('total-price');
-    
+
     if (!selectedList || !selectedCount || !totalPriceElement) return;
-    
+
     // 更新已选座位列表
     if (selectedSeats.length === 0) {
         selectedList.innerHTML = '<p class="no-selection">暂未选择座位</p>';
     } else {
-        const seatsHtml = selectedSeats.map(seat => 
+        const seatsHtml = selectedSeats.map(seat =>
             `<div class="seat-tag" data-seat-id="${seat.id}">
                 <span class="seat-number">${seat.row}排${seat.col}座</span>
                 <button class="seat-remove" data-row="${seat.row}" data-col="${seat.col}">×</button>
             </div>`
         ).join('');
         selectedList.innerHTML = seatsHtml;
-        
+
         // 为删除按钮添加点击事件
         const removeButtons = selectedList.querySelectorAll('.seat-remove');
         removeButtons.forEach(button => {
@@ -534,16 +534,16 @@ function notifySelectionChange() {
             });
         });
     }
-    
+
     // 更新统计信息
     selectedCount.textContent = selectedSeats.length;
     totalPriceElement.textContent = `¥${totalPrice}`;
-    
+
     // 更新按钮状态
     const nextButton = document.getElementById('next-to-payment');
     const reserveButton = document.getElementById('reserve-seats');
     const purchaseButton = document.getElementById('purchase-seats');
-    
+
     const hasSelection = selectedSeats.length > 0;
     if (nextButton) nextButton.disabled = !hasSelection;
     if (reserveButton) reserveButton.disabled = !hasSelection;
