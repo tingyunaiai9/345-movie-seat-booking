@@ -479,6 +479,23 @@ function getSeat(row, col) {
 }
 
 /**
+ * 设置座位状态
+ * @param {number} row - 行号 (1-based)
+ * @param {number} col - 座位号 (1-based)
+ * @param {string} status - 座位状态
+ * @returns {boolean} 操作是否成功
+ */
+function setSeat(row, col, status) {
+    if (!validateSeatParams(row, col)) return false;
+    const seat = cinemaSeats[row - 1][col - 1];
+    if (seat) {
+        seat.status = status;
+        return true;
+    }
+    return false;
+}
+
+/**
  * 获取电影院当前状态概览
  * @returns {Object} 电影院状态统计
  */
@@ -550,6 +567,7 @@ window.CinemaData = {
 
     // 查询函数
     getSeat,
+    setSeat,
     getCinemaStatus,
     getCurrentConfig, // V3 新增
 

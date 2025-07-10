@@ -265,36 +265,39 @@ function handleKeyUp(event) {
 
 /**
  * 选择一个座位
- * @param {number|Object} row - 行号或座位对象
- * @param {number} col - 列号（当第一个参数为行号时使用）
+ * @param {Object} seat - 座位对象
  * @returns {boolean} 操作是否成功
  */
 function selectSeat(seat) {
     if (seat && seat.status === 'available') {
-        seat.status = 'selected';
-        console.log(`座位 ${seat.row}-${seat.col} 已选择`);
-        return true;
+        // 使用 main.js 中的 setSeat 函数修改座位状态
+        const success = window.CinemaData.setSeat(seat.row, seat.col, 'selected');
+        if (success) {
+            console.log(`座位 ${seat.row}-${seat.col} 已选择`);
+            return true;
+        }
     }
     return false;
 }
 
 /**
  * 取消选择一个座位
- * @param {number|Object} row - 行号或座位对象
- * @param {number} col - 列号（当第一个参数为行号时使用）
+ * @param {Object} seat - 座位对象
  * @returns {boolean} 操作是否成功
  */
 function deselectSeat(seat) {
     if (seat && seat.status === 'selected') {
-        seat.status = 'available';
-        console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
+        const success = window.CinemaData.setSeat(seat.row, seat.col, 'available');
+        if (success) {
+            console.log(`座位 ${seat.row}-${seat.col} 已取消选择`);
 
-        // 立即更新UI和重绘
-        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-            window.CanvasRenderer.drawCinema();
+            // 立即更新UI和重绘
+            if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+                window.CanvasRenderer.drawCinema();
+            }
+            notifySelectionChange();
+            return true;
         }
-        notifySelectionChange();
-        return true;
     }
     return false;
 }
@@ -346,7 +349,7 @@ function clearAllSelections() {
 
     const selectedSeats = getSelectedSeats();
     selectedSeats.forEach(seat => {
-        seat.status = 'available';
+        window.CinemaData.setSeat(seat.row, seat.col, 'available');
     });
 
     console.log('已清除所有选择');
@@ -529,7 +532,6 @@ function notifySelectionChange() {
                 const seat = window.CinemaData.getSeat(row, col);
                 if (seat) {
                     deselectSeat(seat);
-                    // 更新UI已在deselectSeat函数中通过调用notifySelectionChange实现
                 }
             });
         });
