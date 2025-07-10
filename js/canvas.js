@@ -50,7 +50,8 @@ const CANVAS_CONFIG = {
     IMAGE_PATHS: {
         available: 'img/available.PNG',
         selected: 'img/selected.PNG',
-        sold: 'img/sold.PNG'
+        sold: 'img/sold.PNG',
+        reserved: 'img/reserved.PNG'
     },
 
     // 布局类型
