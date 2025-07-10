@@ -305,15 +305,43 @@ function updateConfirmCustomerInfo() {
 function handleFinalPayment() {
     console.log('处理最终支付确认...');
 
-    // 这里可以调用支付API或显示支付成功
-    alert('支付成功！订单已确认。');
+    // 获取客户信息
+    const customerInfo = window.UIMemberManagement && window.UIMemberManagement.getMyCustomerDataEnhanced
+        ? window.UIMemberManagement.getMyCustomerDataEnhanced()
+        : { ticketType: 'individual', members: [] };
 
-    // 创建购票订单记录
-    if (window.UIOrders && window.UIOrders.createMyPurchaseOrder) {
-        window.UIOrders.createMyPurchaseOrder();
+    // 调用StateManager的购票函数
+    let result = null;
+    if (window.StateManager && window.StateManager.performPurchase) {
+        result = window.StateManager.performPurchase(customerInfo);
+    } else {
+        alert('购票功能暂不可用，请稍后再试');
+        return;
     }
 
-    console.log('支付完成');
+    if (result && result.success) {
+        alert('支付成功！订单已确认。');
+        // 创建购票订单记录
+        if (window.UIOrders && window.UIOrders.createMyPurchaseOrder) {
+            window.UIOrders.createMyPurchaseOrder();
+        }
+
+        // 切换到 final-view
+        if (window.UICoreModule && window.UICoreModule.switchView) {
+            window.UICoreModule.switchView('final-view');
+        } else {
+            // 兜底：直接用DOM切换
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            var finalView = document.getElementById('final-view');
+            if(finalView) finalView.classList.add('active');
+        }
+
+        console.log('支付完成');
+    } else {
+        const errorMessage = result && result.message ? result.message : '支付失败，请重试';
+        alert('支付失败：' + errorMessage);
+        console.error('❌ 支付失败:', errorMessage);
+    }
 }
 
 // ========================= 图片处理工具函数 =========================
