@@ -1,0 +1,268 @@
+/* ========================= 响应式设计调整 ========================= */
+
+@media (max-width: 1400px) {
+    #cinema-canvas {
+        width: 1200px;
+        height: 900px;
+        /* 保持4:3纵横比 */
+    }
+
+    .screen-large {
+        max-width: 800px;
+    }
+
+    .legend-large {
+        max-width: 1000px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .seat-canvas-section {
+        padding: 20px;
+        min-height: 700px;
+    }
+
+    #cinema-canvas {
+        width: 1200px;
+        height: 900px;
+    }
+
+    .screen-large {
+        max-width: 720px;
+        height: 45px;
+    }
+
+    .legend-large {
+        max-width: 900px;
+        gap: 15px;
+        padding: 12px 20px;
+    }
+}
+
+
+@media (max-width: 1024px) {
+
+    .top-controls-grid,
+    .bottom-controls-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .manual-controls {
+        grid-column: 1 / -1;
+    }
+
+    #cinema-canvas {
+        width: 800px;
+        height: 533px;
+    }
+
+    .screen-large {
+        max-width: 640px;
+    }
+
+    .legend-large {
+        max-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .top-controls-grid,
+    .bottom-controls-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .seat-canvas-section {
+        padding: 20px;
+    }
+
+    #cinema-canvas {
+        width: 100%;
+        height: 375px;
+        max-width: 600px;
+    }
+
+    .legend-large {
+        gap: 10px;
+        padding: 10px 15px;
+    }
+
+    .legend-large .legend-item {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .seat-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .seat-actions .btn {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .seat-panel {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .ticket-type-selector {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .screen-large {
+        height: 40px;
+    }
+
+    .screen-large .screen-label {
+        font-size: 16px;
+    }
+
+    #cinema-canvas {
+        min-height: 300px;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .btn-my-orders-circle {
+        width: 36px;
+        height: 36px;
+        margin-left: 15px;
+    }
+
+    .btn-my-orders-circle .icon {
+        font-size: 16px;
+    }
+
+    .nav-steps {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-my-orders-circle {
+        width: 32px;
+        height: 32px;
+        margin-left: 10px;
+    }
+
+    .btn-my-orders-circle .icon {
+        font-size: 14px;
+    }
+
+    .nav-steps {
+        gap: 15px;
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .orders-filter {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .filter-tabs {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        justify-content: center;
+    }
+
+    .search-box input {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .order-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .order-price {
+        text-align: left;
+    }
+
+    .user-actions {
+        margin-left: 10px;
+    }
+
+    .my-orders-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .my-orders-panel {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .order-item {
+        padding: 15px;
+    }
+
+    .order-movie img {
+        width: 50px;
+        height: 75px;
+    }
+
+    .order-detail-modal .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .order-detail-modal .modal-footer {
+        flex-direction: column;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .individual-members .input-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .individual-members .input-row input,
+    .individual-members .input-row button {
+        width: 100%;
+    }
+
+    .individual-members .member-info {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .group-members .input-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .group-members .input-row input,
+    .group-members .input-row button {
+        width: 100%;
+    }
+
+    .group-members .member-info {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+}
