@@ -157,35 +157,39 @@ function handleCanvasClick(event) {
             return;
         }
 
+        let stateChanged = false;
+        
         // 根据Ctrl键状态决定选择模式
         if (globalState.isCtrlPressed) {
-            if (!hitSeat) return false;
+            // 多选模式
             if (hitSeat.status === 'available') {
-                return selectSeat(hitSeat);
+                stateChanged = selectSeat(hitSeat);
             } else if (hitSeat.status === 'selected') {
-                return deselectSeat(hitSeat);
+                stateChanged = deselectSeat(hitSeat);
             }
-            return false;
         } else {
             // 单选模式：如果点击的是已选中的座位，则取消选择；否则清除其他选择，选择当前座位
             if (hitSeat.status === 'selected') {
                 // 直接取消选择当前座位
-                deselectSeat(hitSeat);
+                stateChanged = deselectSeat(hitSeat);
             } else {
                 // 清除其他选择，选择当前座位
                 clearAllSelections();
-                selectSeat(hitSeat);
+                stateChanged = selectSeat(hitSeat);
             }
         }
 
-        // 触发界面重绘和状态变化通知
-        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-            window.CanvasRenderer.drawCinema();
+        // 如果状态发生变化，触发界面重绘
+        if (stateChanged) {
+            if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+                window.CanvasRenderer.drawCinema();
+            }
+            
+            // 重要：无论是单选还是多选模式，都确保调用通知函数
+            notifySelectionChange();
         }
-        notifySelectionChange();
     }
 }
-
 /**
  * 处理Canvas鼠标移动事件
  * @param {MouseEvent} event - 鼠标移动事件
