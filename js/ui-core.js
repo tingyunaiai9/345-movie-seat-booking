@@ -74,8 +74,10 @@ function initializeUI() {
 /**
  * 切换视图
  * @param {string} viewId - 目标视图ID
+ * @param {Object} options - 切换选项
+ * @param {boolean} options.preserveSeats - 是否保留选座数据
  */
-function switchView(viewId) {
+function switchView(viewId, options = {}) {
     console.log('切换到视图:', viewId);
 
     // 隐藏所有视图
@@ -90,6 +92,56 @@ function switchView(viewId) {
         targetView.classList.add('active');
         uiState.currentView = viewId;
 
+        // 如果切换到座位选择页面
+        if (viewId === UI_CONFIG.VIEWS.SEAT) {
+            setTimeout(() => {
+                // 无论如何都刷新Canvas显示
+                if (window.CanvasRenderer && window.CanvasRenderer.refreshCinemaDisplay) {
+                    window.CanvasRenderer.refreshCinemaDisplay();
+                    console.log('座位视图已刷新');
+                    
+                    // 添加：在控制台显示当前所有座位的状态
+                    if (window.CinemaData) {
+                        const config = window.CinemaData.getCurrentConfig();
+                        console.log('=== 当前座位状态 ===');
+                        
+                        // 创建状态统计对象
+                        let statusStats = {
+                            'available': 0,
+                            'selected': 0,
+                            'sold': 0,
+                            'reserved': 0
+                        };
+                        
+                        // 获取并记录所有座位状态
+                        for (let row = 1; row <= config.TOTAL_ROWS; row++) {
+                            for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
+                                const seat = window.CinemaData.getSeat(row, col);
+                                if (seat) {
+                                    statusStats[seat.status] = (statusStats[seat.status] || 0) + 1;
+                                }
+                            }
+                        }
+                        
+                        // 输出状态统计
+                        console.log('状态统计:', statusStats);
+                        
+                        // 获取已选座位并输出详细信息
+                        if (window.StateManager && window.StateManager.getSelectedSeats) {
+                            const selectedSeats = window.StateManager.getSelectedSeats();
+                            console.log('已选座位:', selectedSeats.length > 0 ? 
+                                selectedSeats.map(s => `${s.row}排${s.col}座`).join(', ') : 
+                                '无');
+                        }
+                        
+                        console.log('=====================');
+                    } else {
+                        console.warn('CinemaData模块未加载，无法获取座位状态');
+                    }
+                }
+            }, 100);
+        }
+        
         // 如果切换到支付页面，更新支付页面数据
         if (viewId === UI_CONFIG.VIEWS.PAYMENT) {
             setTimeout(() => {

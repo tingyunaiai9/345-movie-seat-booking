@@ -233,31 +233,24 @@ class ViewController {
      * 处理支付确认
      */
     handlePaymentConfirmation() {
-        this.showLoading('正在处理支付...');
-
-        setTimeout(() => {
-            this.hideLoading();
-            this.generateOrderInfo();
-            this.switchToView('confirm');
-            this.showMessage('支付成功！', 'success');
-        }, 2000);
+        this.generateOrderInfo();
+        this.switchToView('confirm');
     }
 
     /**
-     * 生成订单信息
+     * 生成订单信息（从 main.js 获取最新订单）
      */
     generateOrderInfo() {
-        const orderNumber = 'ORD' + Date.now();
-        const purchaseTime = new Date().toLocaleString('zh-CN');
-
+        // 获取最新订单（假设 main.js 提供 window.CinemaData.getLatestOrder()）
+        const latestOrder = window.CinemaData && window.CinemaData.getLatestOrder ? window.CinemaData.getLatestOrder() : null;
         const orderNumberElement = document.getElementById('order-number');
-        if (orderNumberElement) {
-            orderNumberElement.textContent = orderNumber;
-        }
-
         const purchaseTimeElement = document.getElementById('purchase-time');
-        if (purchaseTimeElement) {
-            purchaseTimeElement.textContent = purchaseTime;
+        if (latestOrder) {
+            if (orderNumberElement) orderNumberElement.textContent = latestOrder.ticketId || latestOrder.id || '';
+            if (purchaseTimeElement) purchaseTimeElement.textContent = latestOrder.paidAt ? new Date(latestOrder.paidAt).toLocaleString('zh-CN') : (latestOrder.createdAt ? new Date(latestOrder.createdAt).toLocaleString('zh-CN') : '');
+        } else {
+            if (orderNumberElement) orderNumberElement.textContent = '';
+            if (purchaseTimeElement) purchaseTimeElement.textContent = '';
         }
     }
 
@@ -509,93 +502,6 @@ class ViewController {
         }
 
         this.updateConfigNextButton();
-    }
-
-    /**
-     * 生成订单信息
-     */
-    generateOrderInfo() {
-        const orderNumber = 'ORD' + Date.now();
-        const purchaseTime = new Date().toLocaleString('zh-CN');
-
-        const orderNumberElement = document.getElementById('order-number');
-        if (orderNumberElement) {
-            orderNumberElement.textContent = orderNumber;
-        }
-
-        const purchaseTimeElement = document.getElementById('purchase-time');
-        if (purchaseTimeElement) {
-            purchaseTimeElement.textContent = purchaseTime;
-        }
-    }
-
-    /**
-     * 重置到开始状态
-     */
-    resetToStart() {
-        this.currentView = 'config';
-        this.viewHistory = ['config'];
-
-        // 重置背景为田野背景
-        if (window.movieSelector) {
-            window.movieSelector.restoreConfigBackground();
-        }
-
-        this.switchToView('config');
-        this.resetAllForms();
-        this.showMessage('已重置，可以开始新的订单', 'info');
-    }
-
-    /**
-     * 重置所有表单数据
-     */
-    resetAllForms() {
-        // 重置电影选择为第一个
-        const allMovieItems = document.querySelectorAll('.movie-item');
-        allMovieItems.forEach(item => {
-            item.classList.remove('active');
-        });
-
-        const firstMovie = document.querySelector('.movie-item');
-        if (firstMovie) {
-            firstMovie.classList.add('active');
-            if (window.movieSelector) {
-                window.movieSelector.selectMovie(firstMovie);
-            }
-        }
-    }
-
-    /**
-     * 视图切换后的回调函数
-     * @param {string} viewName - 新视图名称
-     */
-    onViewChanged(viewName) {
-        switch (viewName) {
-            case 'config':
-                this.onConfigViewActivated();
-                break;
-            case 'movie':
-                this.onMovieViewActivated();
-                break;
-            case 'seat':
-                this.onSeatViewActivated();
-                break;
-            case 'payment':
-                this.onPaymentViewActivated();
-                break;
-            case 'confirm':
-                this.onConfirmViewActivated();
-                break;
-        }
-    }
-
-    onConfigViewActivated() {
-        console.log('配置视图已激活');
-        // 确保配置选择器已初始化
-        if (!this.configSelectorInitialized) {
-            this.initializeCinemaConfigSelector();
-            this.configSelectorInitialized = true;
-        }
     }
 
     onMovieViewActivated() {

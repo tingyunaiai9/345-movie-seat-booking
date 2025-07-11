@@ -321,11 +321,7 @@ function handleFinalPayment() {
 
     if (result && result.success) {
         alert('支付成功！订单已确认。');
-        // 创建购票订单记录
-        if (window.UIOrders && window.UIOrders.createMyPurchaseOrder) {
-            window.UIOrders.createMyPurchaseOrder();
-        }
-
+        // 订单已由 main.js 创建，UI 层无需再创建订单
         // 切换到 final-view，优先用UICoreModule.switchView
         if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
             window.UICoreModule.switchView('final-view');

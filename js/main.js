@@ -408,9 +408,8 @@ function reserveTickets(seats, customerInfo) {
     // 使用标准化后的 fullSeatObjects 来创建票据
     ticketRecords.push({ ticketId, status: SEAT_STATUS.RESERVED, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), expiresAt });
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.RESERVED; });
-
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
-
+    // 票务操作后同步localStorage
+    try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
     return { success: true, reservationId: ticketId, message: `预订成功！请在 ${expiresAt.toLocaleString()} 前完成支付。` };
 }
 
@@ -432,9 +431,8 @@ function purchaseTickets(seats, customerInfo) {
     const ticketId = `s-${Date.now()}`;
     ticketRecords.push({ ticketId, status: SEAT_STATUS.SOLD, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), paidAt: new Date() });
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.SOLD; });
-
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
-
+    // 票务操作后同步localStorage
+    try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
     return { success: true, ticketId, message: '购票成功！' };
 }
 
@@ -460,9 +458,8 @@ function payForReservation(reservationId) {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.SOLD;
     });
-
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
-
+    // 票务操作后同步localStorage
+    try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
     return { success: true, ticketId: ticket.ticketId, message: '支付成功！' };
 }
 
@@ -481,7 +478,8 @@ function cancelReservation(reservationId) {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
     });
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+    // 票务操作后同步localStorage
+    try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
     return { success: true, message: '预订已成功取消！' };
 }
 
@@ -501,9 +499,8 @@ function refundTicket(ticketId) {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
     });
-
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
-
+    // 票务操作后同步localStorage
+    try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
     return { success: true, message: '退票成功！' };
 }
 
@@ -622,7 +619,47 @@ window.CinemaData = {
     isSeatAvailableOrSelected,
     canSitInRow,
     validateSeatParams,
-    validateCustomerInfo
+    validateCustomerInfo,
+
+    // 订单查询相关
+    getAllOrders,
+    getLatestOrder,
+    getOrderById
 };
 
 console.log('电影院票务系统核心模块(main.js)已加载');
+
+// ========================= 订单localStorage同步与查询接口 =========================
+function syncOrdersToLocalStorage() {
+    try {
+        localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords));
+    } catch (e) {
+        console.error('订单同步到localStorage失败:', e);
+    }
+}
+
+function loadOrdersFromLocalStorage() {
+    try {
+        const stored = localStorage.getItem('movieTicketOrders');
+        if (stored) {
+            ticketRecords = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('订单从localStorage加载失败:', e);
+    }
+}
+
+function getAllOrders() {
+    return ticketRecords.slice();
+}
+
+function getLatestOrder() {
+    return ticketRecords.length > 0 ? ticketRecords[ticketRecords.length - 1] : null;
+}
+
+function getOrderById(orderId) {
+    return ticketRecords.find(o => o.ticketId === orderId || o.id === orderId) || null;
+}
+
+// 初始化时加载localStorage订单
+loadOrdersFromLocalStorage();
