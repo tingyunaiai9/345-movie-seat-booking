@@ -16,7 +16,8 @@ const CINEMA_CONFIG = {
     BACK_RESTRICTED_ROWS: 3,   // 老人不可坐的后排数
     MAX_GROUP_SIZE: 20,         // 团体票最大人数
     // 预订票在电影开始前多少分钟必须付款，否则作废
-    RESERVATION_EXPIRY_MINUTES: 30
+    RESERVATION_EXPIRY_MINUTES: 30,
+    movieId: null // 电影ID，用于标识当前正在放映的电影
 };
 
 const AGE_GROUPS = {
@@ -59,11 +60,38 @@ let currentCinemaConfig = { ...CINEMA_CONFIG };
  * @param {number} seatsPerRow - 每排座位数
  * @param {string | Date | null} movieTime - 电影开始时间 (可以是Date对象或"HH:MM"格式的字符串)
  */
-function initializeCinemaSeats(rows, seatsPerRow, movieTime = null) {
+function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = null) {
     // 更新当前影院配置
     currentCinemaConfig.TOTAL_ROWS = rows;
     currentCinemaConfig.SEATS_PER_ROW = seatsPerRow;
     currentCinemaConfig.TOTAL_SEATS = rows * seatsPerRow;
+    currentCinemaConfig.movieId = movieId;
+
+    // 从 localStorage 加载或初始化座位数据
+    const storageKey = `cinemaState-${movieId}-${rows}x${seatsPerRow}`;
+    const savedSeats = localStorage.getItem(storageKey);
+
+    if (savedSeats) {
+        // 如果 localStorage 中存在座位数据，则加载它
+        console.log(`从 localStorage 加载影院状态: ${storageKey}`);
+        cinemaSeats = JSON.parse(savedSeats);
+    } else {
+        // 如果 localStorage 中没有数据，则初始化新的座位数据
+        console.log(`未找到 localStorage 中的影院状态，初始化新的座位数据: ${rows}排, 每排${seatsPerRow}座。`);
+        cinemaSeats = []; // 清空旧数据
+        for (let i = 0; i < rows; i++) {
+            const rowSeats = [];
+            for (let j = 0; j < seatsPerRow; j++) {
+                rowSeats.push({
+                    row: i + 1,       // 排号 (1-based)
+                    col: j + 1,       // 座位号 (1-based)
+                    id: getSeatId(i + 1, j + 1), // 唯一ID
+                    status: SEAT_STATUS.AVAILABLE, // 初始状态为可用
+                });
+            }
+            cinemaSeats.push(rowSeats);
+        }
+    }
 
     // 处理传入的时间，确保其为Date对象
     if (movieTime) {
@@ -78,21 +106,6 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null) {
     } else {
         currentCinemaConfig.movieStartTime = null;
     }
-
-    cinemaSeats = []; // 清空旧数据
-    for (let i = 0; i < rows; i++) {
-        const rowSeats = [];
-        for (let j = 0; j < seatsPerRow; j++) {
-            rowSeats.push({
-                row: i + 1,       // 排号 (1-based)
-                col: j + 1,       // 座位号 (1-based)
-                id: getSeatId(i + 1, j + 1), // 唯一ID
-                status: SEAT_STATUS.AVAILABLE, // 初始状态为可用
-            });
-        }
-        cinemaSeats.push(rowSeats);
-    }
-    console.log(`影院座位已初始化: ${rows}排, 每排${seatsPerRow}座。`);
     if (currentCinemaConfig.movieStartTime) {
         console.log(`电影开始时间已设定: ${currentCinemaConfig.movieStartTime.toLocaleString()}`);
     }
@@ -166,6 +179,22 @@ function getSeatId(row, col) {
     return `seat-${row}-${col}`;
 }
 
+/**
+ * 将当前影厅的座位状态保存到 localStorage
+ */
+function saveCurrentCinemaState() {
+    //确保当前配置和电影ID都存在
+    if (!currentCinemaConfig.TOTAL_ROWS || !currentCinemaConfig.SEATS_PER_ROW || !currentCinemaConfig.movieId) {
+        console.warn('当前影厅配置不完整，无法保存状态。');
+        return;
+    }
+
+    const { TOTAL_ROWS, SEATS_PER_ROW, movieId } = currentCinemaConfig;
+    const storageKey = `cinemaState-${movieId}-${TOTAL_ROWS}x${SEATS_PER_ROW}`;
+
+    localStorage.setItem(storageKey, JSON.stringify(cinemaSeats));
+    console.log(`当前影厅状态已保存到 localStorage，键为: ${storageKey}`);
+}
 // ========================= 个人选座算法 =========================
 
 /**
@@ -350,6 +379,7 @@ function checkAndReleaseExpiredReservations() {
             });
         }
     });
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return releasedSeatIds;
 }
 
@@ -378,6 +408,9 @@ function reserveTickets(seats, customerInfo) {
     // 使用标准化后的 fullSeatObjects 来创建票据
     ticketRecords.push({ ticketId, status: SEAT_STATUS.RESERVED, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), expiresAt });
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.RESERVED; });
+
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+
     return { success: true, reservationId: ticketId, message: `预订成功！请在 ${expiresAt.toLocaleString()} 前完成支付。` };
 }
 
@@ -399,6 +432,9 @@ function purchaseTickets(seats, customerInfo) {
     const ticketId = `s-${Date.now()}`;
     ticketRecords.push({ ticketId, status: SEAT_STATUS.SOLD, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), paidAt: new Date() });
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.SOLD; });
+
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+
     return { success: true, ticketId, message: '购票成功！' };
 }
 
@@ -425,6 +461,8 @@ function payForReservation(reservationId) {
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.SOLD;
     });
 
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+
     return { success: true, ticketId: ticket.ticketId, message: '支付成功！' };
 }
 
@@ -443,6 +481,7 @@ function cancelReservation(reservationId) {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
     });
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, message: '预订已成功取消！' };
 }
 
@@ -462,6 +501,9 @@ function refundTicket(ticketId) {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
     });
+
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+
     return { success: true, message: '退票成功！' };
 }
 
@@ -474,8 +516,11 @@ function refundTicket(ticketId) {
  * @returns {Object|null} 座位详细信息
  */
 function getSeat(row, col) {
+    if (!Array.isArray(cinemaSeats) || cinemaSeats.length === 0) return null; // 新增安全判断
     if (!validateSeatParams(row, col)) return null;
-    return cinemaSeats[row - 1][col - 1];
+    const rowSeats = cinemaSeats[row - 1];
+    if (!Array.isArray(rowSeats)) return null; // 防止未初始化
+    return rowSeats[col - 1] || null;
 }
 
 /**

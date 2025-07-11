@@ -399,12 +399,15 @@
             setupCinemaData() {
                 this.log('初始化影院数据...');
 
+                const currentConfig = window.CinemaData?.getCurrentConfig();
+                let movieId = currentConfig?.MOVIE_ID || 'default-movie-id';
+                console.log(`这是test.html 当前电影ID: ${movieId}`);
+
                 // 初始化默认配置
                 const rows = parseInt(document.getElementById('rows-input').value);
                 const cols = parseInt(document.getElementById('cols-input').value);
-
                 if (window.CinemaData) {
-                    window.CinemaData.initializeCinemaSeats(rows, cols);
+                    window.CinemaData.initializeCinemaSeats(rows, cols, null, movieId);
                     this.addRandomSoldSeats(); // 添加一些已售座位用于测试
                     this.log(`影院已初始化: ${rows}行 × ${cols}列`);
                 } else {

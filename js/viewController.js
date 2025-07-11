@@ -6,6 +6,7 @@ class ViewController {
         this.currentView = 'config';
         this.viewHistory = ['config'];
         this.selectedMovie = null;
+        this.selectedCinemaSize = null;
         this.cinemaConfigSelected = false; // 新增：影厅配置选择状态
         this.initializeEventListeners();
         this.initializeCinemaConfigSelector();
@@ -28,6 +29,14 @@ class ViewController {
         const nextToSeatBtn = document.getElementById('next-to-seat');
         if (nextToSeatBtn) {
             nextToSeatBtn.addEventListener('click', () => {
+                if (this.selectedCinemaSize && this.selectedMovie) {
+                    this.applyConfigToModules(
+                        this.selectedCinemaSize.rows,
+                        this.selectedCinemaSize.cols,
+                        this.selectedCinemaSize.name,
+                        this.selectedMovie // 电影ID
+                    );
+                }
                 this.switchToView('seat');
             });
         }
@@ -415,8 +424,6 @@ class ViewController {
             radio.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     const selectedPreset = e.target.value;
-
-                    // 标记影厅配置已选择
                     this.cinemaConfigSelected = true;
 
                     if (selectedPreset === 'custom') {
@@ -435,7 +442,7 @@ class ViewController {
                         // 应用预设配置
                         const config = presetConfigs[selectedPreset];
                         if (config) {
-                            this.applyConfigToModules(config.rows, config.cols, config.name);
+                            this.selectedCinemaSize = config;
                         }
                     }
 
@@ -464,7 +471,7 @@ class ViewController {
             if (selectedPreset && selectedPreset.value === 'custom') {
                 this.validateCustomConfig();
                 if (this.cinemaConfigSelected) {
-                    this.applyConfigToModules(rows, cols, '自定义');
+                    this.applyConfigToModules(rows, cols, '自定义', this.selectedMovie);
                 }
             }
         };
@@ -615,7 +622,18 @@ class ViewController {
             return;
         }
 
-        console.log('✅ 核心模块已确认加载。');
+        const config = window.CinemaData.getCurrentConfig();// 获取当前配置
+        const selectedMovie = localStorage.getItem('selectedMovie');// 获取选中的电影ID
+
+        if (!config || !selectedMovie) {
+            console.error('错误：当前影厅配置或选中电影未设置！');
+            this.showMessage('影厅配置或选中电影未设置，请检查。', 'error');
+            return;
+        }
+
+        window.CinemaData.initializeCinemaSeats(config.TOTAL_ROWS, config.SEATS_PER_ROW, selectedMovie);
+        console.log(`✅ 座位数据已根据影厅(${config.TOTAL_ROWS}x${config.SEATS_PER_ROW})和电影(${selectedMovie})完成加载/创建。`);
+
 
         // 2. 初始化或刷新Canvas绘图 (canvas.js)
         //    initializeAndDrawCinema 会从 CinemaData 获取最新配置来绘制。
@@ -666,12 +684,12 @@ class ViewController {
      * @param {number} cols - 列数
      * @param {string} name - 配置名称
      */
-    applyConfigToModules(rows, cols, name) {
-        console.log(`🔧 应用影厅配置: ${name} (${rows}行 × ${cols}列)`);
+    applyConfigToModules(rows, cols, name, movieId = null) {
+        console.log(`🔧 应用影厅配置: ${name} (${rows}行 × ${cols}列)，电影ID:${movieId}`);
 
         // 1. 更新 main.js 中的座位数据
         if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
-            window.CinemaData.initializeCinemaSeats(rows, cols);
+            window.CinemaData.initializeCinemaSeats(rows, cols, null, movieId);
             console.log(`✅ main.js 座位数据已更新`);
         }
 
