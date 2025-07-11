@@ -224,14 +224,17 @@ class ViewController {
      * 处理支付确认
      */
     handlePaymentConfirmation() {
-        this.showLoading('正在处理支付...');
+        // this.showLoading('正在处理支付...');
 
-        setTimeout(() => {
-            this.hideLoading();
-            this.generateOrderInfo();
-            this.switchToView('confirm');
-            this.showMessage('支付成功！', 'success');
-        }, 2000);
+        // setTimeout(() => {
+        //     this.hideLoading();
+        //     this.generateOrderInfo();
+        //     this.switchToView('confirm');
+        //     this.showMessage('支付成功！', 'success');
+        // }, 2000);
+
+        this.generateOrderInfo();
+        this.switchToView('confirm');
     }
 
     /**
