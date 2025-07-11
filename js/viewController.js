@@ -224,34 +224,24 @@ class ViewController {
      * 处理支付确认
      */
     handlePaymentConfirmation() {
-        // this.showLoading('正在处理支付...');
-
-        // setTimeout(() => {
-        //     this.hideLoading();
-        //     this.generateOrderInfo();
-        //     this.switchToView('confirm');
-        //     this.showMessage('支付成功！', 'success');
-        // }, 2000);
-
         this.generateOrderInfo();
         this.switchToView('confirm');
     }
 
     /**
-     * 生成订单信息
+     * 生成订单信息（从 main.js 获取最新订单）
      */
     generateOrderInfo() {
-        const orderNumber = 'ORD' + Date.now();
-        const purchaseTime = new Date().toLocaleString('zh-CN');
-
+        // 获取最新订单（假设 main.js 提供 window.CinemaData.getLatestOrder()）
+        const latestOrder = window.CinemaData && window.CinemaData.getLatestOrder ? window.CinemaData.getLatestOrder() : null;
         const orderNumberElement = document.getElementById('order-number');
-        if (orderNumberElement) {
-            orderNumberElement.textContent = orderNumber;
-        }
-
         const purchaseTimeElement = document.getElementById('purchase-time');
-        if (purchaseTimeElement) {
-            purchaseTimeElement.textContent = purchaseTime;
+        if (latestOrder) {
+            if (orderNumberElement) orderNumberElement.textContent = latestOrder.ticketId || latestOrder.id || '';
+            if (purchaseTimeElement) purchaseTimeElement.textContent = latestOrder.paidAt ? new Date(latestOrder.paidAt).toLocaleString('zh-CN') : (latestOrder.createdAt ? new Date(latestOrder.createdAt).toLocaleString('zh-CN') : '');
+        } else {
+            if (orderNumberElement) orderNumberElement.textContent = '';
+            if (purchaseTimeElement) purchaseTimeElement.textContent = '';
         }
     }
 

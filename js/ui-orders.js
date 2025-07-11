@@ -21,8 +21,9 @@ function initializeMyOrdersFeature() {
     // 绑定我的订单相关事件
     bindMyOrdersEvents();
 
-    // 从localStorage加载订单数据
-    loadMyOrdersFromStorage();
+    // 从 main.js 统一加载订单数据
+    loadMyOrdersFromMain();
+    renderMyOrdersList();
 }
 
 /**
@@ -151,8 +152,8 @@ function showMyOrdersPage() {
     if (myOrdersView) {
         myOrdersView.classList.add('active');
 
-        // 刷新订单数据
-        loadMyOrdersFromStorage();
+        // 只从 main.js 统一加载订单数据
+        loadMyOrdersFromMain();
         renderMyOrdersList();
     }
 }
@@ -185,60 +186,13 @@ function hideMyOrdersPage() {
 // ========================= 订单数据管理 =========================
 
 /**
- * 从localStorage加载订单数据
+ * 从 main.js 获取订单数据
  */
-function loadMyOrdersFromStorage() {
-    try {
-        const storedOrders = localStorage.getItem('movieTicketOrders');
-        if (storedOrders) {
-            MyOrdersState.orders = JSON.parse(storedOrders);
-        } else {
-            MyOrdersState.orders = [];
-        }
-        console.log('已加载我的订单数据:', MyOrdersState.orders.length + '条');
-    } catch (error) {
-        console.error('加载我的订单数据失败:', error);
+function loadMyOrdersFromMain() {
+    if (window.CinemaData && window.CinemaData.getAllOrders) {
+        MyOrdersState.orders = window.CinemaData.getAllOrders();
+    } else {
         MyOrdersState.orders = [];
-    }
-}
-
-/**
- * 保存订单到localStorage
- */
-function saveMyOrderToStorage(orderData) {
-    try {
-        // 生成订单ID
-        const orderId = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
-
-        const order = {
-            id: orderId,
-            movieTitle: orderData.movieTitle || getMySelectedMovieTitle(),
-            movieTime: orderData.movieTime || getMySelectedMovieTime(),
-            moviePoster: orderData.moviePoster || getMySelectedMoviePoster(),
-            seats: orderData.seats || getMySelectedSeatsData(),
-            customerInfo: orderData.customerInfo || getMyCustomerData(),
-            totalPrice: orderData.totalPrice || calculateMyTotalPrice(),
-            status: orderData.status || 'reserved', // reserved, paid, cancelled
-            createTime: new Date().toLocaleString('zh-CN'),
-            payTime: orderData.status === 'paid' ? new Date().toLocaleString('zh-CN') : null,
-            expiresAt: orderData.status === 'reserved' ?
-                new Date(Date.now() + 30 * 60 * 1000).toLocaleString('zh-CN') : null // 30分钟后过期
-        };
-
-        // 加载现有订单
-        loadMyOrdersFromStorage();
-
-        // 添加新订单
-        MyOrdersState.orders.unshift(order);
-
-        // 保存到localStorage
-        localStorage.setItem('movieTicketOrders', JSON.stringify(MyOrdersState.orders));
-
-        console.log('我的订单已保存:', order.id);
-        return order;
-    } catch (error) {
-        console.error('保存我的订单失败:', error);
-        return null;
     }
 }
 
@@ -248,6 +202,7 @@ function saveMyOrderToStorage(orderData) {
  * 渲染订单列表
  */
 function renderMyOrdersList() {
+    loadMyOrdersFromMain();
     const ordersList = document.getElementById('orders-list');
     const noOrders = document.getElementById('no-orders');
 
@@ -260,12 +215,9 @@ function renderMyOrdersList() {
     if (MyOrdersState.currentFilter !== 'all') {
         filteredOrders = filteredOrders.filter(order => {
             switch (MyOrdersState.currentFilter) {
-                case 'reserved':
-                    return order.status === 'reserved';
-                case 'paid':
-                    return order.status === 'paid';
-                default:
-                    return true;
+                case 'reserved': return order.status === 'reserved';
+                case 'paid': return order.status === 'sold' || order.status === 'paid';
+                default: return true;
             }
         });
     }
@@ -274,8 +226,8 @@ function renderMyOrdersList() {
     if (MyOrdersState.searchKeyword) {
         const keyword = MyOrdersState.searchKeyword.toLowerCase();
         filteredOrders = filteredOrders.filter(order =>
-            order.id.toLowerCase().includes(keyword) ||
-            order.movieTitle.toLowerCase().includes(keyword)
+            (order.ticketId || order.id || '').toLowerCase().includes(keyword) ||
+            (order.movieTitle || '').toLowerCase().includes(keyword)
         );
     }
 
@@ -297,28 +249,47 @@ function renderMyOrdersList() {
 }
 
 /**
+ * 座位ID转换为“排座”格式
+ */
+function seatIdToText(seatId) {
+    // seatId 格式为 'seat-8-12'
+    const parts = seatId.split('-');
+    if (parts.length === 3) {
+        return `${parts[1]}排${parts[2]}座`;
+    }
+    return seatId;
+}
+
+/**
+ * 时间格式化
+ */
+function formatDate(date) {
+    if (!date) return '';
+    if (typeof date === 'string') {
+        // 兼容字符串存储的时间
+        date = new Date(date);
+    }
+    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+    return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+}
+
+/**
  * 创建订单项元素
  */
 function createMyOrderItem(order) {
+    // order 即 ticket 对象
     const orderItem = document.createElement('div');
     orderItem.className = `order-item ${order.status}`;
-    orderItem.dataset.orderId = order.id;
-
-    // 状态文本映射
+    orderItem.dataset.orderId = order.ticketId;
     const statusText = {
         'reserved': '已预约',
-        'paid': '已支付',
-        'cancelled': '已取消'
+        'sold': '已支付',
+        'cancelled': '已取消',
+        'expired': '已过期',
+        'refunded': '已退款'
     };
-
     // 格式化座位信息
-    const seatsText = order.seats.map(seat => {
-        if (typeof seat === 'object' && seat.row && seat.col) {
-            return `${seat.row}排${seat.col}座`;
-        }
-        return seat.toString();
-    }).join('、');
-
+    const seatsText = Array.isArray(order.seats) ? order.seats.map(seatIdToText).join('、') : '';
     // 计算过期状态
     let expiryWarning = '';
     if (order.status === 'reserved' && order.expiresAt) {
@@ -328,45 +299,36 @@ function createMyOrderItem(order) {
 
         if (timeLeft > 0) {
             const minutes = Math.floor(timeLeft / (1000 * 60));
-            expiryWarning = `<span class="expiry-warning" style="color: #dc3545; font-weight: 600;">
-                还剩 ${minutes} 分钟支付时间
-            </span>`;
+            expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">还剩 ${minutes} 分钟支付时间</span>`;
         } else {
-            expiryWarning = `<span class="expiry-warning" style="color: #dc3545; font-weight: 600;">
-                预约已过期
-            </span>`;
+            expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">预约已过期</span>`;
         }
     }
-
+    // 客户信息
+    const customer = order.customerInfo || {};
+    // 价格（假设每张票45元）
+    const totalPrice = Array.isArray(order.seats) ? order.seats.length * 45 : 0;
     orderItem.innerHTML = `
-        <div class="order-header">
-            <span class="order-number">订单号: ${order.id}</span>
-            <span class="order-status ${order.status}">${statusText[order.status]}</span>
+        <div class=\"order-header\">
+            <span class=\"order-number\">订单号: ${order.ticketId}</span>
+            <span class=\"order-status ${order.status}\">${statusText[order.status] || order.status}</span>
         </div>
-        <div class="order-content">
-            <div class="order-movie">
-                <img src="${order.moviePoster}" alt="${order.movieTitle}" onerror="this.src='img/LUOXIAOHEI.webp'">
-                <div class="movie-info">
-                    <h4>${order.movieTitle}</h4>
-                    <p>放映时间: ${order.movieTime}</p>
-                    <p>座位: ${seatsText}</p>
-                </div>
-            </div>
-            <div class="order-details">
+        <div class=\"order-content\">
+            <div class=\"order-details\">
                 <h5>客户信息</h5>
-                <div class="order-meta">
-                    姓名: ${order.customerInfo.name || '未填写'}<br>
-                    年龄: ${order.customerInfo.age || '未填写'}<br>
-                    电话: ${order.customerInfo.phone || '未填写'}<br>
-                    下单时间: ${order.createTime}
-                    ${order.payTime ? '<br>支付时间: ' + order.payTime : ''}
+                <div class=\"order-meta\">
+                    姓名: ${customer.name || '未填写'}<br>
+                    年龄: ${customer.age || '未填写'}<br>
+                    下单时间: ${formatDate(order.createdAt)}
+                    ${order.paidAt ? '<br>支付时间: ' + formatDate(order.paidAt) : ''}
                     ${expiryWarning ? '<br>' + expiryWarning : ''}
                 </div>
             </div>
-            <div class="order-price">
-                <div class="price-amount">¥${order.totalPrice}</div>
-                <div class="price-details">
-                    共 ${order.seats.length} 张票<br>
+            <div class=\"order-price\">
+                <div class=\"price-amount\">¥${totalPrice}</div>
+                <div class=\"price-details\">
+                    共 ${Array.isArray(order.seats) ? order.seats.length : 0} 张票<br>
+                    座位: ${seatsText}<br>
                     点击查看详情
                 </div>
             </div>
@@ -393,85 +355,50 @@ function showMyOrderDetail(order) {
     const content = document.getElementById('order-detail-content');
 
     if (!modal || !content) return;
-
-    // 存储当前订单ID
-    modal.dataset.currentOrderId = order.id;
-
-    // 状态文本映射
+    modal.dataset.currentOrderId = order.ticketId;
     const statusText = {
         'reserved': '已预约',
-        'paid': '已支付',
-        'cancelled': '已取消'
+        'sold': '已支付',
+        'cancelled': '已取消',
+        'expired': '已过期',
+        'refunded': '已退款'
     };
-
-    // 格式化座位信息
-    const seatsHtml = order.seats.map(seat => {
-        let seatText = '';
-        if (typeof seat === 'object' && seat.row && seat.col) {
-            seatText = `${seat.row}排${seat.col}座`;
-        } else {
-            seatText = seat.toString();
-        }
-        return `<span class="seat-tag">${seatText}</span>`;
-    }).join('');
-
+    const seatsHtml = Array.isArray(order.seats) ? order.seats.map(id => `<span class=\"seat-tag\">${seatIdToText(id)}</span>`).join('') : '';
+    const customer = order.customerInfo || {};
     content.innerHTML = `
-        <div class="order-detail-section">
+        <div class=\"order-detail-section\">
             <h4>订单信息</h4>
-            <div class="detail-grid">
-                <span class="detail-label">订单号:</span>
-                <span class="detail-value">${order.id}</span>
-                <span class="detail-label">状态:</span>
-                <span class="detail-value order-status ${order.status}">${statusText[order.status]}</span>
-                <span class="detail-label">创建时间:</span>
-                <span class="detail-value">${order.createTime}</span>
-                ${order.payTime ? `
-                    <span class="detail-label">支付时间:</span>
-                    <span class="detail-value">${order.payTime}</span>
-                ` : ''}
-                ${order.expiresAt && order.status === 'reserved' ? `
-                    <span class="detail-label">支付截止:</span>
-                    <span class="detail-value">${order.expiresAt}</span>
-                ` : ''}
+            <div class=\"detail-grid\">
+                <span class=\"detail-label\">订单号:</span>
+                <span class=\"detail-value\">${order.ticketId}</span>
+                <span class=\"detail-label\">状态:</span>
+                <span class=\"detail-value order-status ${order.status}\">${statusText[order.status] || order.status}</span>
+                <span class=\"detail-label\">创建时间:</span>
+                <span class=\"detail-value\">${formatDate(order.createdAt)}</span>
+                ${order.paidAt ? `<span class=\"detail-label\">支付时间:</span><span class=\"detail-value\">${formatDate(order.paidAt)}</span>` : ''}
+                ${(order.expiresAt && order.status === 'reserved') ? `<span class=\"detail-label\">支付截止:</span><span class=\"detail-value\">${formatDate(order.expiresAt)}</span>` : ''}
             </div>
         </div>
-
-        <div class="order-detail-section">
-            <h4>电影信息</h4>
-            <div class="detail-grid">
-                <span class="detail-label">电影名称:</span>
-                <span class="detail-value">${order.movieTitle}</span>
-                <span class="detail-label">放映时间:</span>
-                <span class="detail-value">${order.movieTime}</span>
-            </div>
-        </div>
-
-        <div class="order-detail-section">
+        <div class=\"order-detail-section\">
             <h4>座位信息</h4>
-            <div class="seat-tags">
-                ${seatsHtml}
-            </div>
+            <div class=\"seat-tags\">${seatsHtml}</div>
         </div>
-
-        <div class="order-detail-section">
+        <div class=\"order-detail-section\">
             <h4>客户信息</h4>
-            <div class="detail-grid">
-                <span class="detail-label">姓名:</span>
-                <span class="detail-value">${order.customerInfo.name || '未填写'}</span>
-                <span class="detail-label">年龄:</span>
-                <span class="detail-value">${order.customerInfo.age || '未填写'}</span>
-                <span class="detail-label">电话:</span>
-                <span class="detail-value">${order.customerInfo.phone || '未填写'}</span>
+            <div class=\"detail-grid\">
+                <span class=\"detail-label\">姓名:</span>
+                <span class=\"detail-value\">${customer.name || '未填写'}</span>
+                <span class=\"detail-label\">年龄:</span>
+                <span class=\"detail-value\">${customer.age || '未填写'}</span>
             </div>
         </div>
-
-        <div class="order-detail-section">
+        <div class=\"order-detail-section\">
             <h4>费用明细</h4>
-            <div class="detail-grid">
-                <span class="detail-label">票价:</span>
-                <span class="detail-value">¥45 × ${order.seats.length}</span>
-                <span class="detail-label">总计:</span>
-                <span class="detail-value" style="color: #398d37; font-weight: 700; font-size: 18px;">¥${order.totalPrice}</span>
+            <div class=\"detail-grid\">
+                <span class=\"detail-label\">票价:</span>
+                <span class=\"detail-value\">¥45 × ${Array.isArray(order.seats) ? order.seats.length : 0}</span>
+                <span class=\"detail-label\">总计:</span>
+                <span class=\"detail-value\" style=\"color: #398d37; font-weight: 700; font-size: 18px;\">¥${Array.isArray(order.seats) ? order.seats.length * 45 : 0}</span>
             </div>
         </div>
     `;
@@ -520,20 +447,15 @@ function handleMyCancelOrder() {
     if (!orderId) return;
 
     if (confirm('确定要取消这个订单吗？取消后将无法恢复。')) {
-        // 更新订单状态
-        const orderIndex = MyOrdersState.orders.findIndex(order => order.id === orderId);
-        if (orderIndex !== -1) {
-            MyOrdersState.orders[orderIndex].status = 'cancelled';
-
-            // 保存到localStorage
-            localStorage.setItem('movieTicketOrders', JSON.stringify(MyOrdersState.orders));
-
-            // 刷新显示
-            hideMyOrderDetail();
-            renderMyOrdersList();
-
-            console.log('订单已取消:', orderId);
-            alert('订单已取消');
+        if (window.CinemaData && window.CinemaData.cancelReservation) {
+            const result = window.CinemaData.cancelReservation(orderId);
+            if (result.success) {
+                hideMyOrderDetail();
+                renderMyOrdersList();
+                alert('订单已取消');
+            } else {
+                alert(result.message || '取消失败');
+            }
         }
     }
 }
@@ -548,22 +470,15 @@ function handleMyPayReservedOrder() {
     if (!orderId) return;
 
     if (confirm('确定要支付这个订单吗？')) {
-        // 更新订单状态
-        const orderIndex = MyOrdersState.orders.findIndex(order => order.id === orderId);
-        if (orderIndex !== -1) {
-            MyOrdersState.orders[orderIndex].status = 'paid';
-            MyOrdersState.orders[orderIndex].payTime = new Date().toLocaleString('zh-CN');
-            MyOrdersState.orders[orderIndex].expiresAt = null;
-
-            // 保存到localStorage
-            localStorage.setItem('movieTicketOrders', JSON.stringify(MyOrdersState.orders));
-
-            // 刷新显示
-            hideMyOrderDetail();
-            renderMyOrdersList();
-
-            console.log('订单支付成功:', orderId);
-            alert('支付成功！');
+        if (window.CinemaData && window.CinemaData.payForReservation) {
+            const result = window.CinemaData.payForReservation(orderId);
+            if (result.success) {
+                hideMyOrderDetail();
+                renderMyOrdersList();
+                alert('支付成功！');
+            } else {
+                alert(result.message || '支付失败');
+            }
         }
     }
 }
@@ -578,59 +493,16 @@ function handleMyRefundOrder() {
     if (!orderId) return;
 
     if (confirm('确定要申请退款吗？退款后订单将被取消。')) {
-        // 更新订单状态
-        const orderIndex = MyOrdersState.orders.findIndex(order => order.id === orderId);
-        if (orderIndex !== -1) {
-            MyOrdersState.orders[orderIndex].status = 'cancelled';
-
-            // 保存到localStorage
-            localStorage.setItem('movieTicketOrders', JSON.stringify(MyOrdersState.orders));
-
-            // 刷新显示
-            hideMyOrderDetail();
-            renderMyOrdersList();
-
-            console.log('订单退款申请已提交:', orderId);
-            alert('退款申请已提交，款项将在3-5个工作日内退回');
+        if (window.CinemaData && window.CinemaData.refundTicket) {
+            const result = window.CinemaData.refundTicket(orderId);
+            if (result.success) {
+                hideMyOrderDetail();
+                renderMyOrdersList();
+                alert('退款申请已提交，款项将在3-5个工作日内退回');
+            } else {
+                alert(result.message || '退款失败');
+            }
         }
-    }
-}
-
-// ========================= 订单创建接口 =========================
-
-/**
- * 创建预约订单
- */
-function createMyReservationOrder() {
-    const order = saveMyOrderToStorage({
-        status: 'reserved'
-    });
-
-    if (order) {
-        console.log('预约订单已创建:', order.id);
-        alert(`预约成功！订单号：${order.id}`);
-        return order;
-    } else {
-        alert('预约失败，请重试');
-        return null;
-    }
-}
-
-/**
- * 创建购票订单
- */
-function createMyPurchaseOrder() {
-    const order = saveMyOrderToStorage({
-        status: 'paid'
-    });
-
-    if (order) {
-        console.log('购票订单已创建:', order.id);
-        alert(`购票成功！订单号：${order.id}`);
-        return order;
-    } else {
-        alert('购票失败，请重试');
-        return null;
     }
 }
 
@@ -696,10 +568,6 @@ if (typeof window !== 'undefined') {
         initializeMyOrdersFeature,
 
         // 订单管理
-        createMyReservationOrder,
-        createMyPurchaseOrder,
-        loadMyOrdersFromStorage,
-        saveMyOrderToStorage,
         renderMyOrdersList,
 
         // 订单详情

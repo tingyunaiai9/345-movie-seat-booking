@@ -184,7 +184,7 @@ function handleDirectPurchase() {
         // 跳转到支付页面
         if (window.UICoreModule && window.UICoreModule.switchView) {
             window.UICoreModule.switchView(window.UICoreModule.UI_CONFIG.VIEWS.PAYMENT);
-        } 
+        }
     } catch (error) {
         console.error('购票过程中发生错误:', error);
         alert('购票过程中发生错误，请重试');
@@ -226,12 +226,7 @@ function handleReservation() {
         if (result && result.success) {
             console.log('✅ 预订成功');
             alert('预订成功！请在30分钟内完成支付');
-
-            // 创建预订订单
-            if (window.UIOrders && window.UIOrders.createMyReservationOrder) {
-                window.UIOrders.createMyReservationOrder();
-            }
-
+            // 订单已由 main.js 创建，UI 层无需再创建订单
         } else {
             // 预订失败 - 显示错误信息
             const errorMessage = result && result.message ? result.message : '预订失败，请重试';
