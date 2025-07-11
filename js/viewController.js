@@ -29,6 +29,30 @@ class ViewController {
         const nextToSeatBtn = document.getElementById('next-to-seat');
         if (nextToSeatBtn) {
             nextToSeatBtn.addEventListener('click', () => {
+                // 确保用户已完成影厅和电影的选择
+                if (this.selectedCinemaSize && this.selectedMovie) {
+                    localStorage.setItem('selectedMovie', this.selectedMovie);
+                    // 【核心改动】在这里执行唯一一次权威的座位初始化
+                    console.log('🚀 执行最终初始化，传入影厅和电影信息...');
+                    window.CinemaData.initializeCinemaSeats(
+                        this.selectedCinemaSize.rows,
+                        this.selectedCinemaSize.cols,
+                        null, // movieTime 参数，暂时用 null
+                        this.selectedMovie // movieId 参数，现在保证有值
+                    );
+
+                    // 初始化成功后，才切换视图
+                    this.switchToView('seat');
+
+                } else {
+                    // 如果信息不完整，给出提示
+                    this.showMessage('请确保已选择影厅规模和电影', 'warning');
+                }
+            });
+        }
+        /*const nextToSeatBtn = document.getElementById('next-to-seat');
+        if (nextToSeatBtn) {
+            nextToSeatBtn.addEventListener('click', () => {
                 if (this.selectedCinemaSize && this.selectedMovie) {
                     this.applyConfigToModules(
                         this.selectedCinemaSize.rows,
@@ -40,6 +64,7 @@ class ViewController {
                 this.switchToView('seat');
             });
         }
+        */
 
         // 选座视图 -> 支付视图
         const nextToPaymentBtn = document.getElementById('next-to-payment');
@@ -529,7 +554,7 @@ class ViewController {
         }
 
         const config = window.CinemaData.getCurrentConfig();// 获取当前配置
-        const selectedMovie = localStorage.getItem('selectedMovie');// 获取选中的电影ID
+        const selectedMovie = localStorage.getItem('selectedMovie') || config.movieId;// 获取选中的电影ID
 
         if (!config || !selectedMovie) {
             console.error('错误：当前影厅配置或选中电影未设置！');
@@ -537,7 +562,6 @@ class ViewController {
             return;
         }
 
-        window.CinemaData.initializeCinemaSeats(config.TOTAL_ROWS, config.SEATS_PER_ROW, selectedMovie);
         console.log(`✅ 座位数据已根据影厅(${config.TOTAL_ROWS}x${config.SEATS_PER_ROW})和电影(${selectedMovie})完成加载/创建。`);
 
 
@@ -594,10 +618,12 @@ class ViewController {
         console.log(`🔧 应用影厅配置: ${name} (${rows}行 × ${cols}列)，电影ID:${movieId}`);
 
         // 1. 更新 main.js 中的座位数据
+        /*
         if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
             window.CinemaData.initializeCinemaSeats(rows, cols, null, movieId);
             console.log(`✅ main.js 座位数据已更新`);
         }
+        */
 
         // 2. 如果已经在选座界面，更新 Canvas 显示
         if (window.initializeAndDrawCinema && typeof window.initializeAndDrawCinema === 'function') {

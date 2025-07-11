@@ -66,6 +66,7 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
     currentCinemaConfig.SEATS_PER_ROW = seatsPerRow;
     currentCinemaConfig.TOTAL_SEATS = rows * seatsPerRow;
     currentCinemaConfig.movieId = movieId;
+    console.log(`初始化影院座位数据: ${rows}排, 每排${seatsPerRow}座，电影ID: ${movieId}`);
 
     // 从 localStorage 加载或初始化座位数据
     const storageKey = `cinemaState-${movieId}-${rows}x${seatsPerRow}`;
@@ -183,7 +184,9 @@ function getSeatId(row, col) {
  * 将当前影厅的座位状态保存到 localStorage
  */
 function saveCurrentCinemaState() {
+    console.log(`当前影院共${currentCinemaConfig.TOTAL_ROWS}排，每排${currentCinemaConfig.SEATS_PER_ROW}座，电影ID: ${localStorage.getItem('selectedMovie')}`);
     //确保当前配置和电影ID都存在
+    currentCinemaConfig.movieId = localStorage.getItem('selectedMovie');
     if (!currentCinemaConfig.TOTAL_ROWS || !currentCinemaConfig.SEATS_PER_ROW || !currentCinemaConfig.movieId) {
         console.warn('当前影厅配置不完整，无法保存状态。');
         return;
@@ -410,6 +413,7 @@ function reserveTickets(seats, customerInfo) {
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.RESERVED; });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, reservationId: ticketId, message: `预订成功！请在 ${expiresAt.toLocaleString()} 前完成支付。` };
 }
 
@@ -433,6 +437,7 @@ function purchaseTickets(seats, customerInfo) {
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.SOLD; });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, ticketId, message: '购票成功！' };
 }
 
@@ -460,6 +465,7 @@ function payForReservation(reservationId) {
     });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, ticketId: ticket.ticketId, message: '支付成功！' };
 }
 
@@ -480,6 +486,7 @@ function cancelReservation(reservationId) {
     });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, message: '预订已成功取消！' };
 }
 
@@ -501,6 +508,7 @@ function refundTicket(ticketId) {
     });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
+    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, message: '退票成功！' };
 }
 
