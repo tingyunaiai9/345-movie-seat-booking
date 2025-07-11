@@ -617,7 +617,10 @@ if (typeof window !== 'undefined') {
         // 查询接口
         getSelectedSeats,
         getSelectedCount,
-        getCurrentState
+        getCurrentState,
+
+        // 通知函数
+        notifySelectionChange
     };
 }
 
