@@ -237,10 +237,10 @@
 
 .btn-auto {
     width: 100%;
-    background: linear-gradient(135deg, #98ccbb 0%, #80bc6b 100%);
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
     color: white;
     border: 2px solid transparent;
-    padding: 10px 20px;
+    padding: 12px 20px;
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
@@ -248,9 +248,9 @@
 }
 
 .btn-auto:hover {
-    background: linear-gradient(135deg, #85b8a8 0%, #70a85d 100%);
+    background: linear-gradient(135deg, #5a8f2a 0%, #2f7a2f 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(152, 204, 187, 0.4);
+    box-shadow: 0 6px 15px rgba(104, 165, 48, 0.4);
 }
 
 /* 手动选座控制 */
