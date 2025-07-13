@@ -322,6 +322,13 @@ function handleFinalPayment() {
     if (result && result.success) {
         alert('支付成功！订单已确认。');
         // 订单已由 main.js 创建，UI 层无需再创建订单
+
+        // 清空当前的用户数据
+        if (window.UIMemberManagement && window.UIMemberManagement.clearMembers) {
+            window.UIMemberManagement.clearMembers();
+            console.log('已清除当前用户数据');
+        }
+
         // 切换到 final-view，优先用UICoreModule.switchView
         if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
             window.UICoreModule.switchView('final-view');

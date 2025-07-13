@@ -227,6 +227,22 @@ function handleReservation() {
             console.log('✅ 预订成功');
             alert('预订成功！请在30分钟内完成支付');
             // 订单已由 main.js 创建，UI 层无需再创建订单
+
+            // 清空当前的用户数据
+            if (window.UIMemberManagement && window.UIMemberManagement.clearMembers) {
+                window.UIMemberManagement.clearMembers();
+                console.log('已清除当前用户数据');
+            }
+
+            // 切换到 final-view，优先用UICoreModule.switchView
+            if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
+                window.UICoreModule.switchView('final-view');
+            } else {
+                // 兜底：直接用DOM切换
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                var finalView = document.getElementById('final-view');
+                if(finalView) finalView.classList.add('active');
+            }
         } else {
             // 预订失败 - 显示错误信息
             const errorMessage = result && result.message ? result.message : '预订失败，请重试';

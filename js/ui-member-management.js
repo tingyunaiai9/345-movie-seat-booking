@@ -333,6 +333,32 @@ function getMyCustomerDataEnhanced() {
     }
 }
 
+// ========================= 清除成员信息 =========================
+
+/**
+ * 清除所有成员信息（团体票和个人票）
+ */
+function clearMembers() {
+    // 清除团体成员
+    const groupList = document.querySelector('.group-controls .member-list') || document.getElementById('group-member-list');
+    if (groupList) {
+        groupList.innerHTML = '';
+    }
+    if (window.UICoreModule && window.UICoreModule.uiState) {
+        window.UICoreModule.uiState.memberCount = 0;
+        const memberCountSpan = document.getElementById('member-count');
+        updateMemberCount(memberCountSpan);
+    }
+
+    // 清除个人票成员
+    const individualList = document.getElementById('individual-member-list');
+    if (individualList) {
+        individualList.innerHTML = '';
+    }
+    IndividualMemberState.memberCount = 0;
+    updateIndividualMemberCount();
+}
+
 // ========================= 模块导出 =========================
 
 // 在浏览器环境中，将函数暴露到全局
@@ -356,7 +382,10 @@ if (typeof window !== 'undefined') {
         getMyCustomerDataEnhanced,
 
         // 状态访问
-        getIndividualMemberState: () => IndividualMemberState
+        getIndividualMemberState: () => IndividualMemberState,
+
+        // 清除成员
+        clearMembers
     };
 }
 
