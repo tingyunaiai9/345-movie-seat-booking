@@ -11,12 +11,13 @@ const VIEW_CONFIG = {
         MOVIE: 'movie',
         SEAT: 'seat',
         PAYMENT: 'payment',
-        CONFIRM: 'confirm'
+        CONFIRM: 'confirm',
+        FINAL: 'final-view'
     },
 
 
     // 视图顺序
-    VIEW_ORDER: ['config', 'movie', 'seat', 'payment', 'confirm', 'final-view'],
+    VIEW_ORDER: ['config', 'movie', 'seat', 'payment', 'confirm', 'final'],
 
     // 预设配置
     PRESET_CONFIGS: {

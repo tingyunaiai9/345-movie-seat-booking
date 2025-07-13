@@ -329,9 +329,9 @@ function handleFinalPayment() {
             console.log('已清除当前用户数据');
         }
 
-        // 切换到 final-view，优先用UIViewController.switchView
-        if (window.UIViewController && typeof window.UIViewController.switchView === 'function') {
-            window.UIViewController.switchView('final-view');
+        // 切换到 final-view，优先用UIViewController.switchToView
+        if (window.UIViewController && typeof window.UIViewController.switchToView === 'function') {
+            window.UIViewController.switchToView('final');
         } else {
             // 兜底方案：保持在当前确认页面
             console.warn('UIViewController 不可用，保持在当前确认页面');
