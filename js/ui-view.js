@@ -116,14 +116,16 @@ function initializeEventListeners() {
         });
     }
 
-    const backToSeatBtn = document.getElementById('back-to-seat');
-    if (backToSeatBtn) {
-        backToSeatBtn.addEventListener('click', () => {
+    // 返回按钮事件 - 修改为绑定所有返回选座按钮
+    const backToSeatBtns = document.querySelectorAll('[id="back-to-seat"], #payment-back-to-seat, #confirm-back-to-seat');
+    backToSeatBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log('点击返回选座按钮');
             switchToView('seat');
         });
-    }
+    });
 
-    // 🔑 新增：预订和购票按钮（从ui-core.js移过来）
+    // 🔑 预订和购票按钮
     const purchaseSeatsBtn = document.getElementById('purchase-seats');
     if (purchaseSeatsBtn) {
         purchaseSeatsBtn.addEventListener('click', () => {
@@ -206,7 +208,7 @@ function switchToView(viewName, options = {}) {
     // 显示目标视图
     targetView.classList.add('active');
 
-    // *** 新增：根据视图切换背景 ***
+    // 根据视图切换背景
     handleBackgroundForView(viewName);
 
     // 更新导航步骤状态
@@ -232,7 +234,7 @@ function switchToView(viewName, options = {}) {
 }
 
 /**
- * 处理特殊视图的逻辑（从ui-core.js移过来）
+ * 处理特殊视图的逻辑
  * @param {string} viewName - 视图名称
  * @param {Object} options - 选项
  */
@@ -240,17 +242,24 @@ function handleSpecialViewLogic(viewName, options) {
     // 如果切换到座位选择页面
     if (viewName === 'seat') {
         setTimeout(() => {
-            // 检查是否是从支付页面返回的
+            // 检查是否是从支付页面或确认页面返回的
             const isReturnFromPayment = viewState.viewHistory.length >= 2 && 
                 viewState.viewHistory[viewState.viewHistory.length - 2] === 'payment';
+            
+            const isReturnFromConfirm = viewState.viewHistory.length >= 2 && 
+                viewState.viewHistory[viewState.viewHistory.length - 2] === 'confirm';
 
-            if (!isReturnFromPayment && window.CanvasRenderer && window.CanvasRenderer.refreshCinemaDisplay) {
-                window.CanvasRenderer.refreshCinemaDisplay();
-                console.log('座位视图已刷新');
-            } else if (isReturnFromPayment) {
-                console.log('从支付页面返回，保留座位选择状态');
+            // 如果是从支付或确认页面返回，保留选座状态
+            if (isReturnFromPayment || isReturnFromConfirm) {
+                console.log(`从${isReturnFromPayment ? '支付' : '确认'}页面返回，保留座位选择状态`);
                 if (window.CanvasRenderer && window.CanvasRenderer.refreshCinemaDisplay) {
                     window.CanvasRenderer.refreshCinemaDisplay();
+                }
+            } else {
+                // 正常进入选座页面，刷新显示
+                if (window.CanvasRenderer && window.CanvasRenderer.refreshCinemaDisplay) {
+                    window.CanvasRenderer.refreshCinemaDisplay();
+                    console.log('座位视图已刷新');
                 }
             }
             
@@ -262,6 +271,14 @@ function handleSpecialViewLogic(viewName, options) {
     // 如果切换到支付页面，更新支付页面数据
     if (viewName === 'payment') {
         setTimeout(() => {
+            // 检查是否是从确认页面返回的
+            const isReturnFromConfirm = viewState.viewHistory.length >= 2 && 
+                viewState.viewHistory[viewState.viewHistory.length - 2] === 'confirm';
+            
+            if (isReturnFromConfirm) {
+                console.log('从确认页面返回到支付页面，保留数据状态');
+            }
+            
             if (window.UIPayment && window.UIPayment.updatePaymentPageData) {
                 window.UIPayment.updatePaymentPageData();
             }
@@ -271,13 +288,19 @@ function handleSpecialViewLogic(viewName, options) {
     // 如果切换到确认页面，初始化确认页面数据
     if (viewName === 'confirm') {
         setTimeout(() => {
+            const isReturnFromOtherView = viewState.viewHistory.length >= 2;
+            
+            if (isReturnFromOtherView) {
+                const previousView = viewState.viewHistory[viewState.viewHistory.length - 2];
+                console.log(`从${previousView}页面进入确认页面`);
+            }
+            
             if (window.UIPayment && window.UIPayment.initializeConfirmPage) {
                 window.UIPayment.initializeConfirmPage();
             }
         }, 100);
     }
 }
-
 // ========================= 导航验证函数 =========================
 
 /**
