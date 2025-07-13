@@ -302,12 +302,14 @@ function handleSpecialViewLogic(viewName, options) {
 
     // 如果切换到确认页面，初始化确认页面数据
     if (viewName === 'confirm') {
+        window.UIPayment.updateConfirmPageData();
         setTimeout(() => {
             const isReturnFromOtherView = viewState.viewHistory.length >= 2;
 
             if (isReturnFromOtherView) {
                 const previousView = viewState.viewHistory[viewState.viewHistory.length - 2];
                 console.log(`从${previousView}页面进入确认页面`);
+                console.log('本次支付已选择的座位为:', window.StateManager.getSelectedSeats());
             }
 
             if (window.UIPayment && window.UIPayment.initializeConfirmPage) {
