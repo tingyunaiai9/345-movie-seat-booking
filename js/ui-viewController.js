@@ -13,10 +13,10 @@ const VIEW_CONFIG = {
         PAYMENT: 'payment',
         CONFIRM: 'confirm'
     },
-    
+
     // 视图顺序
     VIEW_ORDER: ['config', 'movie', 'seat', 'payment', 'confirm'],
-    
+
     // 预设配置
     PRESET_CONFIGS: {
         small: { rows: 8, cols: 12, name: '小厅' },
@@ -42,16 +42,16 @@ let viewState = {
  */
 function initializeViewController() {
     console.log('视图控制器开始初始化...');
-    
+
     // 初始化事件监听器
     initializeEventListeners();
-    
+
     // 初始化影厅配置选择器
     initializeCinemaConfigSelector();
-    
+
     // 初始化按钮状态
     initializeButtonStates();
-    
+
     console.log('视图控制器初始化完成');
 }
 
@@ -79,9 +79,10 @@ function initializeEventListeners() {
                 window.CinemaData.initializeCinemaSeats(
                     viewState.selectedCinemaSize.rows,
                     viewState.selectedCinemaSize.cols,
-                    null, // movieTime 参数，暂时用 null
+                    viewState.selectedMovieInfo.startTime,
                     viewState.selectedMovie // movieId 参数，现在保证有值
                 );
+                console.log('viewController,此时得到的电影开始时间为:', viewState.selectedMovieInfo.startTime);
 
                 // 初始化成功后，才切换视图
                 switchToView('seat');
@@ -140,6 +141,10 @@ function initializeEventListeners() {
             console.log('点击预订座位按钮');
             if (window.UIValidation && window.UIValidation.handleReservation) {
                 window.UIValidation.handleReservation();
+            }
+            if (window.CanvasRenderer && typeof window.CanvasRenderer.refreshCinemaDisplay === 'function') {
+                window.CanvasRenderer.refreshCinemaDisplay();
+                console.log('预订后已刷新座位Canvas');
             }
         });
     }
@@ -215,13 +220,13 @@ function switchToView(viewName, options = {}) {
     // 更新当前视图状态
     viewState.currentView = viewName;
     console.log(`当前视图已更新为: ${viewState.currentView}`);
-    
+
     // 限制历史记录大小
     viewState.viewHistory.push(viewName);
     if (viewState.viewHistory.length > 10) {
         viewState.viewHistory = viewState.viewHistory.slice(-10);
     }
-    
+
     console.log(`视图历史: ${viewState.viewHistory.join(' -> ')}`);
 
     // 🔑 特殊视图的处理逻辑（从ui-core.js移过来）
@@ -241,7 +246,7 @@ function handleSpecialViewLogic(viewName, options) {
     if (viewName === 'seat') {
         setTimeout(() => {
             // 检查是否是从支付页面返回的
-            const isReturnFromPayment = viewState.viewHistory.length >= 2 && 
+            const isReturnFromPayment = viewState.viewHistory.length >= 2 &&
                 viewState.viewHistory[viewState.viewHistory.length - 2] === 'payment';
 
             if (!isReturnFromPayment && window.CanvasRenderer && window.CanvasRenderer.refreshCinemaDisplay) {
@@ -253,12 +258,12 @@ function handleSpecialViewLogic(viewName, options) {
                     window.CanvasRenderer.refreshCinemaDisplay();
                 }
             }
-            
+
             // 添加：在控制台显示当前所有座位的状态
             logSeatStatus();
         }, 100);
     }
-    
+
     // 如果切换到支付页面，更新支付页面数据
     if (viewName === 'payment') {
         setTimeout(() => {
@@ -289,12 +294,12 @@ function canNavigateToView(viewName) {
     console.log(`尝试导航到视图: ${viewName}, 当前视图: ${viewState.currentView}`);
     const currentIndex = VIEW_CONFIG.VIEW_ORDER.indexOf(viewState.currentView);
     const targetIndex = VIEW_CONFIG.VIEW_ORDER.indexOf(viewName);
-    
+
     console.log(`当前视图索引: ${currentIndex}, 目标视图索引: ${targetIndex}`);
 
     // 基本导航规则：可以向后导航，或者向前导航一步
     const basicNavigation = targetIndex <= currentIndex || targetIndex === currentIndex + 1;
-    
+
     console.log(`基本导航检查结果: ${basicNavigation ? '通过' : '未通过'}`);
 
     if (!basicNavigation) {
@@ -326,12 +331,12 @@ function canNavigateToView(viewName) {
         case 'payment':
             // 进入支付页面需要选择座位
             console.log(`检查进入支付页面条件，当前视图: ${viewState.currentView}`);
-            
+
             // 如果有StateManager，检查是否已选座位
             if (window.StateManager && typeof window.StateManager.getSelectedCount === 'function') {
                 const selectedCount = window.StateManager.getSelectedCount();
                 console.log(`已选座位数量: ${selectedCount}`);
-                
+
                 if (selectedCount === 0) {
                     console.log('导航失败: 未选择座位');
                     showMessage('请先选择至少一个座位', 'warning');
@@ -428,7 +433,7 @@ function onSeatViewActivated() {
     console.log('选座视图已激活，开始执行初始化流程...');
 
     // 检查是否是从支付页面返回的
-    const isReturnFromPayment = viewState.viewHistory.length >= 2 && 
+    const isReturnFromPayment = viewState.viewHistory.length >= 2 &&
         viewState.viewHistory[viewState.viewHistory.length - 2] === 'payment';
 
     // 使用 requestAnimationFrame 确保在下一次浏览器重绘前执行初始化，
@@ -441,10 +446,10 @@ function onSeatViewActivated() {
 
 function onPaymentViewActivated() {
     console.log('支付视图已激活');
-    
+
     // 强制更新导航步骤状态
     updateNavigationSteps('payment');
-    
+
     // 强制更新UI状态反映当前是支付页面
     const paymentStep = document.querySelector('.nav-steps .step[data-step="payment"]');
     if (paymentStep) {
@@ -692,6 +697,14 @@ function initializeMovieSelection() {
             // 更新选中的电影
             viewState.selectedMovie = movieItem.dataset.movie;
 
+            viewState.selectedMovieInfo = {
+                id: movieItem.dataset.movie,
+                title: movieItem.querySelector('h3').textContent,
+                startTime: movieItem.querySelector('.movie-time').textContent,
+                price: movieItem.querySelector('.movie-price').textContent,
+                image: movieItem.querySelector('img').src
+            };
+
             // 更新按钮状态
             updateMovieNextButton();
 
@@ -747,7 +760,7 @@ function logSeatStatus() {
     if (window.CinemaData) {
         const config = window.CinemaData.getCurrentConfig();
         console.log('=== 当前座位状态 ===');
-        
+
         // 创建状态统计对象
         let statusStats = {
             'available': 0,
@@ -755,7 +768,7 @@ function logSeatStatus() {
             'sold': 0,
             'reserved': 0
         };
-        
+
         // 获取并记录所有座位状态
         for (let row = 1; row <= config.TOTAL_ROWS; row++) {
             for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
@@ -765,18 +778,18 @@ function logSeatStatus() {
                 }
             }
         }
-        
+
         // 输出状态统计
         console.log('状态统计:', statusStats);
-        
+
         // 获取已选座位并输出详细信息
         if (window.StateManager && window.StateManager.getSelectedSeats) {
             const selectedSeats = window.StateManager.getSelectedSeats();
-            console.log('已选座位:', selectedSeats.length > 0 ? 
-                selectedSeats.map(s => `${s.row}排${s.col}座`).join(', ') : 
+            console.log('已选座位:', selectedSeats.length > 0 ?
+                selectedSeats.map(s => `${s.row}排${s.col}座`).join(', ') :
                 '无');
         }
-        
+
         console.log('=====================');
     } else {
         console.warn('CinemaData模块未加载，无法获取座位状态');
@@ -981,15 +994,15 @@ if (typeof window !== 'undefined') {
     window.UIViewController = {
         // 核心初始化
         initializeViewController,
-        
+
         // 视图切换
         switchToView,
         canNavigateToView,
-        
+
         // 导航管理
         updateNavigationSteps,
         isViewCompleted,
-        
+
         // 视图激活回调
         onViewChanged,
         onConfigViewActivated,
@@ -997,29 +1010,29 @@ if (typeof window !== 'undefined') {
         onSeatViewActivated,
         onPaymentViewActivated,
         onConfirmViewActivated,
-        
+
         // 配置管理
         initializeCinemaConfigSelector,
         validateCustomConfig,
         applyConfigToModules,
-        
+
         // 按钮状态管理
         initializeButtonStates,
         updateConfigNextButton,
         updateMovieNextButton,
-        
+
         // 其他功能
         handlePaymentConfirmation,
         resetToStart,
         resetAllForms,
         logSeatStatus,
         updateCinemaStatusDisplay,
-        
+
         // 工具函数
         showMessage,
         showLoading,
         hideLoading,
-        
+
         // 状态访问
         getViewState: () => viewState,
         VIEW_CONFIG,
@@ -1028,7 +1041,7 @@ if (typeof window !== 'undefined') {
 }
 
 // 页面加载完成后自动初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('页面加载完成，初始化视图控制器');
 
     // 等待其他模块加载完成后再初始化
