@@ -257,6 +257,53 @@
     opacity: 0.7;
 }
 
+/* 最新订单高亮样式 */
+.order-item.latest-order {
+    border: 2px solid #398d37;
+    box-shadow: 0 4px 12px rgba(57, 141, 55, 0.2);
+    background: linear-gradient(135deg, #f8fff8 0%, #f0fff0 100%);
+    position: relative;
+}
+
+.order-item.latest-order::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #398d37, #4a9f43);
+}
+
+/* 最新订单标识 */
+.latest-badge {
+    background: linear-gradient(135deg, #398d37, #4a9f43);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+    box-shadow: 0 2px 4px rgba(57, 141, 55, 0.3);
+}
+
+/* 最新订单动画效果 */
+.order-item.latest-order {
+    animation: highlightPulse 2s ease-in-out;
+}
+
+@keyframes highlightPulse {
+    0% {
+        box-shadow: 0 4px 12px rgba(57, 141, 55, 0.2);
+    }
+    50% {
+        box-shadow: 0 6px 16px rgba(57, 141, 55, 0.4);
+    }
+    100% {
+        box-shadow: 0 4px 12px rgba(57, 141, 55, 0.2);
+    }
+}
+
 .order-header {
     display: flex;
     justify-content: space-between;

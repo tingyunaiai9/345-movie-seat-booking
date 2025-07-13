@@ -231,11 +231,11 @@ function renderMyOrdersList() {
         );
     }
 
-    // 🔑 修改：按时间排序 - 最旧的在上，最新的在下
+    // 🔑 修改：按时间排序 - 最新的在上，最旧的在下
     filteredOrders.sort((a, b) => {
         const timeA = new Date(a.createdAt || 0).getTime();
         const timeB = new Date(b.createdAt || 0).getTime();
-        return timeB - timeA; // 升序排列，旧的在前，新的在后
+        return timeB - timeA; // 降序排列，新的在前，旧的在后
     });
 
     // 清空列表
@@ -248,8 +248,9 @@ function renderMyOrdersList() {
         }
     } else {
         // 渲染订单项
-        filteredOrders.forEach(order => {
-            const orderItem = createMyOrderItem(order);
+        filteredOrders.forEach((order, index) => {
+            const isLatest = index === 0; // 第一个订单是最新的
+            const orderItem = createMyOrderItem(order, isLatest);
             ordersList.appendChild(orderItem);
         });
     }
@@ -283,11 +284,12 @@ function formatDate(date) {
 /**
  * 创建订单项元素
  */
-function createMyOrderItem(order) {
+function createMyOrderItem(order, isLatest = false) {
     // order 即 ticket 对象
     const orderItem = document.createElement('div');
-    orderItem.className = `order-item ${order.status}`;
+    orderItem.className = `order-item ${order.status}${isLatest ? ' latest-order' : ''}`;
     orderItem.dataset.orderId = order.ticketId;
+    
     const statusText = {
         'reserved': '已预约',
         'sold': '已支付',
@@ -295,8 +297,10 @@ function createMyOrderItem(order) {
         'expired': '已过期',
         'refunded': '已退款'
     };
+    
     // 格式化座位信息
     const seatsText = Array.isArray(order.seats) ? order.seats.map(seatIdToText).join('、') : '';
+    
     // 计算过期状态
     let expiryWarning = '';
     if (order.status === 'reserved' && order.expiresAt) {
@@ -311,13 +315,18 @@ function createMyOrderItem(order) {
             expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">预约已过期</span>`;
         }
     }
+    
     // 客户信息
     const customer = order.customerInfo || {};
     // 价格（假设每张票45元）
     const totalPrice = Array.isArray(order.seats) ? order.seats.length * 45 : 0;
+    
+    // 最新订单标识
+    const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
+    
     orderItem.innerHTML = `
         <div class=\"order-header\">
-            <span class=\"order-number\">订单号: ${order.ticketId}</span>
+            <span class=\"order-number\">订单号: ${order.ticketId} ${latestBadge}</span>
             <span class=\"order-status ${order.status}\">${statusText[order.status] || order.status}</span>
         </div>
         <div class=\"order-content\">
