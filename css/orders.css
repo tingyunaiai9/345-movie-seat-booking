@@ -433,63 +433,151 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     backdrop-filter: blur(5px);
+    padding: 0; /* 移除padding，避免影响居中 */
+    box-sizing: border-box;
+    margin: 0; /* 确保没有外边距 */
 }
 
+/* 模态框内容 */
 .order-detail-modal .modal-content {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
+    width: 90%; /* 使用百分比宽度 */
     max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.3s ease-out;
+    margin: 0 auto; /* 确保水平居中 */
+}
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .order-detail-modal .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 25px;
+    padding: 25px 30px;
     border-bottom: 2px solid #e9ecef;
     background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(152, 204, 187, 0.2) 100%);
-    border-radius: 12px 12px 0 0;
+    border-radius: 16px 16px 0 0;
+    flex-shrink: 0;
 }
 
 .order-detail-modal .modal-header h3 {
     margin: 0;
     color: #2c3e50;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
 }
 
 .order-detail-modal .modal-close {
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 28px;
     cursor: pointer;
     color: #6c757d;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    padding: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .order-detail-modal .modal-close:hover {
     color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
 }
 
 .order-detail-modal .modal-body {
-    padding: 25px;
+    padding: 30px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.order-detail-modal .modal-footer {
+    display: flex;
+    gap: 15px;
+    justify-content: center; /* 居中对齐按钮 */
+    align-items: center;
+    padding: 25px 30px;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 0 0 16px 16px;
+    flex-shrink: 0;
+}
+
+.order-detail-modal .btn {
+    min-width: 120px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-align: center;
+}
+
+.order-detail-modal .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.order-detail-modal .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.order-detail-modal .btn-primary {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+}
+
+.order-detail-modal .btn-primary:hover {
+    background: linear-gradient(135deg, #5a8e2b 0%, #2d7a2f 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(104, 165, 48, 0.4);
+}
+
+.order-detail-modal .btn-refund {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.order-detail-modal .btn-refund:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .order-detail-section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #e9ecef;
 }
 
@@ -499,22 +587,33 @@
 }
 
 .order-detail-section h4 {
-    margin: 0 0 10px 0;
+    margin: 0 0 15px 0;
     color: #398d37;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-detail-section h4::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    border-radius: 2px;
 }
 
 .detail-grid {
     display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: 10px;
+    grid-template-columns: 130px 1fr;
+    gap: 15px 20px;
     align-items: center;
 }
 
 .detail-label {
     color: #6c757d;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
 }
 
@@ -524,18 +623,105 @@
     font-size: 14px;
 }
 
-.order-detail-modal .modal-footer {
-    display: flex;
-    gap: 15px;
-    justify-content: flex-end;
-    padding: 20px 25px;
-    border-top: 2px solid #e9ecef;
-    background: #f8f9fa;
-    border-radius: 0 0 12px 12px;
+.detail-value.order-status {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
-.order-detail-modal .btn {
-    min-width: 100px;
-    padding: 10px 20px;
-    font-size: 14px;
+.seat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.seat-tag {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.3);
+}
+
+/* 响应式调整 */
+@media (max-height: 700px) {
+    .order-detail-modal {
+        padding: 10px;
+    }
+    
+    .order-detail-modal .modal-content {
+        max-height: 95vh;
+    }
+    
+    .order-detail-modal .modal-header,
+    .order-detail-modal .modal-footer {
+        padding: 20px 25px;
+    }
+    
+    .order-detail-modal .modal-body {
+        padding: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .order-detail-modal {
+        padding: 15px;
+    }
+    
+    .order-detail-modal .modal-content {
+        max-width: none;
+        width: 100%;
+    }
+    
+    .order-detail-modal .modal-header,
+    .order-detail-modal .modal-footer {
+        padding: 20px;
+    }
+    
+    .order-detail-modal .modal-body {
+        padding: 20px;
+    }
+    
+    .order-detail-modal .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .order-detail-modal .btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .detail-grid {
+        grid-template-columns: 100px 1fr;
+        gap: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-detail-modal .modal-header h3 {
+        font-size: 18px;
+    }
+    
+    .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .detail-label {
+        font-weight: 500;
+        color: #6c757d;
+    }
+    
+    .detail-value {
+        margin-bottom: 15px;
+        padding-left: 10px;
+        border-left: 3px solid #68a530;
+    }
 }

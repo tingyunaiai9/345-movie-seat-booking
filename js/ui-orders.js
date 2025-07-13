@@ -449,8 +449,14 @@ function showMyOrderDetail(order) {
         if (refundBtn) refundBtn.style.display = 'inline-block';
     }
 
-    // 显示模态框
+    // 显示模态框并确保在视口中央
     modal.style.display = 'flex';
+    
+    // 防止页面滚动
+    document.body.style.overflow = 'hidden';
+    
+    // 确保模态框聚焦（便于键盘操作）
+    modal.focus();
 }
 
 /**
@@ -460,6 +466,9 @@ function hideMyOrderDetail() {
     const modal = document.getElementById('order-detail-modal');
     if (modal) {
         modal.style.display = 'none';
+        
+        // 恢复页面滚动
+        document.body.style.overflow = '';
     }
 }
 
