@@ -262,7 +262,7 @@ function updateConfirmPriceInfo() {
 }
 
 /**
- * 更新确认页面中的客户信息（增强版）
+ * 更新确认页面中的客户信息
  */
 function updateConfirmCustomerInfo() {
     const customerNameEl = document.getElementById('confirm-customer-name');
