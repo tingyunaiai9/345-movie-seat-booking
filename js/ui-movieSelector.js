@@ -89,17 +89,18 @@ class MovieSelector {
         // 添加active类到选中的电影
         movieElement.classList.add('active');
 
+        const rawPrice = movieElement.querySelector('.movie-price').textContent;
+        const priceNumber = rawPrice.match(/\d+/) ? rawPrice.match(/\d+/)[0] : '0';
         // 提取电影数据
         const movieData = {
             id: movieElement.dataset.movie,
             title: movieElement.querySelector('h3').textContent,
             time: movieElement.querySelector('.movie-time').textContent,
-            price: movieElement.querySelector('.movie-price').textContent,
+            price: priceNumber,
             image: movieElement.querySelector('img').src
         };
 
         this.selectedMovie = movieData;
-        console.log('选中电影:', movieData);
 
         // 更改背景
         this.changeBackgroundMovie(movieData);
