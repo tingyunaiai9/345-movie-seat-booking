@@ -506,57 +506,6 @@ function handleMyRefundOrder() {
     }
 }
 
-// ========================= 数据获取辅助函数 =========================
-
-/**
- * 获取选中的电影标题
- */
-function getMySelectedMovieTitle() {
-    const selectedMovie = document.querySelector('.movie-item.active h3');
-    return selectedMovie ? selectedMovie.textContent : '罗小黑战记';
-}
-
-/**
- * 获取选中的电影时间
- */
-function getMySelectedMovieTime() {
-    const selectedMovie = document.querySelector('.movie-item.active .movie-time');
-    return selectedMovie ? selectedMovie.textContent : '2025-6-1 19:30';
-}
-
-/**
- * 获取选中的电影海报
- */
-function getMySelectedMoviePoster() {
-    const selectedMovie = document.querySelector('.movie-item.active img');
-    return selectedMovie ? selectedMovie.src : 'img/LUOXIAOHEI.webp';
-}
-
-/**
- * 获取选中座位数据
- */
-function getMySelectedSeatsData() {
-    return window.UIValidation ? window.UIValidation.getMySelectedSeatsData() : [];
-}
-
-/**
- * 获取客户数据
- */
-function getMyCustomerData() {
-    return window.UIValidation ? window.UIValidation.getMyCustomerData() : {
-        name: '未填写',
-        age: '未填写',
-        phone: '未填写'
-    };
-}
-
-/**
- * 计算总价格
- */
-function calculateMyTotalPrice() {
-    return window.UIValidation ? window.UIValidation.calculateMyTotalPrice() : 90;
-}
-
 // ========================= 模块导出 =========================
 
 // 在浏览器环境中，将函数暴露到全局
