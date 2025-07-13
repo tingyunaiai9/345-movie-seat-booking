@@ -262,7 +262,7 @@ function updateConfirmPriceInfo() {
 }
 
 /**
- * 更新确认页面中的客户信息（增强版）
+ * 更新确认页面中的客户信息
  */
 function updateConfirmCustomerInfo() {
     const customerNameEl = document.getElementById('confirm-customer-name');
@@ -278,7 +278,7 @@ function updateConfirmCustomerInfo() {
 
         if (members.length > 0) {
             if (customerNameEl) customerNameEl.textContent = `${members[0].name} 等${members.length}人`;
-            if (customerAgeEl) customerAgeEl.textContent = `${members[0].age}岁 (主要联系人)`;
+            if (customerAgeEl) customerAgeEl.textContent = `${members[0].age}岁`;
             if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
             if (ticketTypeEl) ticketTypeEl.textContent = `个人票 (${members.length}人)`;
         } else {
@@ -333,10 +333,8 @@ function handleFinalPayment() {
         if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
             window.UICoreModule.switchView('final-view');
         } else {
-            // 兜底：直接用DOM切换
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            var finalView = document.getElementById('final-view');
-            if(finalView) finalView.classList.add('active');
+            // 兜底方案：保持在当前确认页面
+            console.warn('UIViewController 不可用，保持在当前确认页面');
         }
 
         console.log('支付完成');

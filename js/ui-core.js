@@ -1,20 +1,10 @@
 /**
  * 电影院票务系统 - 核心UI管理模块
- * 负责系统初始化、视图切换、基础配置等核心功能
+ * 负责系统初始化、基础配置等核心功能（不包含视图切换）
  */
 
 // ========================= 常量定义 =========================
 const UI_CONFIG = {
-    // 视图状态
-    VIEWS: {
-        CONFIG: 'config-view',
-        MOVIE: 'movie-view',
-        SEAT: 'seat-view',
-        PAYMENT: 'payment-view',
-        CONFIRM: 'confirm-view',
-        FINAL: 'final-view' // 最终展示的页面
-    },
-
     // 票务类型
     TICKET_TYPES: {
         INDIVIDUAL: 'individual',
@@ -24,7 +14,6 @@ const UI_CONFIG = {
 
 // ========================= 全局状态变量 =========================
 let uiState = {
-    currentView: UI_CONFIG.VIEWS.CONFIG,
     ticketType: UI_CONFIG.TICKET_TYPES.INDIVIDUAL,
     memberCount: 0,
     maxMembers: 20,
@@ -39,14 +28,28 @@ let uiState = {
 function initializeUI() {
     console.log('UI模块开始初始化...');
 
-    // 绑定所有事件监听器
+    // 检测是否已有视图控制器
+    if (window.viewController) {
+        console.log('检测到 viewController，跳过视图管理初始化');
+        // 只初始化非视图管理的功能
+        initializeNonViewFunctions();
+        return;
+    }
+
+    // 如果没有viewController，则继续原有逻辑
+    initializeNonViewFunctions();
+}
+
+/**
+ * 初始化非视图切换的功能
+ */
+function initializeNonViewFunctions() {
+    // 绑定所有事件监听器（除视图切换外）
     bindUIEvents();
 
     // 初始化票务类型控制
     initializeTicketTypeControl();
 
-    // 初始化页面导航
-    initializeNavigation();
     initializeCinemaSeats();
 
     // 初始化支付方式选择
@@ -67,99 +70,6 @@ function initializeUI() {
 
     uiState.systemInitialized = true;
     console.log('UI模块初始化完成');
-}
-
-// ========================= 视图管理函数 =========================
-
-/**
- * 切换视图
- * @param {string} viewId - 目标视图ID
- * @param {Object} options - 切换选项
- * @param {boolean} options.preserveSeats - 是否保留选座数据
- */
-function switchView(viewId, options = {}) {
-    console.log('切换到视图:', viewId);
-
-    // 隐藏所有视图
-    const views = document.querySelectorAll('.view');
-    views.forEach(view => {
-        view.classList.remove('active');
-    });
-
-    // 显示目标视图
-    const targetView = document.getElementById(viewId);
-    if (targetView) {
-        targetView.classList.add('active');
-        uiState.currentView = viewId;
-
-        // 如果切换到座位选择页面
-        if (viewId === UI_CONFIG.VIEWS.SEAT) {
-            setTimeout(() => {
-                // 无论如何都刷新Canvas显示
-                if (window.CanvasRenderer && window.CanvasRenderer.refreshCinemaDisplay) {
-                    window.CanvasRenderer.refreshCinemaDisplay();
-                    console.log('座位视图已刷新');
-                    
-                    // 添加：在控制台显示当前所有座位的状态
-                    if (window.CinemaData) {
-                        const config = window.CinemaData.getCurrentConfig();
-                        console.log('=== 当前座位状态 ===');
-                        
-                        // 创建状态统计对象
-                        let statusStats = {
-                            'available': 0,
-                            'selected': 0,
-                            'sold': 0,
-                            'reserved': 0
-                        };
-                        
-                        // 获取并记录所有座位状态
-                        for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-                            for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-                                const seat = window.CinemaData.getSeat(row, col);
-                                if (seat) {
-                                    statusStats[seat.status] = (statusStats[seat.status] || 0) + 1;
-                                }
-                            }
-                        }
-                        
-                        // 输出状态统计
-                        console.log('状态统计:', statusStats);
-                        
-                        // 获取已选座位并输出详细信息
-                        if (window.StateManager && window.StateManager.getSelectedSeats) {
-                            const selectedSeats = window.StateManager.getSelectedSeats();
-                            console.log('已选座位:', selectedSeats.length > 0 ? 
-                                selectedSeats.map(s => `${s.row}排${s.col}座`).join(', ') : 
-                                '无');
-                        }
-                        
-                        console.log('=====================');
-                    } else {
-                        console.warn('CinemaData模块未加载，无法获取座位状态');
-                    }
-                }
-            }, 100);
-        }
-        
-        // 如果切换到支付页面，更新支付页面数据
-        if (viewId === UI_CONFIG.VIEWS.PAYMENT) {
-            setTimeout(() => {
-                if (window.UIPayment && window.UIPayment.updatePaymentPageData) {
-                    window.UIPayment.updatePaymentPageData();
-                }
-            }, 100);
-        }
-
-        // 如果切换到确认页面，初始化确认页面数据
-        if (viewId === UI_CONFIG.VIEWS.CONFIRM) {
-            setTimeout(() => {
-                if (window.UIPayment && window.UIPayment.initializeConfirmPage) {
-                    window.UIPayment.initializeConfirmPage();
-                }
-            }, 100);
-        }
-    }
 }
 
 // ========================= 票务类型管理 =========================
@@ -234,125 +144,6 @@ function showGroupControls(individualControls, groupControls) {
 
         uiState.ticketType = UI_CONFIG.TICKET_TYPES.GROUP;
     }
-}
-
-// ========================= 页面导航管理 =========================
-
-/**
- * 初始化页面导航
- */
-function initializeNavigation() {
-    bindNavigationButtons();
-    bindBackButtons();
-}
-
-/**
- * 绑定导航按钮
- */
-function bindNavigationButtons() {
-    // 配置页面 -> 电影选择
-    const nextToMovieBtn = document.getElementById('next-to-movie');
-    if (nextToMovieBtn) {
-        nextToMovieBtn.addEventListener('click', function() {
-            switchView(UI_CONFIG.VIEWS.MOVIE);
-        });
-    }
-
-    // 电影选择 -> 选座页面
-    const nextToSeatBtn = document.getElementById('next-to-seat');
-    if (nextToSeatBtn) {
-        nextToSeatBtn.addEventListener('click', function() {
-            switchView(UI_CONFIG.VIEWS.SEAT);
-        });
-    }
-
-    // 选座页面 -> 支付页面
-    const nextToPaymentBtn = document.getElementById('next-to-payment');
-    if (nextToPaymentBtn) {
-        nextToPaymentBtn.disabled = false;
-        nextToPaymentBtn.addEventListener('click', function() {
-            console.log('跳转到支付页面');
-            switchView(UI_CONFIG.VIEWS.PAYMENT);
-        });
-    }
-
-    // 🔑 修正：直接购票按钮
-    const purchaseSeatsBtn = document.getElementById('purchase-seats');
-    if (purchaseSeatsBtn) {
-        purchaseSeatsBtn.addEventListener('click', function() {
-            console.log('点击直接购票按钮');
-            if (window.UIValidation && window.UIValidation.handleDirectPurchase) {
-                window.UIValidation.handleDirectPurchase();
-            }
-        });
-    }
-
-    // 🔑 修正：预订座位按钮
-    const reserveSeatsBtn = document.getElementById('reserve-seats');
-    if (reserveSeatsBtn) {
-        reserveSeatsBtn.addEventListener('click', function() {
-            console.log('点击预订座位按钮');
-            if (window.UIValidation && window.UIValidation.handleReservation) {
-                window.UIValidation.handleReservation();
-            }
-        });
-    }
-
-    // 支付页面 -> 确认页面
-    const confirmPaymentBtn = document.getElementById('confirm-payment');
-    if (confirmPaymentBtn) {
-        confirmPaymentBtn.disabled = false;
-        confirmPaymentBtn.addEventListener('click', function() {
-            console.log('确认支付，跳转到确认页面');
-            switchView(UI_CONFIG.VIEWS.CONFIRM);
-        });
-    }
-
-    // 支付页面 -> 返回选座页面
-    const backToSeatFromPaymentBtn = document.getElementById('back-to-seat-from-payment');
-    if (backToSeatFromPaymentBtn) {
-        backToSeatFromPaymentBtn.addEventListener('click', function() {
-            console.log('从支付页面返回选座页面');
-            switchView(UI_CONFIG.VIEWS.SEAT);
-        });
-    }
-
-    // 确认页面的支付按钮
-    const confirmPayBtn = document.querySelector('#confirm-view .btn-pay');
-    if (confirmPayBtn) {
-        confirmPayBtn.disabled = false;
-        confirmPayBtn.addEventListener('click', function() {
-            if (window.UIPayment && window.UIPayment.handleFinalPayment) {
-                window.UIPayment.handleFinalPayment();
-            }
-        });
-    }
-}
-
-/**
- * 绑定返回按钮
- */
-function bindBackButtons() {
-    const backToConfigBtn = document.getElementById('back-to-config');
-    if (backToConfigBtn) {
-        backToConfigBtn.addEventListener('click', function() {
-            switchView(UI_CONFIG.VIEWS.CONFIG);
-        });
-    }
-
-    const backToMovieBtn = document.getElementById('back-to-movie');
-    if (backToMovieBtn) {
-        backToMovieBtn.addEventListener('click', function() {
-            switchView(UI_CONFIG.VIEWS.MOVIE);
-        });
-    }
-
-    const backToSeatBtns = document.querySelectorAll('#back-to-seat');
-    backToSeatBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            switchView(UI_CONFIG.VIEWS.SEAT);
-        });
-    });
 }
 
 // ========================= 支付方式管理 =========================
@@ -448,7 +239,7 @@ function showConfirmDialog(message, onConfirm, onCancel) {
 // ========================= 事件绑定函数 =========================
 
 /**
- * 绑定所有UI事件
+ * 绑定所有UI事件（不包含视图切换）
  */
 function bindUIEvents() {
     // 初始化团体成员管理
@@ -640,9 +431,6 @@ if (typeof window !== 'undefined') {
         initializeUI,
         initializeCompleteSystem,
         initializeSeatLayoutToggle,
-
-        // 视图管理
-        switchView,
 
         // 票务类型管理
         showIndividualControls,
