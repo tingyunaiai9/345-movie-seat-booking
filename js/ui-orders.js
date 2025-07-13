@@ -231,6 +231,13 @@ function renderMyOrdersList() {
         );
     }
 
+    // 🔑 修改：按时间排序 - 最旧的在上，最新的在下
+    filteredOrders.sort((a, b) => {
+        const timeA = new Date(a.createdAt || 0).getTime();
+        const timeB = new Date(b.createdAt || 0).getTime();
+        return timeB - timeA; // 升序排列，旧的在前，新的在后
+    });
+
     // 清空列表
     ordersList.innerHTML = '';
 
