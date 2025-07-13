@@ -368,10 +368,10 @@ function createMyOrderItem(order, isLatest = false) {
  */
 function showMyOrderDetail(order) {
     const modal = document.getElementById('order-detail-modal');
-    const content = document.getElementById('order-detail-content');
-
-    if (!modal || !content) return;
+    if (!modal) return;
+    
     modal.dataset.currentOrderId = order.ticketId;
+    
     const statusText = {
         'reserved': '已预约',
         'sold': '已支付',
@@ -379,46 +379,58 @@ function showMyOrderDetail(order) {
         'expired': '已过期',
         'refunded': '已退款'
     };
-    const seatsHtml = Array.isArray(order.seats) ? order.seats.map(id => `<span class=\"seat-tag\">${seatIdToText(id)}</span>`).join('') : '';
+    
     const customer = order.customerInfo || {};
-    content.innerHTML = `
-        <div class=\"order-detail-section\">
-            <h4>订单信息</h4>
-            <div class=\"detail-grid\">
-                <span class=\"detail-label\">订单号:</span>
-                <span class=\"detail-value\">${order.ticketId}</span>
-                <span class=\"detail-label\">状态:</span>
-                <span class=\"detail-value order-status ${order.status}\">${statusText[order.status] || order.status}</span>
-                <span class=\"detail-label\">创建时间:</span>
-                <span class=\"detail-value\">${formatDate(order.createdAt)}</span>
-                ${order.paidAt ? `<span class=\"detail-label\">支付时间:</span><span class=\"detail-value\">${formatDate(order.paidAt)}</span>` : ''}
-                ${(order.expiresAt && order.status === 'reserved') ? `<span class=\"detail-label\">支付截止:</span><span class=\"detail-value\">${formatDate(order.expiresAt)}</span>` : ''}
-            </div>
-        </div>
-        <div class=\"order-detail-section\">
-            <h4>座位信息</h4>
-            <div class=\"seat-tags\">${seatsHtml}</div>
-        </div>
-        <div class=\"order-detail-section\">
-            <h4>客户信息</h4>
-            <div class=\"detail-grid\">
-                <span class=\"detail-label\">姓名:</span>
-                <span class=\"detail-value\">${customer.name || '未填写'}</span>
-                <span class=\"detail-label\">年龄:</span>
-                <span class=\"detail-value\">${customer.age || '未填写'}</span>
-            </div>
-        </div>
-        <div class=\"order-detail-section\">
-            <h4>费用明细</h4>
-            <div class=\"detail-grid\">
-                <span class=\"detail-label\">票价:</span>
-                <span class=\"detail-value\">¥45 × ${Array.isArray(order.seats) ? order.seats.length : 0}</span>
-                <span class=\"detail-label\">总计:</span>
-                <span class=\"detail-value\" style=\"color: #398d37; font-weight: 700; font-size: 18px;\">¥${Array.isArray(order.seats) ? order.seats.length * 45 : 0}</span>
-            </div>
-        </div>
-    `;
-
+    
+    // 更新订单信息
+    document.getElementById('detail-order-id').textContent = order.ticketId;
+    
+    const statusElement = document.getElementById('detail-order-status');
+    statusElement.textContent = statusText[order.status] || order.status;
+    statusElement.className = `detail-value order-status ${order.status}`;
+    
+    document.getElementById('detail-created-time').textContent = formatDate(order.createdAt);
+    
+    // 支付时间（仅在已支付时显示）
+    const paidTimeLabel = document.getElementById('detail-paid-time-label');
+    const paidTime = document.getElementById('detail-paid-time');
+    if (order.paidAt) {
+        paidTimeLabel.style.display = 'inline';
+        paidTime.style.display = 'inline';
+        paidTime.textContent = formatDate(order.paidAt);
+    } else {
+        paidTimeLabel.style.display = 'none';
+        paidTime.style.display = 'none';
+    }
+    
+    // 支付截止时间（仅在预约状态时显示）
+    const expiresLabel = document.getElementById('detail-expires-label');
+    const expiresTime = document.getElementById('detail-expires-time');
+    if (order.expiresAt && order.status === 'reserved') {
+        expiresLabel.style.display = 'inline';
+        expiresTime.style.display = 'inline';
+        expiresTime.textContent = formatDate(order.expiresAt);
+    } else {
+        expiresLabel.style.display = 'none';
+        expiresTime.style.display = 'none';
+    }
+    
+    // 更新座位信息
+    const seatTagsContainer = document.getElementById('detail-seat-tags');
+    const seatsHtml = Array.isArray(order.seats) ? 
+        order.seats.map(id => `<span class="seat-tag">${seatIdToText(id)}</span>`).join('') : '';
+    seatTagsContainer.innerHTML = seatsHtml;
+    
+    // 更新客户信息
+    document.getElementById('detail-customer-name').textContent = customer.name || '未填写';
+    document.getElementById('detail-customer-age').textContent = customer.age || '未填写';
+    
+    // 更新费用明细
+    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
+    const totalPrice = seatCount * 45;
+    document.getElementById('detail-ticket-price').textContent = `¥45 × ${seatCount}`;
+    document.getElementById('detail-total-price').textContent = `¥${totalPrice}`;
+    
     // 显示/隐藏操作按钮
     const cancelBtn = document.getElementById('cancel-order');
     const payBtn = document.getElementById('pay-reserved-order');
@@ -433,7 +445,7 @@ function showMyOrderDetail(order) {
     if (order.status === 'reserved') {
         if (cancelBtn) cancelBtn.style.display = 'inline-block';
         if (payBtn) payBtn.style.display = 'inline-block';
-    } else if (order.status === 'paid') {
+    } else if (order.status === 'paid' || order.status === 'sold') {
         if (refundBtn) refundBtn.style.display = 'inline-block';
     }
 
