@@ -198,6 +198,7 @@ function saveCurrentCinemaState() {
     localStorage.setItem(storageKey, JSON.stringify(cinemaSeats));
     console.log(`当前影厅状态已保存到 localStorage，键为: ${storageKey}`);
 }
+
 // ========================= 个人选座算法 =========================
 
 /**
@@ -567,8 +568,6 @@ function getCurrentConfig() {
     return { ...currentCinemaConfig };
 }
 
-
-
 // ========================= 数据验证函数 =========================
 
 /**
@@ -583,16 +582,36 @@ function validateSeatParams(row, col) {
     return !isNaN(r) && !isNaN(c) && r >= 1 && r <= currentCinemaConfig.TOTAL_ROWS && c >= 1 && c <= currentCinemaConfig.SEATS_PER_ROW;
 }
 
-/**
- * 验证客户信息
- * @param {Object} customerInfo - 客户信息
- * @returns {Object} 验证结果 {valid: boolean, errors: Array}
- */
-function validateCustomerInfo(customerInfo) {
-    const errors = [];
-    if (!customerInfo.name || customerInfo.name.trim() === '') errors.push('姓名不能为空');
-    if (customerInfo.age === undefined || isNaN(customerInfo.age) || customerInfo.age <= 0) errors.push('年龄必须是有效的数字');
-    return { valid: errors.length === 0, errors };
+// ========================= 订单localStorage同步与查询接口 =========================
+function syncOrdersToLocalStorage() {
+    try {
+        localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords));
+    } catch (e) {
+        console.error('订单同步到localStorage失败:', e);
+    }
+}
+
+function loadOrdersFromLocalStorage() {
+    try {
+        const stored = localStorage.getItem('movieTicketOrders');
+        if (stored) {
+            ticketRecords = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('订单从localStorage加载失败:', e);
+    }
+}
+
+function getAllOrders() {
+    return ticketRecords.slice();
+}
+
+function getLatestOrder() {
+    return ticketRecords.length > 0 ? ticketRecords[ticketRecords.length - 1] : null;
+}
+
+function getOrderById(orderId) {
+    return ticketRecords.find(o => o.ticketId === orderId || o.id === orderId) || null;
 }
 
 // ========================= 模块导出 =========================
@@ -627,7 +646,6 @@ window.CinemaData = {
     isSeatAvailableOrSelected,
     canSitInRow,
     validateSeatParams,
-    validateCustomerInfo,
 
     // 订单查询相关
     getAllOrders,
@@ -636,38 +654,6 @@ window.CinemaData = {
 };
 
 console.log('电影院票务系统核心模块(main.js)已加载');
-
-// ========================= 订单localStorage同步与查询接口 =========================
-function syncOrdersToLocalStorage() {
-    try {
-        localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords));
-    } catch (e) {
-        console.error('订单同步到localStorage失败:', e);
-    }
-}
-
-function loadOrdersFromLocalStorage() {
-    try {
-        const stored = localStorage.getItem('movieTicketOrders');
-        if (stored) {
-            ticketRecords = JSON.parse(stored);
-        }
-    } catch (e) {
-        console.error('订单从localStorage加载失败:', e);
-    }
-}
-
-function getAllOrders() {
-    return ticketRecords.slice();
-}
-
-function getLatestOrder() {
-    return ticketRecords.length > 0 ? ticketRecords[ticketRecords.length - 1] : null;
-}
-
-function getOrderById(orderId) {
-    return ticketRecords.find(o => o.ticketId === orderId || o.id === orderId) || null;
-}
 
 // 初始化时加载localStorage订单
 loadOrdersFromLocalStorage();
