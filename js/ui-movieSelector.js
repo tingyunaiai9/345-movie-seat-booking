@@ -17,7 +17,7 @@ class MovieSelector {
         this.bindMovieSelection();
         // 移除自动应用默认背景的逻辑
         // this.applyDefaultBackground();
-        
+
         // 只在非配置页面时恢复电影背景
         this.restoreMovieBackgroundIfNeeded();
     }
@@ -47,14 +47,14 @@ class MovieSelector {
      */
     applyBackgroundById(movieId) {
         const backgroundImage = movieBackgrounds[movieId] || movieBackgrounds.cat;
-        
+
         // 应用背景
         document.body.style.background = `url('${backgroundImage}') no-repeat center center fixed`;
         document.body.style.backgroundSize = 'cover';
-        
+
         // 更新body类名
         this.updateBodyClass(movieId);
-        
+
         console.log('背景已应用:', backgroundImage);
     }
 
@@ -64,10 +64,10 @@ class MovieSelector {
     restoreConfigBackground() {
         document.body.style.background = `url('./img/background-field.png') no-repeat center center fixed`;
         document.body.style.backgroundSize = 'cover';
-        
+
         // 移除电影相关的CSS类
         document.body.className = document.body.className.replace(/movie-\w+/g, '');
-        
+
         console.log('已恢复配置页面背景');
     }
 
@@ -85,7 +85,7 @@ class MovieSelector {
         document.querySelectorAll('.movie-item').forEach(item => {
             item.classList.remove('active');
         });
-        
+
         // 添加active类到选中的电影
         movieElement.classList.add('active');
 
@@ -97,16 +97,17 @@ class MovieSelector {
             price: movieElement.querySelector('.movie-price').textContent,
             image: movieElement.querySelector('img').src
         };
-        
+
         this.selectedMovie = movieData;
         console.log('选中电影:', movieData);
 
         // 更改背景
         this.changeBackgroundMovie(movieData);
-        
+
         // 保存到localStorage
         localStorage.setItem('selectedMovie', movieData.id);
-        
+        localStorage.setItem('selectedMovieInfo', JSON.stringify(movieData));
+
         // 通知其他组件更新
         this.notifyMovieSelection(movieData);
     }
@@ -118,7 +119,7 @@ class MovieSelector {
     updateBodyClass(movieId) {
         // 移除现有的电影类名
         document.body.className = document.body.className.replace(/movie-\w+/g, '');
-        
+
         // 添加新的电影类名
         document.body.classList.add(`movie-${movieId}`);
     }
@@ -137,7 +138,7 @@ class MovieSelector {
 }
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('初始化电影选择器...');
     window.movieSelector = new MovieSelector();
 });

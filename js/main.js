@@ -66,6 +66,7 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
     currentCinemaConfig.SEATS_PER_ROW = seatsPerRow;
     currentCinemaConfig.TOTAL_SEATS = rows * seatsPerRow;
     currentCinemaConfig.movieId = movieId;
+    currentCinemaConfig.movieStartTime = movieTime;
     console.log(`初始化影院座位数据: ${rows}排, 每排${seatsPerRow}座，电影ID: ${movieId}`);
 
     // 从 localStorage 加载或初始化座位数据

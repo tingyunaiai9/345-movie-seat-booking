@@ -22,6 +22,12 @@ body {
     transition: background 0.3s ease-in-out;
 }
 
+html,
+body {
+    min-width: 900px;
+    /* 限制网页最小宽度为900px */
+}
+
 /* ========================= 页面视图控制 ========================= */
 .view {
     display: none;
@@ -33,6 +39,8 @@ body {
 
 /* ========================= 通用组件样式 ========================= */
 .container {
+    min-width: 900px;
+    /* 主容器也限制最小宽度 */
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;

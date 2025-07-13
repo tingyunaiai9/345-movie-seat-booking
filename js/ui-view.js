@@ -14,6 +14,7 @@ const VIEW_CONFIG = {
         CONFIRM: 'confirm'
     },
 
+
     // 视图顺序
     VIEW_ORDER: ['config', 'movie', 'seat', 'payment', 'confirm', 'final-view'],
 
@@ -43,14 +44,18 @@ let viewState = {
 function initializeViewController() {
     console.log('视图控制器开始初始化...');
 
+
     // 初始化事件监听器
     initializeEventListeners();
+
 
     // 初始化影厅配置选择器
     initializeCinemaConfigSelector();
 
+
     // 初始化按钮状态
     initializeButtonStates();
+
 
     console.log('视图控制器初始化完成');
 }
@@ -79,9 +84,10 @@ function initializeEventListeners() {
                 window.CinemaData.initializeCinemaSeats(
                     viewState.selectedCinemaSize.rows,
                     viewState.selectedCinemaSize.cols,
-                    null, // movieTime 参数，暂时用 null
+                    viewState.selectedMovieInfo.startTime,
                     viewState.selectedMovie // movieId 参数，现在保证有值
                 );
+                console.log('viewController,此时得到的电影开始时间为:', viewState.selectedMovieInfo.startTime);
 
                 // 初始化成功后，才切换视图
                 switchToView('seat');
@@ -142,6 +148,10 @@ function initializeEventListeners() {
             console.log('点击预订座位按钮');
             if (window.UIValidation && window.UIValidation.handleReservation) {
                 window.UIValidation.handleReservation();
+            }
+            if (window.CanvasRenderer && typeof window.CanvasRenderer.refreshCinemaDisplay === 'function') {
+                window.CanvasRenderer.refreshCinemaDisplay();
+                console.log('预订后已刷新座位Canvas');
             }
         });
     }
@@ -218,11 +228,13 @@ function switchToView(viewName, options = {}) {
     viewState.currentView = viewName;
     console.log(`当前视图已更新为: ${viewState.currentView}`);
 
+
     // 限制历史记录大小
     viewState.viewHistory.push(viewName);
     if (viewState.viewHistory.length > 10) {
         viewState.viewHistory = viewState.viewHistory.slice(-10);
     }
+
 
     console.log(`视图历史: ${viewState.viewHistory.join(' -> ')}`);
 
@@ -263,10 +275,12 @@ function handleSpecialViewLogic(viewName, options) {
                 }
             }
 
+
             // 添加：在控制台显示当前所有座位的状态
             logSeatStatus();
         }, 100);
     }
+
 
     // 如果切换到支付页面，更新支付页面数据
     if (viewName === 'payment') {
@@ -715,6 +729,14 @@ function initializeMovieSelection() {
             // 更新选中的电影
             viewState.selectedMovie = movieItem.dataset.movie;
 
+            viewState.selectedMovieInfo = {
+                id: movieItem.dataset.movie,
+                title: movieItem.querySelector('h3').textContent,
+                startTime: movieItem.querySelector('.movie-time').textContent,
+                price: movieItem.querySelector('.movie-price').textContent,
+                image: movieItem.querySelector('img').src
+            };
+
             // 更新按钮状态
             updateMovieNextButton();
 
@@ -1051,7 +1073,7 @@ if (typeof window !== 'undefined') {
 }
 
 // 页面加载完成后自动初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('页面加载完成，初始化视图控制器');
 
     // 等待其他模块加载完成后再初始化
