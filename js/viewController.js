@@ -489,9 +489,10 @@ class ViewController {
             if (selectedPreset && selectedPreset.value === 'custom') {
                 this.validateCustomConfig();
                 if (this.cinemaConfigSelected) {
-                    this.applyConfigToModules(rows, cols, '自定义', this.selectedMovie);
+                    this.selectedCinemaSize = { rows, cols, name: '自定义' };
                 }
             }
+            this.updateConfigNextButton();
         };
 
         if (customRowsInput) {
