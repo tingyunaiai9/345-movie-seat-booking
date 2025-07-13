@@ -200,31 +200,43 @@ function updateConfirmPageData() {
  */
 function updateConfirmMovieInfo() {
     const movieTitleEl = document.getElementById('confirm-movie-title');
-    const movieTimeEl = document.getElementById('confirm-movie-time');
-    const movieCinemaEl = document.getElementById('confirm-cinema-info');
+    const movieTimeEl = document.getElementById('confirm-showtime');
+    const movieCinemaEl = document.getElementById('confirm-cinema');
 
-    // 从验证模块获取数据
-    const movieTitle = window.UIValidation ?
-        window.UIValidation.getMySelectedMovieTitle() : '罗小黑战记';
-    const movieTime = window.UIValidation ?
-        window.UIValidation.getMySelectedMovieTime() : '2025-6-1 19:30';
+    let movieData = null;
+    try {
+        movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) {
+        movieData = null;
+    }
 
-    if (movieTitleEl) movieTitleEl.textContent = movieTitle;
-    if (movieTimeEl) movieTimeEl.textContent = movieTime;
-    if (movieCinemaEl) movieCinemaEl.textContent = '中厅 (10排×20座)';
+
+    if (movieData) {
+        if (movieTitleEl) movieTitleEl.textContent = movieData.title || '-';
+        if (movieTimeEl) movieTimeEl.textContent = movieData.time || '-';
+        if (movieCinemaEl) movieCinemaEl.textContent = movieData.cinema || '中厅 (10排×20座)';
+    } else {
+        // 默认值
+        if (movieTitleEl) movieTitleEl.textContent = '罗小黑战记';
+        if (movieTimeEl) movieTimeEl.textContent = '2025-6-1 19:30';
+        if (movieCinemaEl) movieCinemaEl.textContent = '中厅 (10排×20座)';
+    }
 }
 
 /**
  * 更新确认页面中的座位信息
  */
 function updateConfirmSeatInfo() {
-    const seatListEl = document.getElementById('confirm-seats-list');
+    const seatListEl = document.getElementById('confirm-seat-list');
     if (!seatListEl) return;
 
     // 清空现有座位信息
     seatListEl.innerHTML = '';
 
-    // 从验证模块获取真实选中座位数据
+    // 获取选中的座位数据
     const selectedSeats = window.UIValidation ?
         window.UIValidation.getMySelectedSeatsData() : [];
 
@@ -245,20 +257,36 @@ function updateConfirmSeatInfo() {
  * 更新确认页面中的价格信息
  */
 function updateConfirmPriceInfo() {
-    const unitPriceEl = document.getElementById('confirm-unit-price');
-    const ticketQuantityEl = document.getElementById('confirm-ticket-quantity');
-    const finalTotalEl = document.getElementById('confirm-final-total');
+    const ticketCostEl = document.getElementById('ticket-cost');
+    const serviceFeeEl = document.getElementById('service-fee');
+    const totalCostEl = document.getElementById('total-cost');
 
-    // 从验证模块获取真实选中座位数据
+    // 获取票价和已选座位数
+    let unitPrice = 45; // 默认票价
+    let serviceFee = 0; // 可自定义服务费
+    let quantity = 1;
+
+    // 从 localStorage 获取电影票价
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+
+    // 获取已选座位数量
     const selectedSeats = window.UIValidation ?
         window.UIValidation.getMySelectedSeatsData() : [];
-    const unitPrice = 45; // 单价，应该从配置或状态管理器获取
-    const quantity = selectedSeats.length;
-    const total = unitPrice * quantity;
+    quantity = selectedSeats.length;
 
-    if (unitPriceEl) unitPriceEl.textContent = `¥${unitPrice}`;
-    if (ticketQuantityEl) ticketQuantityEl.textContent = quantity;
-    if (finalTotalEl) finalTotalEl.textContent = `¥${total}`;
+    // 计算费用
+    const ticketCost = unitPrice * quantity;
+    const totalCost = ticketCost + serviceFee;
+
+    // 更新页面
+    if (ticketCostEl) ticketCostEl.textContent = `¥${unitPrice} × ${quantity} = ¥${ticketCost}`;
+    if (serviceFeeEl) serviceFeeEl.textContent = `¥${serviceFee}`;
+    if (totalCostEl) totalCostEl.textContent = `¥${totalCost}`;
 }
 
 /**
@@ -287,15 +315,28 @@ function updateConfirmCustomerInfo() {
             if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
             if (ticketTypeEl) ticketTypeEl.textContent = '个人票';
         }
-    } else {
-        // 团体票逻辑保持不变
-        const customerName = document.getElementById('customer-name')?.value || '未填写';
-        const customerAge = document.getElementById('customer-age')?.value || '未填写';
+    } else if (uiState && uiState.ticketType === 'group') {
+        // 团体票逻辑：获取团体成员列表
+        const groupMembers = window.UIMemberManagement ?
+            window.UIMemberManagement.getGroupMembersList() : [];
 
-        if (customerNameEl) customerNameEl.textContent = customerName;
-        if (customerAgeEl) customerAgeEl.textContent = customerAge;
+        if (groupMembers && groupMembers.length > 0) {
+            if (customerNameEl) customerNameEl.textContent = `${groupMembers[0].name} 等${groupMembers.length}人`;
+            if (customerAgeEl) customerAgeEl.textContent = `${groupMembers[0].age}岁`;
+            if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+            if (ticketTypeEl) ticketTypeEl.textContent = `团体票 (${groupMembers.length}人)`;
+        } else {
+            if (customerNameEl) customerNameEl.textContent = '未添加成员';
+            if (customerAgeEl) customerAgeEl.textContent = '未填写';
+            if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+            if (ticketTypeEl) ticketTypeEl.textContent = '团体票';
+        }
+    } else {
+        // 默认逻辑
+        if (customerNameEl) customerNameEl.textContent = '未填写';
+        if (customerAgeEl) customerAgeEl.textContent = '未填写';
         if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
-        if (ticketTypeEl) ticketTypeEl.textContent = uiState.ticketType === 'group' ? '团体票' : '个人票';
+        if (ticketTypeEl) ticketTypeEl.textContent = '个人票';
     }
 }
 
@@ -356,12 +397,12 @@ function checkImageCompatibility(imageSrc) {
     return new Promise((resolve) => {
         const img = new Image();
 
-        img.onload = function() {
+        img.onload = function () {
             console.log('图片格式兼容:', imageSrc);
             resolve(imageSrc);
         };
 
-        img.onerror = function() {
+        img.onerror = function () {
             console.warn('图片格式不兼容:', imageSrc);
             // 如果是webp格式，尝试使用jpg格式
             if (imageSrc.includes('.webp')) {
@@ -392,7 +433,7 @@ async function setSafeImageSrc(imgElement, src, alt) {
         imgElement.alt = alt;
 
         // 添加最终的错误处理
-        imgElement.onerror = function() {
+        imgElement.onerror = function () {
             this.src = 'https://via.placeholder.com/100x150?text=' + encodeURIComponent(alt);
         };
 
