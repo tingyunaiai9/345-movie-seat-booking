@@ -322,14 +322,15 @@ function handleFinalPayment() {
     if (result && result.success) {
         alert('支付成功！订单已确认。');
         // 订单已由 main.js 创建，UI 层无需再创建订单
-        // 切换到 final-view，优先用UICoreModule.switchView
-        if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
-            window.UICoreModule.switchView('final-view');
+        
+        // 切换到确认视图 - 使用 UIViewController
+        if (window.UIViewController && window.UIViewController.switchToView) {
+            // 如果当前已经在确认页面，可能需要切换到其他视图或显示成功状态
+            console.log('支付成功，停留在确认页面显示成功状态');
+            // 这里可以添加显示支付成功状态的逻辑
         } else {
-            // 兜底：直接用DOM切换
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            var finalView = document.getElementById('final-view');
-            if(finalView) finalView.classList.add('active');
+            // 兜底方案：保持在当前确认页面
+            console.warn('UIViewController 不可用，保持在当前确认页面');
         }
 
         console.log('支付完成');

@@ -118,7 +118,7 @@ function validateAgeRestriction(members, seats) {
         const seat = seats[i];
         const ageGroup = window.CinemaData.getAgeGroup(member.age);
         if (!window.CinemaData.canSitInRow(ageGroup, seat.row)) {
-            alert(`成员“${member.name || ''}”年龄为${member.age}岁，不能坐在第${seat.row}排，请重新选择座位或调整成员顺序。`);
+            alert(`成员"${member.name || ''}"年龄为${member.age}岁，不能坐在第${seat.row}排，请重新选择座位或调整成员顺序。`);
             return false;
         }
     }
@@ -181,9 +181,20 @@ function handleDirectPurchase() {
     console.log('客户信息:', customerInfo);
 
     try {
-        // 跳转到支付页面
-        if (window.UICoreModule && window.UICoreModule.switchView) {
-            window.UICoreModule.switchView(window.UICoreModule.UI_CONFIG.VIEWS.PAYMENT);
+        // 跳转到支付页面 - 使用 UIViewController
+        if (window.UIViewController && window.UIViewController.switchToView) {
+            window.UIViewController.switchToView('payment');
+        } else if (window.UIViewController && window.UIViewController.VIEW_CONFIG) {
+            // 兜底方案：使用视图配置中的支付视图名称
+            window.UIViewController.switchToView(window.UIViewController.VIEW_CONFIG.VIEWS.PAYMENT);
+        } else {
+            // 最后的兜底方案：直接操作DOM
+            console.warn('UIViewController 不可用，使用DOM方式切换视图');
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            const paymentView = document.getElementById('payment-view');
+            if (paymentView) {
+                paymentView.classList.add('active');
+            }
         }
     } catch (error) {
         console.error('购票过程中发生错误:', error);
