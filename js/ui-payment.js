@@ -278,7 +278,7 @@ function updateConfirmCustomerInfo() {
 
         if (members.length > 0) {
             if (customerNameEl) customerNameEl.textContent = `${members[0].name} 等${members.length}人`;
-            if (customerAgeEl) customerAgeEl.textContent = `${members[0].age}岁 (主要联系人)`;
+            if (customerAgeEl) customerAgeEl.textContent = `${members[0].age}岁`;
             if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
             if (ticketTypeEl) ticketTypeEl.textContent = `个人票 (${members.length}人)`;
         } else {
