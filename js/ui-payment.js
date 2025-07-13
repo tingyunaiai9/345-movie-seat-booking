@@ -315,15 +315,28 @@ function updateConfirmCustomerInfo() {
             if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
             if (ticketTypeEl) ticketTypeEl.textContent = '个人票';
         }
-    } else {
-        // 团体票逻辑保持不变
-        const customerName = document.getElementById('customer-name')?.value || '未填写';
-        const customerAge = document.getElementById('customer-age')?.value || '未填写';
+    } else if (uiState && uiState.ticketType === 'group') {
+        // 团体票逻辑：获取团体成员列表
+        const groupMembers = window.UIMemberManagement ?
+            window.UIMemberManagement.getGroupMembersList() : [];
 
-        if (customerNameEl) customerNameEl.textContent = customerName;
-        if (customerAgeEl) customerAgeEl.textContent = customerAge;
+        if (groupMembers && groupMembers.length > 0) {
+            if (customerNameEl) customerNameEl.textContent = `${groupMembers[0].name} 等${groupMembers.length}人`;
+            if (customerAgeEl) customerAgeEl.textContent = `${groupMembers[0].age}岁`;
+            if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+            if (ticketTypeEl) ticketTypeEl.textContent = `团体票 (${groupMembers.length}人)`;
+        } else {
+            if (customerNameEl) customerNameEl.textContent = '未添加成员';
+            if (customerAgeEl) customerAgeEl.textContent = '未填写';
+            if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
+            if (ticketTypeEl) ticketTypeEl.textContent = '团体票';
+        }
+    } else {
+        // 默认逻辑
+        if (customerNameEl) customerNameEl.textContent = '未填写';
+        if (customerAgeEl) customerAgeEl.textContent = '未填写';
         if (customerPhoneEl) customerPhoneEl.textContent = '未填写';
-        if (ticketTypeEl) ticketTypeEl.textContent = uiState.ticketType === 'group' ? '团体票' : '个人票';
+        if (ticketTypeEl) ticketTypeEl.textContent = '个人票';
     }
 }
 
