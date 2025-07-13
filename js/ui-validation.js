@@ -245,9 +245,9 @@ function handleReservation() {
                 console.log('已清除当前用户数据');
             }
 
-            // 切换到 final-view，优先用UICoreModule.switchView
-            if (window.UICoreModule && typeof window.UICoreModule.switchView === 'function') {
-                window.UICoreModule.switchView('final-view');
+            // 切换到 final-view，优先用UIViewController.switchView
+            if (window.UIViewController && typeof window.UIViewController.switchView === 'function') {
+                window.UIViewController.switchView('final-view');
             } else {
                 // 兜底：直接用DOM切换
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
