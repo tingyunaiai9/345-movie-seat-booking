@@ -59,6 +59,20 @@ function updatePaymentMovieInfo() {
         setSafeImageSrc(moviePosterEl, 'img/LUOXIAOHEI.webp', '罗小黑战记');
     }
 }
+/**
+ * 更新支付页面中的支付方式信息
+ */
+function updateConfirmPaymentMethod() {
+    const paymentMethodEl = document.getElementById('confirm-payment-method');
+    if (!paymentMethodEl) return;
+    console.log('payment 当前的支付方式:', localStorage.getItem('selectedPaymentMethod'));
+    const method = localStorage.getItem('selectedPaymentMethod') || 'wechat';
+    let methodText = '微信支付';
+    if (method === 'alipay') methodText = '支付宝';
+    if (method === 'card') methodText = '银行卡';
+
+    paymentMethodEl.textContent = methodText;
+}
 
 /**
  * 更新支付页面中的座位信息
@@ -193,6 +207,9 @@ function updateConfirmPageData() {
 
     // 更新客户信息
     updateConfirmCustomerInfo();
+
+    // 更新支付方式信息
+    updateConfirmPaymentMethod();
 }
 
 /**

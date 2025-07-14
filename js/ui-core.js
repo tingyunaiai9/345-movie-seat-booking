@@ -83,7 +83,7 @@ function initializeTicketTypeControl() {
     const groupControls = document.querySelector('.group-controls');
 
     ticketTypes.forEach((ticketType, index) => {
-        ticketType.addEventListener('click', function() {
+        ticketType.addEventListener('click', function () {
             console.log(`点击了票务类型 ${index}`);
 
             // 移除所有active类
@@ -152,10 +152,17 @@ function showGroupControls(individualControls, groupControls) {
  * 初始化支付方式选择
  */
 function initializePaymentMethods() {
-    const paymentOptions = document.querySelectorAll('.payment-option');
-    paymentOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            handlePaymentMethodSelection(this);
+    document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            localStorage.setItem('selectedPaymentMethod', this.value);
+            console.log('已选择支付方式:', this.value);
+            // 移除所有active类
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+            // 给当前radio的父label加active
+            this.parentElement.classList.add('active');
+
+            // 可选：提示
+            showMessage(`已选择${this.value}支付方式`, 'success');
         });
     });
 }
@@ -176,10 +183,9 @@ function handlePaymentMethodSelection(selectedOption) {
     const radio = selectedOption.querySelector('input[type="radio"]');
     if (radio) {
         radio.checked = true;
+        localStorage.setItem('selectedPaymentMethod', radio.value);
     }
 
-    console.log('选择支付方式:', radio ? radio.value : '未知');
-    showMessage(`已选择${radio ? radio.value : '未知'}支付方式`, 'success');
 }
 
 // ========================= 设置默认状态 =========================
@@ -271,7 +277,7 @@ function bindAutoSeatButtons() {
 
     const autoSelectIndividualBtn = document.getElementById('auto-select-individual');
     if (autoSelectIndividualBtn) {
-        autoSelectIndividualBtn.addEventListener('click', function() {
+        autoSelectIndividualBtn.addEventListener('click', function () {
             console.log('🎯 个人票自动选座');
 
             // 获取个人票成员信息
@@ -293,7 +299,7 @@ function bindAutoSeatButtons() {
     // 团体票自动选座按钮
     const autoSelectGroupBtn = document.getElementById('auto-select-group');
     if (autoSelectGroupBtn) {
-        autoSelectGroupBtn.addEventListener('click', function() {
+        autoSelectGroupBtn.addEventListener('click', function () {
             console.log('🎯 团体票自动选座');
 
             // 获取团体成员信息
@@ -377,7 +383,7 @@ function initializeSeatLayoutToggle() {
         toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
 
         // 添加新的事件监听器
-        newToggleBtn.addEventListener('click', function() {
+        newToggleBtn.addEventListener('click', function () {
             console.log('布局切换按钮被点击');
 
             // 获取当前布局类型
@@ -448,7 +454,7 @@ if (typeof window !== 'undefined') {
 }
 
 // 页面加载完成后自动初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('页面加载完成，初始化核心UI功能');
 
     // 等待其他模块加载完成后再初始化UI
