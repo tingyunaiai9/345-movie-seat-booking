@@ -148,11 +148,15 @@ function initializeEventListeners() {
         reserveSeatsBtn.addEventListener('click', () => {
             console.log('点击预订座位按钮');
             if (window.UIValidation && window.UIValidation.handleReservation) {
-                window.UIValidation.handleReservation();
-            }
-            if (window.CanvasRenderer && typeof window.CanvasRenderer.refreshCinemaDisplay === 'function') {
-                window.CanvasRenderer.refreshCinemaDisplay();
-                console.log('预订后已刷新座位Canvas');
+                const reservationResult = window.UIValidation.handleReservation();
+                if (reservationResult && reservationResult.success) {
+                    console.log('预订成功，刷新座位Canvas');
+                    if (window.CanvasRenderer && typeof window.CanvasRenderer.refreshCinemaDisplay === 'function') {
+                        window.CanvasRenderer.refreshCinemaDisplay();
+                    }
+                } else {
+                    console.log('预订失败，不刷新座位Canvas');
+                }
             }
         });
     }
