@@ -435,7 +435,7 @@
     left: 0;
     width: 100vw;
     max-width: 1000px; /* 限制最大宽度 */
-    height: 100vh;
+    height: 100%;
     background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
