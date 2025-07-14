@@ -105,12 +105,20 @@ function updatePaymentPriceInfo() {
     const ticketQuantityEl = document.getElementById('ticket-quantity');
     const finalTotalEl = document.getElementById('final-total');
 
-    // 从验证模块获取真实数据
+    // 获取最新票价
+    let unitPrice = 45;
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+
+    // 获取已选座位数量
     const selectedSeats = window.UIValidation ?
         window.UIValidation.getMySelectedSeatsData() :
         [{ row: 5, col: 8 }, { row: 5, col: 9 }];
 
-    const unitPrice = 45;
     const quantity = selectedSeats.length;
     const total = unitPrice * quantity;
 
