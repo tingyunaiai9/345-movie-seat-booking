@@ -320,6 +320,13 @@ function handleSpecialViewLogic(viewName, options) {
             }
         }, 100);
     }
+
+    // 如果从 final 界面回到 config 界面
+    if (viewName === 'config' && viewState.viewHistory.length >= 2 &&
+        viewState.viewHistory[viewState.viewHistory.length - 2] === 'final') {
+        console.log('从最终结算页面返回到配置页面，重新初始化影厅配置选择器');
+        resetToStart();
+    }
 }
 
 // ========================= 导航验证函数 =========================
@@ -590,17 +597,20 @@ function initializeSeatView(resetSelection = true) {
  * 修改后的影厅配置选择器初始化
  */
 function initializeCinemaConfigSelector() {
+    console.log('初始化影厅配置选择器...');
     const presetRadios = document.querySelectorAll('input[name="cinema-preset"]');
     const customConfig = document.querySelector('.custom-config');
 
     // 监听预设选项变化
     presetRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
+            console.log(`预设选项变化: ${e.target.value}`);
             if (e.target.checked) {
                 const selectedPreset = e.target.value;
                 viewState.cinemaConfigSelected = true;
 
                 if (selectedPreset === 'custom') {
+                    console.log('选择了自定义配置');
                     // 显示自定义配置
                     if (customConfig) {
                         customConfig.style.display = 'block';
@@ -608,6 +618,7 @@ function initializeCinemaConfigSelector() {
                     // 检查自定义配置是否有效
                     validateCustomConfig();
                 } else {
+                    console.log(`选择了预设配置: ${selectedPreset}`);
                     // 隐藏自定义配置
                     if (customConfig) {
                         customConfig.style.display = 'none';
@@ -616,6 +627,7 @@ function initializeCinemaConfigSelector() {
                     // 应用预设配置
                     const config = VIEW_CONFIG.PRESET_CONFIGS[selectedPreset];
                     if (config) {
+                        console.log(`应用预设配置: ${JSON.stringify(config)}`);
                         viewState.selectedCinemaSize = config;
                     }
                 }
@@ -632,10 +644,12 @@ function initializeCinemaConfigSelector() {
     const totalSeatsSpan = document.getElementById('total-seats');
 
     const updateCustomConfig = () => {
+        console.log('自定义配置变化...');
         const rows = parseInt(customRowsInput?.value) || 10;
         const cols = parseInt(customSeatsInput?.value) || 20;
         const total = rows * cols;
 
+        console.log(`当前自定义配置: 行数=${rows}, 列数=${cols}, 总座位数=${total}`);
         if (totalSeatsSpan) {
             totalSeatsSpan.textContent = total;
         }
@@ -646,6 +660,7 @@ function initializeCinemaConfigSelector() {
             validateCustomConfig();
             if (viewState.cinemaConfigSelected) {
                 viewState.selectedCinemaSize = { rows, cols, name: '自定义' };
+                console.log(`应用自定义配置: ${JSON.stringify(viewState.selectedCinemaSize)}`);
             }
         }
         updateConfigNextButton();
@@ -660,6 +675,7 @@ function initializeCinemaConfigSelector() {
 
     // 初始状态：没有选择任何配置
     viewState.cinemaConfigSelected = false;
+    console.log('初始状态: 未选择任何配置');
     updateConfigNextButton();
 }
 
@@ -912,24 +928,27 @@ function updateCinemaStatusDisplay() {
  * 重置到开始状态
  */
 function resetToStart() {
+    console.log('重置到开始状态...');
+
+    // 重置 viewState 的所有状态为初始值
     viewState.currentView = 'config';
     viewState.viewHistory = ['config'];
+    viewState.selectedMovie = null;
+    viewState.selectedCinemaSize = null;
+    viewState.cinemaConfigSelected = false;
+    viewState.configSelectorInitialized = false;
+
+    console.log('viewState 已重置:', viewState);
 
     // 重置背景为田野背景
     if (window.movieSelector) {
         window.movieSelector.restoreConfigBackground();
     }
 
+    // 切换到配置视图
     switchToView('config');
-    resetAllForms();
-    showMessage('已重置，可以开始新的订单', 'info');
-}
 
-/**
- * 重置所有表单数据
- */
-function resetAllForms() {
-    // 重置电影选择为第一个
+    // 重置所有表单数据
     const allMovieItems = document.querySelectorAll('.movie-item');
     allMovieItems.forEach(item => {
         item.classList.remove('active');
@@ -942,8 +961,10 @@ function resetAllForms() {
             window.movieSelector.selectMovie(firstMovie);
         }
     }
-}
 
+    // 显示提示信息
+    showMessage('已重置，可以开始新的订单', 'info');
+}
 // ========================= 工具函数 =========================
 
 /**
@@ -1082,7 +1103,7 @@ if (typeof window !== 'undefined') {
         // 其他功能
         handlePaymentConfirmation,
         resetToStart,
-        resetAllForms,
+        // resetAllForms,
         logSeatStatus,
         updateCinemaStatusDisplay,
 
