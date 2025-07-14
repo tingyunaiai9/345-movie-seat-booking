@@ -123,8 +123,8 @@ function initializeEventListeners() {
         });
     }
 
-    // 返回按钮事件 - 修改为绑定所有返回选座按钮
-    const backToSeatBtns = document.querySelectorAll('[id="back-to-seat"], #payment-back-to-seat, #confirm-back-to-seat');
+    // 返回按钮事件 - 只绑定 payment-back-to-seat 和 confirm-back-to-seat
+    const backToSeatBtns = document.querySelectorAll('#payment-back-to-seat, #confirm-back-to-seat');
     backToSeatBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             console.log('点击返回选座按钮');
@@ -467,15 +467,17 @@ function onMovieViewActivated() {
 function onSeatViewActivated() {
     console.log('选座视图已激活，开始执行初始化流程...');
 
-    // 检查是否是从支付页面返回的
+    // 检查是否是从支付页面或确认页面返回的
     const isReturnFromPayment = viewState.viewHistory.length >= 2 &&
         viewState.viewHistory[viewState.viewHistory.length - 2] === 'payment';
+    const isReturnFromConfirm = viewState.viewHistory.length >= 2 &&
+        viewState.viewHistory[viewState.viewHistory.length - 2] === 'confirm';
 
     // 使用 requestAnimationFrame 确保在下一次浏览器重绘前执行初始化，
     // 这能保证视图（DOM元素）已经可见。
     requestAnimationFrame(() => {
-        // 仅在不是从支付页面返回的情况下完全初始化
-        initializeSeatView(!isReturnFromPayment);
+        // 仅在不是从支付页面或确认页面返回的情况下完全初始化
+        initializeSeatView(!(isReturnFromPayment || isReturnFromConfirm));
     });
 }
 
