@@ -511,10 +511,6 @@
                                 <span class="amount" id="ticket-cost">¥0</span>
                             </div>
                             <div class="cost-item">
-                                <span class="label">服务费:</span>
-                                <span class="amount" id="service-fee">¥0</span>
-                            </div>
-                            <div class="cost-item">
                                 <span class="label">总计:</span>
                                 <span class="amount" id="total-cost">¥0</span>
                             </div>
@@ -523,7 +519,7 @@
                         <div class="detail-section payment-methods">
                             <h3>支付方式</h3>
                             <div class="payment-method-confirm" id="confirm-payment-method">
-                                微信支付
+                                <!-- 支付方式将由JS动态填充 -->
                             </div>
                         </div>
                     </div>
@@ -591,10 +587,13 @@
                                         <span class="detail-value order-status" id="detail-order-status">-</span>
                                         <span class="detail-label">创建时间:</span>
                                         <span class="detail-value" id="detail-created-time">-</span>
-                                        <span class="detail-label" id="detail-paid-time-label" style="display: none;">支付时间:</span>
+                                        <span class="detail-label" id="detail-paid-time-label"
+                                            style="display: none;">支付时间:</span>
                                         <span class="detail-value" id="detail-paid-time" style="display: none;">-</span>
-                                        <span class="detail-label" id="detail-expires-label" style="display: none;">支付截止:</span>
-                                        <span class="detail-value" id="detail-expires-time" style="display: none;">-</span>
+                                        <span class="detail-label" id="detail-expires-label"
+                                            style="display: none;">支付截止:</span>
+                                        <span class="detail-value" id="detail-expires-time"
+                                            style="display: none;">-</span>
                                     </div>
                                 </div>
 
@@ -624,13 +623,15 @@
                                         <span class="detail-label">票价:</span>
                                         <span class="detail-value" id="detail-ticket-price">-</span>
                                         <span class="detail-label">总计:</span>
-                                        <span class="detail-value" id="detail-total-price" style="color: #398d37; font-weight: 700; font-size: 18px;">-</span>
+                                        <span class="detail-value" id="detail-total-price"
+                                            style="color: #398d37; font-weight: 700; font-size: 18px;">-</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
                                 <button class="btn btn-secondary" id="cancel-order" style="display: none;">取消订单</button>
-                                <button class="btn btn-primary" id="pay-reserved-order" style="display: none;">立即支付</button>
+                                <button class="btn btn-primary" id="pay-reserved-order"
+                                    style="display: none;">立即支付</button>
                                 <button class="btn btn-refund" id="refund-order" style="display: none;">申请退款</button>
                             </div>
                         </div>

@@ -59,6 +59,20 @@ function updatePaymentMovieInfo() {
         setSafeImageSrc(moviePosterEl, 'img/LUOXIAOHEI.webp', '罗小黑战记');
     }
 }
+/**
+ * 更新支付页面中的支付方式信息
+ */
+function updateConfirmPaymentMethod() {
+    const paymentMethodEl = document.getElementById('confirm-payment-method');
+    if (!paymentMethodEl) return;
+    console.log('payment 当前的支付方式:', localStorage.getItem('selectedPaymentMethod'));
+    const method = localStorage.getItem('selectedPaymentMethod') || 'wechat';
+    let methodText = '微信支付';
+    if (method === 'alipay') methodText = '支付宝';
+    if (method === 'card') methodText = '银行卡';
+
+    paymentMethodEl.textContent = methodText;
+}
 
 /**
  * 更新支付页面中的座位信息
@@ -91,12 +105,20 @@ function updatePaymentPriceInfo() {
     const ticketQuantityEl = document.getElementById('ticket-quantity');
     const finalTotalEl = document.getElementById('final-total');
 
-    // 从验证模块获取真实数据
+    // 获取最新票价
+    let unitPrice = 45;
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+
+    // 获取已选座位数量
     const selectedSeats = window.UIValidation ?
         window.UIValidation.getMySelectedSeatsData() :
         [{ row: 5, col: 8 }, { row: 5, col: 9 }];
 
-    const unitPrice = 45;
     const quantity = selectedSeats.length;
     const total = unitPrice * quantity;
 
@@ -193,6 +215,9 @@ function updateConfirmPageData() {
 
     // 更新客户信息
     updateConfirmCustomerInfo();
+
+    // 更新支付方式信息
+    updateConfirmPaymentMethod();
 }
 
 /**
@@ -346,10 +371,24 @@ function updateConfirmCustomerInfo() {
 function handleFinalPayment() {
     console.log('处理最终支付确认...');
 
+    let unitPrice = 45; // 默认票价
+    let totalCost = 0;
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+    const selectedSeats = window.UIValidation ? window.UIValidation.getMySelectedSeatsData() : [];
+    totalCost = unitPrice * selectedSeats.length;
+
     // 获取客户信息
     const customerInfo = window.UIMemberManagement && window.UIMemberManagement.getMyCustomerDataEnhanced
         ? window.UIMemberManagement.getMyCustomerDataEnhanced()
         : { ticketType: 'individual', members: [] };
+
+    customerInfo.totalCost = totalCost;
+    customerInfo.unitPrice = unitPrice;
 
     // 调用StateManager的购票函数
     let result = null;

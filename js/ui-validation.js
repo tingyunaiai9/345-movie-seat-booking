@@ -13,7 +13,7 @@ function validateSeatSelection() {
     console.log('开始验证选座规则...');
 
     // 获取选中的座位
-    const selectedSeats = getMySelectedSeatsData();
+    const selectedSeats = window.StateManager.getSelectedSeats();
 
     if (!selectedSeats || selectedSeats.length === 0) {
         alert('请先选择座位');
@@ -249,8 +249,20 @@ function handleReservation() {
         window.UIMemberManagement.getMyCustomerDataEnhanced() :
         { ticketType: 'individual', members: [] };
 
-    console.log('客户信息:', customerInfo);
+    let unitPrice = 45;
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+    const selectedSeats = window.StateManager.getSelectedSeats();
+    const totalCost = unitPrice * selectedSeats.length;
 
+    customerInfo.unitPrice = unitPrice;
+    customerInfo.totalCost = totalCost;
+
+    console.log('客户信息:', customerInfo);
     try {
         // 调用StateManager的预订函数
         const result = window.StateManager.performReservation(customerInfo);
@@ -273,11 +285,13 @@ function handleReservation() {
             if (window.UIViewController && typeof window.UIViewController.switchToView === 'function') {
                 window.UIViewController.switchToView('final');
             } else {
-                // 兜底方案：保持在当前页面
-                console.warn('UIViewController 不可用，保持在当前页面');
+                // 兜底：直接用DOM切换
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                var finalView = document.getElementById('final-view');
+                if (finalView) finalView.classList.add('active');
             }
-
-            console.log('支付完成');
+            // 兜底方案：保持在当前页面
+            console.warn('UIViewController 不可用，保持在当前页面');
         } else {
             // 预订失败 - 显示错误信息
             const errorMessage = result && result.message ? result.message : '预订失败，请重试';
@@ -285,93 +299,11 @@ function handleReservation() {
             alert('预订失败：' + errorMessage);
         }
 
+        console.log('支付完成');
     } catch (error) {
         console.error('预订过程中发生错误:', error);
         alert('预订过程中发生错误，请重试');
     }
-}
-
-// ========================= 数据获取辅助函数 =========================
-
-/**
- * 获取选中座位数据
- * 优先从StateManager获取真实选中座位数据，否则从UI解析，最后使用示例数据
- */
-function getMySelectedSeatsData() {
-    // 优先从StateManager获取真实选中座位数据
-    if (window.StateManager && typeof window.StateManager.getSelectedSeats === 'function') {
-        const selectedSeats = window.StateManager.getSelectedSeats();
-        if (selectedSeats && selectedSeats.length > 0) {
-            return selectedSeats.map(seat => ({
-                row: seat.row,
-                col: seat.col,
-                status: seat.status
-            }));
-        }
-    }
-
-    // 尝试从页面中获取已选座位
-    const seatTags = document.querySelectorAll('#selected-seats-list .seat-tag');
-    if (seatTags.length > 0) {
-        return Array.from(seatTags).map(tag => {
-            const text = tag.textContent.trim();
-            const match = text.match(/(\d+)排(\d+)座/);
-            if (match) {
-                return { row: parseInt(match[1]), col: parseInt(match[2]) };
-            }
-            return text;
-        });
-    }
-
-    // 最后使用示例数据（保持向后兼容）
-    return [
-        { row: 5, col: 8 },
-        { row: 5, col: 9 }
-    ];
-}
-
-/**
- * 获取选中的电影标题
- */
-function getMySelectedMovieTitle() {
-    const selectedMovie = document.querySelector('.movie-item.active h3');
-    return selectedMovie ? selectedMovie.textContent : '罗小黑战记';
-}
-
-/**
- * 获取选中的电影时间
- */
-function getMySelectedMovieTime() {
-    const selectedMovie = document.querySelector('.movie-item.active .movie-time');
-    return selectedMovie ? selectedMovie.textContent : '2025-6-1 19:30';
-}
-
-/**
- * 获取选中的电影海报
- */
-function getMySelectedMoviePoster() {
-    const selectedMovie = document.querySelector('.movie-item.active img');
-    return selectedMovie ? selectedMovie.src : 'img/LUOXIAOHEI.webp';
-}
-
-/**
- * 获取客户数据
- */
-function getMyCustomerData() {
-    return {
-        name: document.getElementById('customer-name')?.value || '未填写',
-        age: document.getElementById('customer-age')?.value || '未填写',
-        phone: document.getElementById('customer-phone')?.value || '未填写'
-    };
-}
-
-/**
- * 计算总价格
- */
-function calculateMyTotalPrice() {
-    const seats = getMySelectedSeatsData();
-    const unitPrice = 45; // 单价，应该从配置或状态管理器获取
-    return seats.length * unitPrice;
 }
 
 // ========================= 模块导出 =========================
@@ -389,14 +321,6 @@ if (typeof window !== 'undefined') {
         // 业务逻辑处理
         handleDirectPurchase,
         handleReservation,
-
-        // 数据获取辅助函数
-        getMySelectedSeatsData,
-        getMySelectedMovieTitle,
-        getMySelectedMovieTime,
-        getMySelectedMoviePoster,
-        getMyCustomerData,
-        calculateMyTotalPrice
     };
 }
 

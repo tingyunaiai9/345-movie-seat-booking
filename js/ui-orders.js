@@ -278,7 +278,7 @@ function formatDate(date) {
         date = new Date(date);
     }
     if (!(date instanceof Date) || isNaN(date.getTime())) return '';
-    return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 /**
@@ -319,7 +319,9 @@ function createMyOrderItem(order, isLatest = false) {
     // 客户信息
     const customer = order.customerInfo || {};
     // 价格（假设每张票45元）
-    const totalPrice = Array.isArray(order.seats) ? order.seats.length * 45 : 0;
+    const unitPrice = order.unitPrice || 45; // 默认票价
+    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
+    const totalPrice = order.totalPrice || (seatCount * unitPrice); // 总价
 
     // 最新订单标识
     const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
@@ -343,7 +345,8 @@ function createMyOrderItem(order, isLatest = false) {
             <div class=\"order-price\">
                 <div class=\"price-amount\">¥${totalPrice}</div>
                 <div class=\"price-details\">
-                    共 ${Array.isArray(order.seats) ? order.seats.length : 0} 张票<br>
+                    共 ${seatCount} 张票<br>
+                    单价：¥${unitPrice}<br>
                     座位: ${seatsText}<br>
                     点击查看详情
                 </div>
@@ -427,8 +430,9 @@ function showMyOrderDetail(order) {
 
     // 更新费用明细
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const totalPrice = seatCount * 45;
-    document.getElementById('detail-ticket-price').textContent = `¥45 × ${seatCount}`;
+    const unitPrice = order.unitPrice || 45; // 默认票价
+    const totalPrice = seatCount * unitPrice;
+    document.getElementById('detail-ticket-price').textContent = `¥${unitPrice} × ${seatCount}`;
     document.getElementById('detail-total-price').textContent = `¥${totalPrice}`;
 
     // 显示/隐藏操作按钮
@@ -453,7 +457,7 @@ function showMyOrderDetail(order) {
     modal.style.display = 'flex';
 
     // 防止页面滚动
-    // document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
 
     // 确保模态框聚焦（便于键盘操作）
     modal.focus();
@@ -571,7 +575,7 @@ if (typeof window !== 'undefined') {
 }
 
 // 页面加载时初始化我的订单功能
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 延迟初始化，确保其他模块已加载
     setTimeout(() => {
         initializeMyOrdersFeature();
