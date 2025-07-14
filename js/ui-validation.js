@@ -245,15 +245,15 @@ function handleReservation() {
                 console.log('已清除当前用户数据');
             }
 
-            // 切换到 final-view，优先用UIViewController.switchView
-            if (window.UIViewController && typeof window.UIViewController.switchView === 'function') {
-                window.UIViewController.switchView('final-view');
+            // 切换到 final-view，优先用UIViewController.switchToView
+            if (window.UIViewController && typeof window.UIViewController.switchToView === 'function') {
+                window.UIViewController.switchToView('final');
             } else {
-                // 兜底：直接用DOM切换
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                var finalView = document.getElementById('final-view');
-                if(finalView) finalView.classList.add('active');
+                // 兜底方案：保持在当前页面
+                console.warn('UIViewController 不可用，保持在当前页面');
             }
+
+            console.log('支付完成');
         } else {
             // 预订失败 - 显示错误信息
             const errorMessage = result && result.message ? result.message : '预订失败，请重试';
