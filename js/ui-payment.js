@@ -363,10 +363,24 @@ function updateConfirmCustomerInfo() {
 function handleFinalPayment() {
     console.log('处理最终支付确认...');
 
+    let unitPrice = 45; // 默认票价
+    let totalCost = 0;
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+    const selectedSeats = window.UIValidation ? window.UIValidation.getMySelectedSeatsData() : [];
+    totalCost = unitPrice * selectedSeats.length;
+
     // 获取客户信息
     const customerInfo = window.UIMemberManagement && window.UIMemberManagement.getMyCustomerDataEnhanced
         ? window.UIMemberManagement.getMyCustomerDataEnhanced()
         : { ticketType: 'individual', members: [] };
+
+    customerInfo.totalCost = totalCost;
+    customerInfo.unitPrice = unitPrice;
 
     // 调用StateManager的购票函数
     let result = null;

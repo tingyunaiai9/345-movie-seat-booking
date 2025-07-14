@@ -88,7 +88,6 @@ function initializeEventListeners() {
                     viewState.selectedMovieInfo.startTime,
                     viewState.selectedMovie // movieId 参数，现在保证有值
                 );
-                console.log('viewController,此时得到的电影开始时间为:', viewState.selectedMovieInfo.startTime);
 
                 // 初始化成功后，才切换视图
                 switchToView('seat');

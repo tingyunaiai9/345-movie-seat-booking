@@ -66,7 +66,18 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
     currentCinemaConfig.SEATS_PER_ROW = seatsPerRow;
     currentCinemaConfig.TOTAL_SEATS = rows * seatsPerRow;
     currentCinemaConfig.movieId = movieId;
-    currentCinemaConfig.movieStartTime = movieTime;
+    if (movieTime) {
+        if (typeof movieTime === 'string') {
+            currentCinemaConfig.movieStartTime = new Date(movieTime.replace(/-/g, '/'));
+        } else if (movieTime instanceof Date) {
+            currentCinemaConfig.movieStartTime = movieTime;
+        }
+    } else {
+        currentCinemaConfig.movieStartTime = null;
+    }
+    if (currentCinemaConfig.movieStartTime) {
+        console.log(`电影开始时间已设定: ${currentCinemaConfig.movieStartTime.toLocaleString()}`);
+    }
     console.log(`初始化影院座位数据: ${rows}排, 每排${seatsPerRow}座，电影ID: ${movieId}`);
 
     // 从 localStorage 加载或初始化座位数据
@@ -96,7 +107,7 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
     }
 
     // 处理传入的时间，确保其为Date对象
-    if (movieTime) {
+    /*if (movieTime) {
         if (typeof movieTime === 'string') {
             const [hours, minutes] = movieTime.split(':');
             const startTime = new Date();
@@ -107,10 +118,8 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
         }
     } else {
         currentCinemaConfig.movieStartTime = null;
-    }
-    if (currentCinemaConfig.movieStartTime) {
-        console.log(`电影开始时间已设定: ${currentCinemaConfig.movieStartTime.toLocaleString()}`);
-    }
+    }*/
+
     return cinemaSeats;
 }
 
@@ -407,11 +416,22 @@ function reserveTickets(seats, customerInfo) {
     if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
     const expiresAt = new Date(currentCinemaConfig.movieStartTime.getTime() - currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
+    console.log('电影开始时间:', currentCinemaConfig.movieStartTime);
+    console.log('预订过期时间:', expiresAt);
     if (new Date() > expiresAt) return { success: false, message: `已超过预订时间，请直接购票。` };
 
     const ticketId = `r-${Date.now()}`;
     // 使用标准化后的 fullSeatObjects 来创建票据
-    ticketRecords.push({ ticketId, status: SEAT_STATUS.RESERVED, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), expiresAt });
+    ticketRecords.push({
+        ticketId,
+        status: SEAT_STATUS.RESERVED,
+        seats: fullSeatObjects.map(s => s.id),
+        customerInfo,
+        unitPrice: customerInfo.unitPrice || 45,
+        totalCost: customerInfo.totalCost || (customerInfo.unitPrice || 45) * fullSeatObjects.length,
+        createdAt: new Date(),
+        expiresAt
+    });
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.RESERVED; });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
@@ -435,7 +455,16 @@ function purchaseTickets(seats, customerInfo) {
     if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
     const ticketId = `s-${Date.now()}`;
-    ticketRecords.push({ ticketId, status: SEAT_STATUS.SOLD, seats: fullSeatObjects.map(s => s.id), customerInfo, createdAt: new Date(), paidAt: new Date() });
+    ticketRecords.push({
+        ticketId,
+        status: SEAT_STATUS.SOLD,
+        seats: fullSeatObjects.map(s => s.id),
+        customerInfo,
+        createdAt: new Date(),
+        paidAt: new Date(),
+        unitPrice: customerInfo.unitPrice || 45,
+        totalCost: customerInfo.totalCost || (customerInfo.unitPrice || 45) * fullSeatObjects.length,
+    });
     fullSeatObjects.forEach(s => { cinemaSeats[s.row - 1][s.col - 1].status = SEAT_STATUS.SOLD; });
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
