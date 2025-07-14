@@ -249,8 +249,21 @@ function handleReservation() {
         window.UIMemberManagement.getMyCustomerDataEnhanced() :
         { ticketType: 'individual', members: [] };
 
-    console.log('客户信息:', customerInfo);
 
+    let unitPrice = 45; // 假设单价为45元，实际应从配置或状态管理器获取
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+    const selectedSeats = getMySelectedSeatsData();
+    const totalCost = unitPrice * selectedSeats.length;
+
+    customerInfo.unitPrice = unitPrice;
+    customerInfo.totalCost = totalCost;
+
+    console.log('客户信息:', customerInfo);
     try {
         // 调用StateManager的预订函数
         const result = window.StateManager.performReservation(customerInfo);
@@ -273,22 +286,27 @@ function handleReservation() {
             if (window.UIViewController && typeof window.UIViewController.switchToView === 'function') {
                 window.UIViewController.switchToView('final');
             } else {
-                // 兜底方案：保持在当前页面
-                console.warn('UIViewController 不可用，保持在当前页面');
+                // 兜底：直接用DOM切换
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                var finalView = document.getElementById('final-view');
+                if (finalView) finalView.classList.add('active');
             }
-
-            console.log('支付完成');
-        } else {
-            // 预订失败 - 显示错误信息
-            const errorMessage = result && result.message ? result.message : '预订失败，请重试';
-            console.error('❌ 预订失败:', errorMessage);
-            alert('预订失败：' + errorMessage);
+            // 兜底方案：保持在当前页面
+            console.warn('UIViewController 不可用，保持在当前页面');
         }
 
-    } catch (error) {
-        console.error('预订过程中发生错误:', error);
-        alert('预订过程中发生错误，请重试');
+        console.log('支付完成');
+    } else {
+        // 预订失败 - 显示错误信息
+        const errorMessage = result && result.message ? result.message : '预订失败，请重试';
+        console.error('❌ 预订失败:', errorMessage);
+        alert('预订失败：' + errorMessage);
     }
+
+} catch (error) {
+    console.error('预订过程中发生错误:', error);
+    alert('预订过程中发生错误，请重试');
+}
 }
 
 // ========================= 数据获取辅助函数 =========================

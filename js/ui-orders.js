@@ -278,7 +278,7 @@ function formatDate(date) {
         date = new Date(date);
     }
     if (!(date instanceof Date) || isNaN(date.getTime())) return '';
-    return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 /**
@@ -289,7 +289,7 @@ function createMyOrderItem(order, isLatest = false) {
     const orderItem = document.createElement('div');
     orderItem.className = `order-item ${order.status}${isLatest ? ' latest-order' : ''}`;
     orderItem.dataset.orderId = order.ticketId;
-    
+
     const statusText = {
         'reserved': '已预约',
         'sold': '已支付',
@@ -297,10 +297,10 @@ function createMyOrderItem(order, isLatest = false) {
         'expired': '已过期',
         'refunded': '已退款'
     };
-    
+
     // 格式化座位信息
     const seatsText = Array.isArray(order.seats) ? order.seats.map(seatIdToText).join('、') : '';
-    
+
     // 计算过期状态
     let expiryWarning = '';
     if (order.status === 'reserved' && order.expiresAt) {
@@ -315,15 +315,17 @@ function createMyOrderItem(order, isLatest = false) {
             expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">预约已过期</span>`;
         }
     }
-    
+
     // 客户信息
     const customer = order.customerInfo || {};
     // 价格（假设每张票45元）
-    const totalPrice = Array.isArray(order.seats) ? order.seats.length * 45 : 0;
-    
+    const unitPrice = order.unitPrice || 45; // 默认票价
+    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
+    const totalPrice = order.totalPrice || (seatCount * unitPrice); // 总价
+
     // 最新订单标识
     const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
-    
+
     orderItem.innerHTML = `
         <div class=\"order-header\">
             <span class=\"order-number\">订单号: ${order.ticketId} ${latestBadge}</span>
@@ -343,7 +345,8 @@ function createMyOrderItem(order, isLatest = false) {
             <div class=\"order-price\">
                 <div class=\"price-amount\">¥${totalPrice}</div>
                 <div class=\"price-details\">
-                    共 ${Array.isArray(order.seats) ? order.seats.length : 0} 张票<br>
+                    共 ${seatCount} 张票<br>
+                    单价：¥${unitPrice}<br>
                     座位: ${seatsText}<br>
                     点击查看详情
                 </div>
@@ -369,9 +372,9 @@ function createMyOrderItem(order, isLatest = false) {
 function showMyOrderDetail(order) {
     const modal = document.getElementById('order-detail-modal');
     if (!modal) return;
-    
+
     modal.dataset.currentOrderId = order.ticketId;
-    
+
     const statusText = {
         'reserved': '已预约',
         'sold': '已支付',
@@ -379,18 +382,18 @@ function showMyOrderDetail(order) {
         'expired': '已过期',
         'refunded': '已退款'
     };
-    
+
     const customer = order.customerInfo || {};
-    
+
     // 更新订单信息
     document.getElementById('detail-order-id').textContent = order.ticketId;
-    
+
     const statusElement = document.getElementById('detail-order-status');
     statusElement.textContent = statusText[order.status] || order.status;
     statusElement.className = `detail-value order-status ${order.status}`;
-    
+
     document.getElementById('detail-created-time').textContent = formatDate(order.createdAt);
-    
+
     // 支付时间（仅在已支付时显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
     const paidTime = document.getElementById('detail-paid-time');
@@ -402,7 +405,7 @@ function showMyOrderDetail(order) {
         paidTimeLabel.style.display = 'none';
         paidTime.style.display = 'none';
     }
-    
+
     // 支付截止时间（仅在预约状态时显示）
     const expiresLabel = document.getElementById('detail-expires-label');
     const expiresTime = document.getElementById('detail-expires-time');
@@ -414,23 +417,24 @@ function showMyOrderDetail(order) {
         expiresLabel.style.display = 'none';
         expiresTime.style.display = 'none';
     }
-    
+
     // 更新座位信息
     const seatTagsContainer = document.getElementById('detail-seat-tags');
-    const seatsHtml = Array.isArray(order.seats) ? 
+    const seatsHtml = Array.isArray(order.seats) ?
         order.seats.map(id => `<span class="seat-tag">${seatIdToText(id)}</span>`).join('') : '';
     seatTagsContainer.innerHTML = seatsHtml;
-    
+
     // 更新客户信息
     document.getElementById('detail-customer-name').textContent = customer.name || '未填写';
     document.getElementById('detail-customer-age').textContent = customer.age || '未填写';
-    
+
     // 更新费用明细
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const totalPrice = seatCount * 45;
-    document.getElementById('detail-ticket-price').textContent = `¥45 × ${seatCount}`;
+    const unitPrice = order.unitPrice || 45; // 默认票价
+    const totalPrice = seatCount * unitPrice;
+    document.getElementById('detail-ticket-price').textContent = `¥${unitPrice} × ${seatCount}`;
     document.getElementById('detail-total-price').textContent = `¥${totalPrice}`;
-    
+
     // 显示/隐藏操作按钮
     const cancelBtn = document.getElementById('cancel-order');
     const payBtn = document.getElementById('pay-reserved-order');
@@ -451,10 +455,10 @@ function showMyOrderDetail(order) {
 
     // 显示模态框并确保在视口中央
     modal.style.display = 'flex';
-    
+
     // 防止页面滚动
     document.body.style.overflow = 'hidden';
-    
+
     // 确保模态框聚焦（便于键盘操作）
     modal.focus();
 }
@@ -466,7 +470,7 @@ function hideMyOrderDetail() {
     const modal = document.getElementById('order-detail-modal');
     if (modal) {
         modal.style.display = 'none';
-        
+
         // 恢复页面滚动
         document.body.style.overflow = '';
     }
@@ -571,7 +575,7 @@ if (typeof window !== 'undefined') {
 }
 
 // 页面加载时初始化我的订单功能
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 延迟初始化，确保其他模块已加载
     setTimeout(() => {
         initializeMyOrdersFeature();
