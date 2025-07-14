@@ -249,8 +249,7 @@ function handleReservation() {
         window.UIMemberManagement.getMyCustomerDataEnhanced() :
         { ticketType: 'individual', members: [] };
 
-
-    let unitPrice = 45; // 假设单价为45元，实际应从配置或状态管理器获取
+    let unitPrice = 45;
     try {
         const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
         if (movieData && movieData.price) {
@@ -293,20 +292,18 @@ function handleReservation() {
             }
             // 兜底方案：保持在当前页面
             console.warn('UIViewController 不可用，保持在当前页面');
+        } else {
+            // 预订失败 - 显示错误信息
+            const errorMessage = result && result.message ? result.message : '预订失败，请重试';
+            console.error('❌ 预订失败:', errorMessage);
+            alert('预订失败：' + errorMessage);
         }
 
         console.log('支付完成');
-    } else {
-        // 预订失败 - 显示错误信息
-        const errorMessage = result && result.message ? result.message : '预订失败，请重试';
-        console.error('❌ 预订失败:', errorMessage);
-        alert('预订失败：' + errorMessage);
+    } catch (error) {
+        console.error('预订过程中发生错误:', error);
+        alert('预订过程中发生错误，请重试');
     }
-
-} catch (error) {
-    console.error('预订过程中发生错误:', error);
-    alert('预订过程中发生错误，请重试');
-}
 }
 
 // ========================= 数据获取辅助函数 =========================
