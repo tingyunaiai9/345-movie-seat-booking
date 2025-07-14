@@ -225,8 +225,21 @@ function handleReservation() {
         window.UIMemberManagement.getMyCustomerDataEnhanced() :
         { ticketType: 'individual', members: [] };
 
-    console.log('客户信息:', customerInfo);
 
+    let unitPrice = 45; // 假设单价为45元，实际应从配置或状态管理器获取
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            unitPrice = Number(movieData.price);
+        }
+    } catch (e) { }
+    const selectedSeats = getMySelectedSeatsData();
+    const totalCost = unitPrice * selectedSeats.length;
+
+    customerInfo.unitPrice = unitPrice;
+    customerInfo.totalCost = totalCost;
+
+    console.log('客户信息:', customerInfo);
     try {
         // 调用StateManager的预订函数
         const result = window.StateManager.performReservation(customerInfo);
@@ -252,7 +265,7 @@ function handleReservation() {
                 // 兜底：直接用DOM切换
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                 var finalView = document.getElementById('final-view');
-                if(finalView) finalView.classList.add('active');
+                if (finalView) finalView.classList.add('active');
             }
         } else {
             // 预订失败 - 显示错误信息
