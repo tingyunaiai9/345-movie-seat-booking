@@ -434,6 +434,7 @@
     top: 0;
     left: 0;
     width: 100vw;
+    max-width: 1000px; /* 限制最大宽度 */
     height: 100vh;
     background: rgba(0, 0, 0, 0.6);
     display: flex;
@@ -459,7 +460,7 @@
     display: flex;
     flex-direction: column;
     animation: modalSlideIn 0.3s ease-out;
-    margin: 0 auto; /* 确保水平居中 */
+    margin: 0;
 }
 @keyframes modalSlideIn {
     from {
@@ -654,16 +655,16 @@
     .order-detail-modal {
         padding: 10px;
     }
-    
+
     .order-detail-modal .modal-content {
         max-height: 95vh;
     }
-    
+
     .order-detail-modal .modal-header,
     .order-detail-modal .modal-footer {
         padding: 20px 25px;
     }
-    
+
     .order-detail-modal .modal-body {
         padding: 25px;
     }
@@ -673,31 +674,31 @@
     .order-detail-modal {
         padding: 15px;
     }
-    
+
     .order-detail-modal .modal-content {
         max-width: none;
         width: 100%;
     }
-    
+
     .order-detail-modal .modal-header,
     .order-detail-modal .modal-footer {
         padding: 20px;
     }
-    
+
     .order-detail-modal .modal-body {
         padding: 20px;
     }
-    
+
     .order-detail-modal .modal-footer {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .order-detail-modal .btn {
         width: 100%;
         min-width: auto;
     }
-    
+
     .detail-grid {
         grid-template-columns: 100px 1fr;
         gap: 10px 15px;
@@ -708,17 +709,17 @@
     .order-detail-modal .modal-header h3 {
         font-size: 18px;
     }
-    
+
     .detail-grid {
         grid-template-columns: 1fr;
         gap: 5px;
     }
-    
+
     .detail-label {
         font-weight: 500;
         color: #6c757d;
     }
-    
+
     .detail-value {
         margin-bottom: 15px;
         padding-left: 10px;
