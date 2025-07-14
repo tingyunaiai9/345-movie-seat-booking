@@ -220,20 +220,51 @@ function findSeatForIndividual(members) {
 
     if (validRows.length === 0) return null;
 
-    // 按照距离中间的远近排序行
-    const midRow = Math.ceil(currentCinemaConfig.TOTAL_ROWS / 2);
-    validRows.sort((a, b) => Math.abs(a - midRow) - Math.abs(b - midRow));
+    // 计算中心区域
+    const centerZone = calculateCenterZoneForMain();
+    // 获取中心区域的有效行和列
+    const centerRows = [];
+    for (let r = centerZone.rowStart; r <= centerZone.rowEnd; r++) {
+        if (validRows.includes(r)) centerRows.push(r);
+    }
+    const centerCols = [];
+    for (let c = centerZone.colStart; c <= centerZone.colEnd; c++) {
+        centerCols.push(c);
+    }
 
-    // 策略1：优先尝试在同一行找到连续座位
-    for (const row of validRows) {
+    // 优先在中心区域选座
+    // 行循环从中心开始向两侧扩展
+    function getCenterSortedRows(rows, totalRows) {
+        const mid = Math.ceil(totalRows / 2);
+        return rows.slice().sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid));
+    }
+    const sortedCenterRows = getCenterSortedRows(centerRows, currentCinemaConfig.TOTAL_ROWS);
+    // 策略1：优先尝试在同一行找到连续座位（中心区域）
+    for (const row of sortedCenterRows) {
+        const consecutiveSeats = findConsecutiveSeatsInRowForIndividual(row, members.length, centerCols);
+        if (consecutiveSeats) {
+            return consecutiveSeats;
+        }
+    }
+    // 策略2：如果无法找到连续座位，则分散选择最优座位（中心区域）
+    const scatteredCenterSeats = findScatteredSeatsForIndividual(members, sortedCenterRows, centerCols);
+    if (scatteredCenterSeats) {
+        return scatteredCenterSeats;
+    }
+
+    // 如果中心区域没有合适座位，则在非中心区域选座
+    // 不用避开中心区域，中心区域没有座位的话，自然不会被选
+    const sortedRows = getCenterSortedRows(validRows, currentCinemaConfig.TOTAL_ROWS);
+    // 策略1：优先尝试在同一行找到连续座位（非中心区域）
+    for (const row of sortedRows) {
         const consecutiveSeats = findConsecutiveSeatsInRowForIndividual(row, members.length);
         if (consecutiveSeats) {
             return consecutiveSeats;
         }
     }
 
-    // 策略2：如果无法找到连续座位，则分散选择最优座位
-    return findScatteredSeatsForIndividual(members, validRows);
+    // 策略2：如果无法找到连续座位，则分散选择最优座位（非中心区域）
+    return findScatteredSeatsForIndividual(members, sortedRows);
 }
 
 /**
@@ -242,36 +273,38 @@ function findSeatForIndividual(members) {
  * @param {number} count - 需要的座位数
  * @returns {Array|null} 连续座位对象列表或 null
  */
-function findConsecutiveSeatsInRowForIndividual(row, count) {
+function findConsecutiveSeatsInRowForIndividual(row, count, colFilter = null) {
     const rowSeats = cinemaSeats[row - 1];
     if (!rowSeats) return null;
 
-    const midSeat = Math.ceil(currentCinemaConfig.SEATS_PER_ROW / 2);
-    const maxStartPos = rowSeats.length - count;
+    // 只考虑colFilter范围内的座位
+    let filteredSeats = rowSeats;
+    if (Array.isArray(colFilter)) {
+        filteredSeats = rowSeats.filter(seat => colFilter.includes(seat.col));
+    }
+    const midSeatIdx = Math.floor(filteredSeats.length / 2);
+    const maxStartPos = filteredSeats.length - count;
 
-    // 从中间位置开始，向两边扩散寻找连续座位
-    for (let offset = 0; offset <= Math.max(midSeat - 1, maxStartPos - midSeat + 1); offset++) {
+    for (let offset = 0; offset <= Math.max(midSeatIdx, maxStartPos - midSeatIdx); offset++) {
         // 先尝试中间偏右的位置
-        const rightStart = midSeat - Math.floor(count / 2) + offset;
+        const rightStart = midSeatIdx - Math.floor(count / 2) + offset;
         if (rightStart >= 0 && rightStart <= maxStartPos) {
-            const rightChunk = rowSeats.slice(rightStart, rightStart + count);
-            if (rightChunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) {
+            const rightChunk = filteredSeats.slice(rightStart, rightStart + count);
+            if (rightChunk.length === count && rightChunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) {
                 return rightChunk;
             }
         }
-
         // 再尝试中间偏左的位置
         if (offset > 0) {
-            const leftStart = midSeat - Math.floor(count / 2) - offset;
+            const leftStart = midSeatIdx - Math.floor(count / 2) - offset;
             if (leftStart >= 0 && leftStart <= maxStartPos) {
-                const leftChunk = rowSeats.slice(leftStart, leftStart + count);
-                if (leftChunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) {
+                const leftChunk = filteredSeats.slice(leftStart, leftStart + count);
+                if (leftChunk.length === count && leftChunk.every(seat => isSeatAvailableOrSelected(seat.row, seat.col))) {
                     return leftChunk;
                 }
             }
         }
     }
-
     return null;
 }
 
@@ -281,9 +314,13 @@ function findConsecutiveSeatsInRowForIndividual(row, count) {
  * @param {Array} validRows - 有效行号列表
  * @returns {Array|null} 选中的座位对象列表或 null
  */
-function findScatteredSeatsForIndividual(members, validRows) {
+function findScatteredSeatsForIndividual(members, validRows, colFilter = null) {
     const selectedSeats = [];
-    const midSeat = Math.ceil(currentCinemaConfig.SEATS_PER_ROW / 2);
+    // 计算螺旋式搜索的中心点
+    let midSeat = Math.ceil(currentCinemaConfig.SEATS_PER_ROW / 2);
+    if (Array.isArray(colFilter) && colFilter.length > 0) {
+        midSeat = colFilter[Math.floor(colFilter.length / 2)];
+    }
 
     for (const member of members) {
         const ageGroup = getAgeGroup(member.age);
@@ -292,14 +329,14 @@ function findScatteredSeatsForIndividual(members, validRows) {
         // 为每个成员在有效行中寻找最佳座位
         for (const row of validRows) {
             if (!canSitInRow(ageGroup, row)) continue;
-
-            // 从中间位置开始螺旋式搜索
-            for (let j = 0; j < currentCinemaConfig.SEATS_PER_ROW; j++) {
+            // 螺旋式搜索colFilter范围内的座位
+            const colsToSearch = Array.isArray(colFilter) && colFilter.length > 0 ? colFilter : Array.from({length: currentCinemaConfig.SEATS_PER_ROW}, (_, i) => i + 1);
+            for (let j = 0; j < colsToSearch.length; j++) {
                 const seatOffset = Math.ceil(j / 2) * (j % 2 === 0 ? 1 : -1);
-                const col = midSeat + seatOffset;
-
+                const colIdx = colsToSearch.indexOf(midSeat) + seatOffset;
+                if (colIdx < 0 || colIdx >= colsToSearch.length) continue;
+                const col = colsToSearch[colIdx];
                 if (col < 1 || col > currentCinemaConfig.SEATS_PER_ROW) continue;
-
                 // 检查座位是否可用且没有被本次选择占用
                 if (isSeatAvailableOrSelected(row, col) &&
                     !selectedSeats.some(seat => seat.row === row && seat.col === col)) {
@@ -308,17 +345,42 @@ function findScatteredSeatsForIndividual(members, validRows) {
                     break;
                 }
             }
-
             if (seatFound) break;
         }
-
         // 如果某个成员找不到座位，则整个选座失败
         if (!seatFound) {
             return null;
         }
     }
-
     return selectedSeats;
+}
+/**
+ * 计算中心区域信息（main.js专用，无依赖外部变量）
+ * @returns {Object} 中心区域信息
+ */
+function calculateCenterZoneForMain() {
+    // 可根据实际需要调整中心区域比例
+    const CENTER_ZONE_RATIO = 0.25; // 默认中心区域占比25%
+    const totalRows = currentCinemaConfig.TOTAL_ROWS;
+    const totalCols = currentCinemaConfig.SEATS_PER_ROW;
+    const totalSeats = totalRows * totalCols;
+    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
+    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
+    const numCenterCols = Math.ceil(totalCols * layoutRatio);
+    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
+    const middleRow = Math.ceil(totalRows / 2);
+    let middleCol;
+    if (totalCols % 2 === 1) {
+        middleCol = (totalCols + 1) / 2;
+    } else {
+        middleCol = (totalCols + 1) / 2;
+    }
+    return {
+        rowStart: middleRow - Math.floor(numCenterRows / 2),
+        rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
+        colStart: Math.round(middleCol - numCenterCols / 2),
+        colEnd: Math.round(middleCol + numCenterCols / 2) - 1
+    };
 }
 
 // ========================= 团体选座算法 =========================
