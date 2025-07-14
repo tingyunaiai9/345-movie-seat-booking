@@ -439,13 +439,15 @@ function notifySelectionChange() {
     // 获取选中的座位（直接从本模块获取）
     const selectedSeats = getSelectedSeats();
 
-    // 获取当前电影价格
-    const activeMovie = document.querySelector('.movie-item.active');
+    // 从 localStorage 获取电影票价
     let ticketPrice = 45; // 默认价格
-    if (activeMovie) {
-        const priceText = activeMovie.querySelector('.movie-price').textContent;
-        const price = priceText.match(/¥(\d+)/);
-        if (price) ticketPrice = parseInt(price[1]);
+    try {
+        const movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+        if (movieData && movieData.price) {
+            ticketPrice = Number(movieData.price);
+        }
+    } catch (e) {
+        console.warn('无法从 localStorage 获取电影票价，使用默认价格:', e);
     }
 
     const totalPrice = selectedSeats.length * ticketPrice;
