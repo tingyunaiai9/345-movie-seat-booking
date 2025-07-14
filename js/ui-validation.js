@@ -136,25 +136,49 @@ function areSeatsConsecutive(seats) {
     }
 
     // 按行和列排序
-    const sortedSeats = seats.sort((a, b) => {
+    const sortedSeats = seats.slice().sort((a, b) => {
         if (a.row !== b.row) {
             return a.row - b.row;
         }
         return a.col - b.col;
     });
 
-    // 检查是否在同一行且连续
-    let currentRow = sortedSeats[0].row;
-    let expectedCol = sortedSeats[0].col;
-
-    for (let i = 0; i < sortedSeats.length; i++) {
-        const seat = sortedSeats[i];
-
-        if (seat.row !== currentRow || seat.col !== expectedCol) {
-            return false;
+    // 判断是否为多排连续团体座位
+    // 统计每排座位
+    const rowMap = {};
+    sortedSeats.forEach(seat => {
+        if (!rowMap[seat.row]) rowMap[seat.row] = [];
+        rowMap[seat.row].push(seat.col);
+    });
+    const rows = Object.keys(rowMap).map(r => parseInt(r)).sort((a, b) => a - b);
+    const seatsPerRow = window.CinemaData.getCurrentConfig().SEATS_PER_ROW;
+    // 如果只有一排，直接判断是否连续
+    if (rows.length === 1) {
+        const cols = rowMap[rows[0]].sort((a, b) => a - b);
+        for (let i = 1; i < cols.length; i++) {
+            if (cols[i] !== cols[i - 1] + 1) return false;
         }
-
-        expectedCol = seat.col + 1;
+        return true;
+    }
+    // 多排情况，需判断：前几排都坐满且连续，最后一排连续
+    for (let i = 0; i < rows.length; i++) {
+        const cols = rowMap[rows[i]].sort((a, b) => a - b);
+        if (i < rows.length - 1) {
+            // 前几排必须坐满且连续
+            if (cols.length !== seatsPerRow) return false;
+            for (let j = 1; j < cols.length; j++) {
+                if (cols[j] !== cols[j - 1] + 1) return false;
+            }
+        } else {
+            // 最后一排剩余座位必须连续
+            for (let j = 1; j < cols.length; j++) {
+                if (cols[j] !== cols[j - 1] + 1) return false;
+            }
+        }
+    }
+    // 行号必须连续
+    for (let i = 1; i < rows.length; i++) {
+        if (rows[i] !== rows[i - 1] + 1) return false;
     }
 
     return true;

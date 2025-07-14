@@ -331,8 +331,13 @@ function findScatteredSeatsForIndividual(members, validRows) {
 function findSeatsForGroup(members) {
     if (!members || members.length === 0 || members.length > currentCinemaConfig.MAX_GROUP_SIZE) return null;
 
+    const groupSize = members.length;
+    const seatsPerRow = currentCinemaConfig.SEATS_PER_ROW;
+    const totalRows = currentCinemaConfig.TOTAL_ROWS;
+
+    // 获取所有成员能坐的行
     const validRows = [];
-    for (let i = 1; i <= currentCinemaConfig.TOTAL_ROWS; i++) {
+    for (let i = 1; i <= totalRows; i++) {
         if (members.every(member => canSitInRow(getAgeGroup(member.age), i))) {
             validRows.push(i);
         }
@@ -340,9 +345,47 @@ function findSeatsForGroup(members) {
 
     if (validRows.length === 0) return null;
 
-    for (const row of validRows) {
-        const consecutiveSeats = findConsecutiveSeatsInRow(row, members.length);
-        if (consecutiveSeats) return consecutiveSeats;
+    // 团体人数小于等于一排座位数，使用原算法
+    if (groupSize <= seatsPerRow) {
+        for (const row of validRows) {
+            const consecutiveSeats = findConsecutiveSeatsInRow(row, groupSize);
+            if (consecutiveSeats) return consecutiveSeats;
+        }
+        return null;
+    }
+
+    // 团体人数大于一排座位数，寻找连续几排座位
+    // 需要找到连续的几排，每排都坐满，最后一排剩余座位也要连在一起
+    const minRowsNeeded = Math.ceil(groupSize / seatsPerRow);
+    // 在validRows中寻找连续的minRowsNeeded排
+    for (let startIdx = 0; startIdx <= validRows.length - minRowsNeeded; startIdx++) {
+        const candidateRows = validRows.slice(startIdx, startIdx + minRowsNeeded);
+        let allRowsAvailable = true;
+        let selectedSeats = [];
+        let memberIdx = 0;
+        // 前几排都要坐满
+        for (let r = 0; r < minRowsNeeded; r++) {
+            const row = candidateRows[r];
+            const rowSeats = cinemaSeats[row - 1];
+            if (!rowSeats) { allRowsAvailable = false; break; }
+            if (r < minRowsNeeded - 1) {
+                // 这一排需要找到连续seatsPerRow个座位
+                const chunk = findConsecutiveSeatsInRow(row, seatsPerRow);
+                if (!chunk) { allRowsAvailable = false; break; }
+                selectedSeats = selectedSeats.concat(chunk);
+                memberIdx += seatsPerRow;
+            } else {
+                // 最后一排，剩余人数
+                const lastRowCount = groupSize - seatsPerRow * (minRowsNeeded - 1);
+                const chunk = findConsecutiveSeatsInRow(row, lastRowCount);
+                if (!chunk) { allRowsAvailable = false; break; }
+                selectedSeats = selectedSeats.concat(chunk);
+                memberIdx += lastRowCount;
+            }
+        }
+        if (allRowsAvailable && selectedSeats.length === groupSize) {
+            return selectedSeats;
+        }
     }
     return null;
 }
