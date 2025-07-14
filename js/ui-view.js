@@ -12,7 +12,7 @@ const VIEW_CONFIG = {
         SEAT: 'seat',
         PAYMENT: 'payment',
         CONFIRM: 'confirm',
-        FINAL: 'final-view'
+        FINAL: 'final'
     },
 
 
@@ -148,11 +148,15 @@ function initializeEventListeners() {
         reserveSeatsBtn.addEventListener('click', () => {
             console.log('点击预订座位按钮');
             if (window.UIValidation && window.UIValidation.handleReservation) {
-                window.UIValidation.handleReservation();
-            }
-            if (window.CanvasRenderer && typeof window.CanvasRenderer.refreshCinemaDisplay === 'function') {
-                window.CanvasRenderer.refreshCinemaDisplay();
-                console.log('预订后已刷新座位Canvas');
+                const reservationResult = window.UIValidation.handleReservation();
+                if (reservationResult && reservationResult.success) {
+                    console.log('预订成功，刷新座位Canvas');
+                    if (window.CanvasRenderer && typeof window.CanvasRenderer.refreshCinemaDisplay === 'function') {
+                        window.CanvasRenderer.refreshCinemaDisplay();
+                    }
+                } else {
+                    console.log('预订失败，不刷新座位Canvas');
+                }
             }
         });
     }
@@ -239,7 +243,7 @@ function switchToView(viewName, options = {}) {
 
     console.log(`视图历史: ${viewState.viewHistory.join(' -> ')}`);
 
-    // 🔑 特殊视图的处理逻辑（从ui-core.js移过来）
+    // 🔑 特殊视图的处理逻辑
     handleSpecialViewLogic(viewName, options);
 
     // 触发视图切换后的回调
@@ -282,7 +286,6 @@ function handleSpecialViewLogic(viewName, options) {
         }, 100);
     }
 
-
     // 如果切换到支付页面，更新支付页面数据
     if (viewName === 'payment') {
         setTimeout(() => {
@@ -318,6 +321,7 @@ function handleSpecialViewLogic(viewName, options) {
         }, 100);
     }
 }
+
 // ========================= 导航验证函数 =========================
 
 /**
@@ -331,6 +335,18 @@ function canNavigateToView(viewName) {
     const targetIndex = VIEW_CONFIG.VIEW_ORDER.indexOf(viewName);
 
     console.log(`当前视图索引: ${currentIndex}, 目标视图索引: ${targetIndex}`);
+
+    // 特殊处理：允许从 seat 界面直接跳转到 final 界面
+    if (viewName === 'final' && viewState.currentView === 'seat') {
+        console.log('允许从选座页面直接跳转到最终结算页面');
+        return true;
+    }
+
+    // 特殊处理：允许从 confirm 界面到 final 界面
+    if (viewName === 'final' && viewState.currentView === 'confirm') {
+        console.log('从确认页面导航到最终结算页面');
+        return true;
+    }
 
     // 基本导航规则：可以向后导航，或者向前导航一步
     const basicNavigation = targetIndex <= currentIndex || targetIndex === currentIndex + 1;
@@ -383,12 +399,19 @@ function canNavigateToView(viewName) {
                 console.log('警告: StateManager不可用，无法验证座位选择');
             }
             break;
+        case 'final':
+            // 如果不是从 seat 或 confirm 界面来的，需要通过正常流程
+            if (viewState.currentView !== 'seat' && viewState.currentView !== 'confirm') {
+                console.log('导航失败: 只能从选座页面或确认页面导航到最终结算页面');
+                showMessage('请完成支付确认后再查看最终结算', 'warning');
+                return false;
+            }
+            break;
     }
 
     console.log(`导航到 ${viewName} 验证通过`);
     return true;
 }
-
 // ========================= 导航状态管理 =========================
 
 /**
