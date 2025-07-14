@@ -86,6 +86,12 @@ function initializeTicketTypeControl() {
         ticketType.addEventListener('click', function() {
             console.log(`点击了票务类型 ${index}`);
 
+            // 切换票务类型时清空当前选座
+            if (window.StateManager && typeof window.StateManager.resetStateManager === 'function') {
+                window.StateManager.resetStateManager();
+                console.log('切换票务类型，已清空选座');
+            }
+
             // 移除所有active类
             ticketTypes.forEach(type => type.classList.remove('active'));
 
