@@ -418,21 +418,15 @@
                         <div class="payment-method">
                             <h3>支付方式</h3>
                             <div class="payment-options">
-                                <label class="payment-option active">
-                                    <input type="radio" name="payment-method" value="wechat" checked>
-                                    <span class="payment-icon">💳</span>
-                                    <span>微信支付</span>
-                                </label>
-                                <label class="payment-option">
-                                    <input type="radio" name="payment-method" value="alipay">
-                                    <span class="payment-icon">💰</span>
-                                    <span>支付宝</span>
-                                </label>
-                                <label class="payment-option">
-                                    <input type="radio" name="payment-method" value="card">
-                                    <span class="payment-icon">💳</span>
-                                    <span>银行卡</span>
-                                </label>
+                                <button class="payment-btn active" data-payment="wechat">
+                                    <img src="img/WeChatPay.png" alt="微信支付" class="payment-icon">
+                                </button>
+                                <button class="payment-btn" data-payment="alipay">
+                                    <img src="img/AliPay.png" alt="支付宝" class="payment-icon">
+                                </button>
+                                <button class="payment-btn" data-payment="card">
+                                    <img src="img/UnionPay.png" alt="银行卡支付" class="payment-icon">
+                                </button>
                             </div>
                         </div>
 
