@@ -436,6 +436,210 @@ function handleFinalPayment() {
     }
 }
 
+/**
+ * 绑定支付方式选择事件
+ */
+function bindPaymentMethodEvents() {
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    
+    paymentOptions.forEach(option => {
+        // 单击事件 - 选择支付方式
+        option.addEventListener('click', function() {
+            // 移除其他选项的active状态
+            paymentOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // 为当前选项添加active状态
+            this.classList.add('active');
+            
+            // 获取选择的支付方式
+            const radioInput = this.querySelector('input[type="radio"]');
+            if (radioInput) {
+                radioInput.checked = true;
+                const selectedPayment = radioInput.value;
+                console.log('选择的支付方式:', selectedPayment);
+                
+                // 保存到localStorage
+                localStorage.setItem('selectedPaymentMethod', selectedPayment);
+                
+                // 更新支付方式信息
+                updatePaymentMethod(selectedPayment);
+            }
+        });
+
+        // 双击事件 - 显示支付方式详细图片
+        option.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const radioInput = this.querySelector('input[type="radio"]');
+            if (radioInput) {
+                const paymentType = radioInput.value;
+                showPaymentMethodImage(paymentType);
+            }
+        });
+    });
+}
+
+/**
+ * 显示支付方式详细图片
+ * @param {string} paymentType - 支付方式类型
+ */
+function showPaymentMethodImage(paymentType) {
+    const imageData = getPaymentMethodImageData(paymentType);
+    if (!imageData) {
+        console.warn('未找到支付方式图片:', paymentType);
+        return;
+    }
+
+    // 创建模态框
+    createPaymentImageModal(imageData);
+}
+
+/**
+ * 获取支付方式图片数据
+ * @param {string} paymentType - 支付方式类型
+ * @returns {Object|null} 图片数据对象
+ */
+function getPaymentMethodImageData(paymentType) {
+    const imageDatabase = {
+        'Genshin': {
+            title: '原石支付详情',
+            description: '原神游戏内货币支付方式',
+            base64: 'data:image/png;base64,' // 这里应该是完整的base64编码
+        },
+        'Deltaforce': {
+            title: '哈夫币支付详情',
+            description: '三角洲部队游戏内货币支付方式',
+            base64: 'data:image/png;base64,***' // 这里应该是完整的base64编码
+        },
+        'Arknights': {
+            title: '源石支付详情',
+            description: '明日方舟游戏内货币支付方式',
+            base64: 'data:image/png;base64,***' // 这里应该是完整的base64编码
+        },
+        'IdentityV': {
+            title: '回声支付详情',
+            description: '第五人格游戏内货币支付方式',
+            base64: 'data:image/png;base64,***' // 这里应该是完整的base64编码
+        }
+    };
+
+    return imageDatabase[paymentType] || null;
+}
+
+/**
+ * 创建支付方式图片模态框
+ * @param {Object} imageData - 图片数据
+ */
+function createPaymentImageModal(imageData) {
+    // 检查是否已存在模态框，如果存在则先移除
+    const existingModal = document.getElementById('payment-image-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // 创建模态框HTML
+    const modalHTML = `
+        <div class="payment-image-modal" id="payment-image-modal">
+            <div class="payment-image-overlay">
+                <div class="payment-image-container">
+                    <div class="payment-image-header">
+                        <h3>${imageData.title}</h3>
+                        <button class="payment-image-close" id="payment-image-close">×</button>
+                    </div>
+                    <div class="payment-image-body">
+                        <img src="${imageData.base64}" alt="${imageData.title}" class="payment-detail-image">
+                        <p class="payment-image-description">${imageData.description}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 添加到页面
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // 绑定关闭事件
+    bindPaymentImageModalEvents();
+
+    // 显示模态框
+    const modal = document.getElementById('payment-image-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // 添加显示动画
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+}
+
+/**
+ * 绑定支付图片模态框事件
+ */
+function bindPaymentImageModalEvents() {
+    const modal = document.getElementById('payment-image-modal');
+    const closeBtn = document.getElementById('payment-image-close');
+    const overlay = modal?.querySelector('.payment-image-overlay');
+
+    // 关闭按钮事件
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closePaymentImageModal);
+    }
+
+    // 点击遮罩层关闭
+    if (overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                closePaymentImageModal();
+            }
+        });
+    }
+
+    // ESC键关闭
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            closePaymentImageModal();
+        }
+    });
+}
+
+/**
+ * 关闭支付图片模态框
+ */
+function closePaymentImageModal() {
+    const modal = document.getElementById('payment-image-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+/**
+ * 更新支付方式信息
+ */
+function updatePaymentMethod(paymentType) {
+    const paymentNames = {
+        'Genshin': '原石支付',
+        'Deltaforce': '哈夫币支付',
+        'Arknights': '源石支付',
+        'IdentityV': '回声支付'
+    };
+    
+    // 更新确认页面的支付方式显示
+    const confirmPaymentMethod = document.getElementById('confirm-payment-method');
+    if (confirmPaymentMethod) {
+        confirmPaymentMethod.textContent = paymentNames[paymentType] || paymentType;
+    }
+}
+
+// 在支付页面初始化时调用
+function initializePaymentView() {
+    // 绑定支付方式事件
+    bindPaymentMethodEvents();
+}
+
 // ========================= 图片处理工具函数 =========================
 
 /**
@@ -514,10 +718,25 @@ if (typeof window !== 'undefined') {
         updateConfirmCustomerInfo,
         handleFinalPayment,
 
+        // 支付方式管理
+        bindPaymentMethodEvents,
+        showPaymentMethodImage,
+        initializePaymentView,
+
         // 图片处理工具
         checkImageCompatibility,
         setSafeImageSrc
     };
 }
+
+// 页面加载时初始化支付方式事件
+document.addEventListener('DOMContentLoaded', function() {
+    // 等待页面完全加载后绑定事件
+    setTimeout(() => {
+        if (document.getElementById('payment-view')) {
+            bindPaymentMethodEvents();
+        }
+    }, 500);
+});
 
 console.log('UI支付管理模块已加载');
