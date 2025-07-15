@@ -1,4 +1,4 @@
-/* ========================= 页面头部 - 我的订单按钮 ========================= */
+/* ========================= 圆形我的订单按钮 ========================= */
 .btn-my-orders-circle {
     width: 40px;
     height: 40px;
@@ -28,6 +28,7 @@
     line-height: 1;
 }
 
+/* 可选：添加一个小的脉冲动画效果 */
 .btn-my-orders-circle::before {
     content: '';
     position: absolute;
@@ -46,17 +47,32 @@
         transform: scale(1);
         opacity: 0.3;
     }
+
     50% {
         transform: scale(1.1);
         opacity: 0;
     }
+
     100% {
         transform: scale(1);
         opacity: 0;
     }
 }
 
-/* ========================= 我的订单视图 - 主容器 ========================= */
+/* 导航步骤容器调整 */
+.nav-steps {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    /* 确保圆形按钮与步骤对齐 */
+}
+
+/* 如果想让圆形按钮更突出，可以添加这个样式 */
+.btn-my-orders-circle:hover::before {
+    animation-duration: 1s;
+}
+
+/* ========================= 我的订单页面样式 ========================= */
 .my-orders-panel {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
@@ -68,7 +84,6 @@
     min-height: 70vh;
 }
 
-/* ========================= 我的订单视图 - 页面头部 ========================= */
 .my-orders-header {
     display: flex;
     justify-content: space-between;
@@ -89,7 +104,25 @@
     background-clip: text;
 }
 
-/* ========================= 订单筛选器部分 ========================= */
+/* 订单信息显示 */
+.order-info {
+    margin-top: 20px;
+}
+
+.order-number {
+    display: inline-block;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin: 10px 0;
+}
+
+/* 订单筛选器 */
 .orders-filter {
     display: flex;
     justify-content: space-between;
@@ -101,7 +134,6 @@
     border: 1px solid #c2d4d6;
 }
 
-/* 筛选标签 */
 .filter-tabs {
     display: flex;
     gap: 10px;
@@ -131,7 +163,6 @@
     background: rgba(255, 255, 255, 0.9);
 }
 
-/* 搜索框 */
 .search-box {
     display: flex;
     gap: 10px;
@@ -159,7 +190,7 @@
     min-width: auto;
 }
 
-/* ========================= 订单列表容器 ========================= */
+/* 订单列表容器 */
 .orders-container {
     min-height: 400px;
 }
@@ -195,316 +226,295 @@
     opacity: 0.8;
 }
 
-/* 订单信息显示 */
-.order-info {
-    margin-top: 20px;
-}
-
-/* ========================= 单一订单项 - 基础样式 ========================= */
+/* 订单项样式 */
 .order-item {
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid #e1e5e9;
-    border-radius: 12px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    margin-bottom: 16px;
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-}
-
-.order-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: #68a530;
-    transform: scaleY(0);
-    transform-origin: top;
-    transition: transform 0.3s ease;
-}
-
-.order-item:hover::before {
-    transform: scaleY(1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .order-item:hover {
     border-color: #68a530;
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 6px 20px rgba(104, 165, 48, 0.15);
+    box-shadow: 0 8px 25px rgba(104, 165, 48, 0.15);
     transform: translateY(-2px);
 }
 
-/* ========================= 单一订单项 - 状态样式 ========================= */
-/* 正常状态 */
-.order-item.reserved {
-    border-left: 4px solid #98ccbb;
+.order-card {
+    display: flex;
+    align-items: stretch;
+    min-height: 140px;
+    padding: 20px;
+    gap: 20px;
 }
 
-.order-item.paid {
-    border-left: 4px solid #68a530;
+/* ========================= 左侧：电影海报区域 ========================= */
+.order-left {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
 }
 
-/* 失效状态 - 已退款、已过期、已取消 */
-.order-item.cancelled,
-.order-item.refunded,
-.order-item.expired {
-    border-left: 4px solid #dc3545;
-    opacity: 0.6;
-    background: rgba(248, 249, 250, 0.95);
-    filter: grayscale(20%);
-}
-
-.order-item.cancelled:hover,
-.order-item.refunded:hover,
-.order-item.expired:hover {
-    border-color: #dc3545;
-    background: rgba(248, 249, 250, 0.98);
-    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.15);
-    transform: translateY(-1px);
-    opacity: 0.8;
-}
-
-.order-item.cancelled::before,
-.order-item.refunded::before,
-.order-item.expired::before {
-    background: #dc3545;
-}
-
-/* 最新订单高亮 */
-.order-item.latest-order {
-    border: 2px solid #398d37;
-    box-shadow: 0 4px 12px rgba(57, 141, 55, 0.2);
-    background: linear-gradient(135deg, #f8fff8 0%, #f0fff0 100%);
+.movie-poster-container {
     position: relative;
-    animation: highlightPulse 2s ease-in-out;
+    width: 80px;
+    height: 120px;
 }
 
-.order-item.latest-order::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
+.movie-poster {
+    width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #398d37, #4a9f43);
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.order-item:hover .movie-poster {
+    transform: scale(1.05);
+}
+
+.order-status-badge {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+}
+
+.order-status-badge.reserved {
+    background: linear-gradient(135deg, #ffc107, #ffb300);
+    color: white;
+}
+
+.order-status-badge.paid,
+.order-status-badge.sold {
+    background: linear-gradient(135deg, #68a530, #398d37);
+    color: white;
+}
+
+.order-status-badge.cancelled,
+.order-status-badge.refunded,
+.order-status-badge.expired {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.order-status-badge.urgent {
+    background: linear-gradient(135deg, #ff6b35, #ff4757);
+    color: white;
+    animation: pulse-urgent 2s infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+    50% { box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4); }
+}
+
+/* ========================= 中间：主要信息区域 ========================= */
+.order-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+/* 电影标题区 - 突出显示 */
+.movie-title-section {
+    margin-bottom: 12px;
+}
+
+.movie-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .latest-badge {
     background: linear-gradient(135deg, #398d37, #4a9f43);
     color: white;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-left: 8px;
-    box-shadow: 0 2px 4px rgba(57, 141, 55, 0.3);
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(57, 141, 55, 0.3);
+    animation: highlight-glow 2s ease-in-out;
 }
 
-@keyframes highlightPulse {
-    0% {
-        box-shadow: 0 4px 12px rgba(57, 141, 55, 0.2);
-    }
-    50% {
-        box-shadow: 0 6px 16px rgba(57, 141, 55, 0.4);
-    }
-    100% {
-        box-shadow: 0 4px 12px rgba(57, 141, 55, 0.2);
-    }
+@keyframes highlight-glow {
+    0%, 100% { box-shadow: 0 2px 6px rgba(57, 141, 55, 0.3); }
+    50% { box-shadow: 0 4px 12px rgba(57, 141, 55, 0.5); }
 }
 
-/* ========================= 单一订单项 - 头部区域 ========================= */
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.order-number {
-    display: inline-block;
-    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 1px;
-    margin: 10px 0;
-}
-
-.order-status {
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.order-status.reserved {
-    background: linear-gradient(135deg, rgba(152, 204, 187, 0.2) 0%, rgba(128, 188, 107, 0.2) 100%);
-    color: #80bc6b;
-    border: 1px solid #98ccbb;
-}
-
-.order-status.paid {
-    background: linear-gradient(135deg, rgba(104, 165, 48, 0.2) 0%, rgba(57, 141, 55, 0.2) 100%);
-    color: #398d37;
-    border: 1px solid #68a530;
-}
-
-.order-status.cancelled,
-.order-status.refunded,
-.order-status.expired {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.15) 100%);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.3);
-    font-weight: 600;
-}
-
-/* ========================= 单一订单项 - 内容区域 ========================= */
-.order-content {
+.movie-subtitle {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
-}
-
-/* 电影信息区域 */
-.order-movie {
-    flex: 0 0 auto;
-    min-width: 200px;
-}
-
-.order-movie img {
-    width: 60px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.movie-info h4 {
-    margin: 0 0 8px 0;
-    color: #2c3e50;
-    font-size: 18px;
-    font-weight: 700;
-    border-bottom: 2px solid #68a530;
-    padding-bottom: 4px;
-    display: inline-block;
-}
-
-.movie-info p {
-    margin: 4px 0;
-    color: #6c757d;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.movie-info p:first-of-type {
-    color: #398d37;
-    font-weight: 600;
-}
-
-/* 订单详情区域 */
-.order-details {
-    flex: 1;
-    min-width: 200px;
-}
-
-.order-details h5 {
-    margin: 0 0 10px 0;
-    color: #2c3e50;
-    font-size: 16px;
-    font-weight: 600;
-    border-bottom: 1px solid #e9ecef;
-    padding-bottom: 4px;
-}
-
-.order-meta {
-    color: #6c757d;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-/* 价格区域 */
-.order-price {
-    flex: 0 0 auto;
-    text-align: right;
-    min-width: 120px;
-}
-
-.price-amount {
-    font-size: 22px;
-    font-weight: 700;
-    color: #398d37;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.price-details {
-    font-size: 12px;
-    color: #6c757d;
-    line-height: 1.4;
-}
-
-/* ========================= 失效状态订单的特殊样式 ========================= */
-.order-item.cancelled .order-header,
-.order-item.refunded .order-header,
-.order-item.expired .order-header {
-    color: #6c757d !important;
-}
-
-.order-item.cancelled .order-number,
-.order-item.refunded .order-number,
-.order-item.expired .order-number {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
-    color: white !important;
-}
-
-.order-item.cancelled .price-amount,
-.order-item.refunded .price-amount,
-.order-item.expired .price-amount {
-    color: #6c757d !important;
-}
-
-.order-item.cancelled .movie-info h4,
-.order-item.refunded .movie-info h4,
-.order-item.expired .movie-info h4 {
-    color: #6c757d !important;
-    border-bottom-color: #6c757d !important;
-}
-
-.order-item.cancelled .movie-info p,
-.order-item.refunded .movie-info p,
-.order-item.expired .movie-info p {
-    color: #6c757d !important;
-}
-
-.order-item.cancelled .order-details h5,
-.order-item.refunded .order-details h5,
-.order-item.expired .order-details h5 {
-    color: #6c757d !important;
-    border-bottom-color: #e9ecef !important;
-}
-
-/* ========================= 座位标签组件 ========================= */
-.seat-tags {
-    display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 5px;
+    font-size: 14px;
 }
 
-.seat-tag {
-    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 12px;
+.showtime, .seats {
+    color: #6c757d;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.showtime {
+    color: #398d37;
+}
+
+/* 时间信息区 */
+.time-section {
+    margin-bottom: 8px;
+}
+
+.order-time, .additional-time {
+    display: flex;
+    align-items: center;
+    margin: 4px 0;
+    font-size: 13px;
+}
+
+.time-label {
+    color: #6c757d;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.time-value {
+    color: #495057;
     font-weight: 600;
-    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.3);
+}
+
+.time-warning {
+    color: #dc3545;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+/* 订单号信息 */
+.order-meta {
+    margin-top: auto;
+}
+
+.order-id {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #6c757d;
+    background: rgba(108, 117, 125, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+/* ========================= 右侧：价格和操作 ========================= */
+.order-right {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    min-width: 120px;
+    text-align: right;
+}
+
+.price-section {
+    margin-bottom: 12px;
+}
+
+.total-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: #398d37;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.price-breakdown {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.action-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #007bff;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.order-item:hover .action-hint {
+    color: #68a530;
+    transform: translateX(4px);
+}
+
+.click-text {
+    font-style: italic;
+}
+
+.arrow {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.order-item:hover .arrow {
+    transform: translateX(4px);
+}
+
+/* ========================= 失效状态订单样式 ========================= */
+.order-item.cancelled,
+.order-item.refunded,
+.order-item.expired {
+    opacity: 0.7;
+    background: rgba(248, 249, 250, 0.95);
+}
+
+.order-item.cancelled .movie-poster,
+.order-item.refunded .movie-poster,
+.order-item.expired .movie-poster {
+    filter: grayscale(50%);
+}
+
+.order-item.cancelled .movie-title,
+.order-item.refunded .movie-title,
+.order-item.expired .movie-title {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.order-item.cancelled .total-price,
+.order-item.refunded .total-price,
+.order-item.expired .total-price {
+    color: #6c757d;
 }
 
 /* ========================= 订单详情模态框 - 主容器 ========================= */
@@ -546,6 +556,7 @@
         opacity: 0;
         transform: scale(0.9) translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -767,18 +778,18 @@
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .order-movie,
     .order-details,
     .order-price {
         flex: none;
         min-width: auto;
     }
-    
+
     .order-price {
         text-align: left;
     }
-    
+
     .price-amount {
         font-size: 20px;
     }
@@ -840,17 +851,17 @@
     .order-item {
         padding: 15px;
     }
-    
+
     .order-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .movie-info h4 {
         font-size: 16px;
     }
-    
+
     .price-amount {
         font-size: 18px;
     }
