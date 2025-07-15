@@ -315,16 +315,27 @@ function createMyOrderItem(order, isLatest = false) {
     const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
     let movieTitle = '未知电影';
     let movieTime = '时间待定';
+    let movieImage = 'img/poster_cat.jpg'; // 默认海报
     
-    // 电影名称映射
-    const movieTitleMapping = {
-        'cat': '罗小黑战记',
-        'girl': '蓦然回首', 
-        'love': '情书'
+    // 电影名称和海报映射
+    const movieMapping = {
+        'cat': {
+            title: '罗小黑战记',
+            image: 'img/poster_cat.jpg'
+        },
+        'girl': {
+            title: '蓦然回首',
+            image: 'img/poster_girl.jpg'
+        },
+        'love': {
+            title: '情书',
+            image: 'img/poster_love.jpg'
+        }
     };
     
-    if (selectedMovieId && movieTitleMapping[selectedMovieId]) {
-        movieTitle = movieTitleMapping[selectedMovieId];
+    if (selectedMovieId && movieMapping[selectedMovieId]) {
+        movieTitle = movieMapping[selectedMovieId].title;
+        movieImage = movieMapping[selectedMovieId].image;
     }
     
     if (selectedMovieInfo) {
@@ -332,6 +343,10 @@ function createMyOrderItem(order, isLatest = false) {
             const movieInfo = JSON.parse(selectedMovieInfo);
             if (movieInfo.time) {
                 movieTime = movieInfo.time;
+            }
+            // 如果存储的信息中有图片路径，使用存储的图片
+            if (movieInfo.image) {
+                movieImage = movieInfo.image;
             }
         } catch (e) {
             console.warn('解析电影信息失败:', e);
@@ -341,20 +356,17 @@ function createMyOrderItem(order, isLatest = false) {
     // 格式化座位信息
     const seatsText = Array.isArray(order.seats) ? order.seats.map(seatIdToText).join('、') : '';
 
-    // 计算过期状态
-    let expiryWarning = '';
+    // 计算时间相关信息
+    let timeInfo = '';
+    let statusBadgeClass = '';
     if (order.status === 'reserved') {
         let expiryTime;
         
         if (order.expiresAt) {
-            // 如果已有过期时间，使用现有的
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            // 如果没有过期时间但有创建时间，设置为创建时间后30分钟
             const createdTime = new Date(order.createdAt);
             expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
-            
-            // 更新订单对象的过期时间
             order.expiresAt = expiryTime.toISOString();
         }
         
@@ -364,52 +376,81 @@ function createMyOrderItem(order, isLatest = false) {
 
             if (timeLeft > 0) {
                 const minutes = Math.floor(timeLeft / (1000 * 60));
-                expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">还剩 ${minutes} 分钟支付时间</span>`;
+                timeInfo = `过期时间: ${formatDate(expiryTime)} <span class="time-warning">(还剩 ${minutes} 分钟)</span>`;
+                statusBadgeClass = 'urgent';
             } else {
-                expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">预约已过期</span>`;
+                timeInfo = `已过期: ${formatDate(expiryTime)}`;
+                statusBadgeClass = 'expired';
             }
         }
+    } else if (order.paidAt) {
+        timeInfo = `支付时间: ${formatDate(order.paidAt)}`;
+        statusBadgeClass = 'paid';
     }
 
     // 客户信息
     const customer = order.customerInfo || {};
-    // 价格（假设每张票45元）
-    const unitPrice = order.unitPrice || 45; // 默认票价
+    // 价格
+    const unitPrice = order.unitPrice || 45;
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const totalPrice = order.totalPrice || (seatCount * unitPrice); // 总价
+    const totalPrice = order.totalPrice || (seatCount * unitPrice);
 
     // 最新订单标识
     const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
 
     orderItem.innerHTML = `
-        <div class=\"order-header\">
-            <span class=\"order-number\">订单号: ${order.ticketId} ${latestBadge}</span>
-            <span class=\"order-status ${order.status}\">${statusText[order.status] || order.status}</span>
-        </div>
-        <div class=\"order-content\">
-            <div class=\"order-movie\">
-                <div class=\"movie-info\">
-                    <h4>${movieTitle}</h4>
-                    <p>放映时间: ${movieTime}</p>
-                    <p>座位: ${seatsText}</p>
+        <div class="order-card">
+            <!-- 左侧：电影海报和基本信息 -->
+            <div class="order-left">
+                <div class="movie-poster-container">
+                    <img src="${movieImage}" alt="${movieTitle}" onerror="this.src='img/poster_cat.jpg'" class="movie-poster">
+                    <div class="order-status-badge ${order.status} ${statusBadgeClass}">
+                        ${statusText[order.status] || order.status}
+                    </div>
                 </div>
             </div>
-            <div class=\"order-details\">
-                <h5>客户信息</h5>
-                <div class=\"order-meta\">
-                    姓名: ${customer.name || '未填写'}<br>
-                    年龄: ${customer.age || '未填写'}<br>
-                    下单时间: ${formatDate(order.createdAt)}
-                    ${order.paidAt ? '<br>支付时间: ' + formatDate(order.paidAt) : ''}
-                    ${expiryWarning ? '<br>' + expiryWarning : ''}
+
+            <!-- 中间：主要信息区域 -->
+            <div class="order-center">
+                <!-- 电影标题区 - 突出显示 -->
+                <div class="movie-title-section">
+                    <h3 class="movie-title">${movieTitle} ${latestBadge}</h3>
+                    <div class="movie-subtitle">
+                        <span class="showtime">🎬 ${movieTime}</span>
+                        <span class="seats">🎫 ${seatsText}</span>
+                    </div>
+                </div>
+
+                <!-- 时间信息区 -->
+                <div class="time-section">
+                    <div class="order-time">
+                        <span class="time-label">下单时间:</span>
+                        <span class="time-value">${formatDate(order.createdAt)}</span>
+                    </div>
+                    ${timeInfo ? `
+                    <div class="additional-time">
+                        <span class="time-label">${order.status === 'reserved' ? '过期信息:' : '支付信息:'}</span>
+                        <span class="time-value">${timeInfo}</span>
+                    </div>` : ''}
+                </div>
+
+                <!-- 订单号信息 -->
+                <div class="order-meta">
+                    <span class="order-id">订单号: ${order.ticketId}</span>
                 </div>
             </div>
-            <div class=\"order-price\">
-                <div class=\"price-amount\">¥${totalPrice}</div>
-                <div class=\"price-details\">
-                    共 ${seatCount} 张票<br>
-                    单价：¥${unitPrice}<br>
-                    点击查看详情
+
+            <!-- 右侧：价格和操作 -->
+            <div class="order-right">
+                <div class="price-section">
+                    <div class="total-price">¥${totalPrice}</div>
+                    <div class="price-breakdown">
+                        ${seatCount} 张票 × ¥${unitPrice}
+                    </div>
+                </div>
+                <div class="action-hint">
+                    <span class="click-text">点击查看详情</span>
+                    <span class="arrow">→</span>
                 </div>
             </div>
         </div>
