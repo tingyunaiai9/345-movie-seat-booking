@@ -48,10 +48,10 @@ const CANVAS_CONFIG = {
 
     // 图片路径配置
     IMAGE_PATHS: {
-        available: 'img/available.PNG',
-        selected: 'img/selected.PNG',
-        sold: 'img/sold.PNG',
-        reserved: 'img/reserved.PNG'
+        available: 'img/seat_available.PNG',
+        selected: 'img/seat_selected.PNG',
+        sold: 'img/seat_sold.PNG',
+        reserved: 'img/seat_reserved.PNG'
     },
 
     // 布局类型
