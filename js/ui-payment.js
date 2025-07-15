@@ -59,6 +59,7 @@ function updatePaymentMovieInfo() {
         setSafeImageSrc(moviePosterEl, 'img/LUOXIAOHEI.webp', '罗小黑战记');
     }
 }
+
 /**
  * 更新支付页面中的支付方式信息
  */

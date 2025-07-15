@@ -521,22 +521,26 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
 
     GLOBAL_STATE.ctx = GLOBAL_STATE.canvas.getContext('2d');
 
-    // 首先尝试初始化main.js中的座位数据
+    // ===== 确保座位数据已初始化 =====
     if (window.CinemaData && typeof window.CinemaData.initializeCinemaSeats === 'function') {
-        // 不在这里初始化，因为配置应该在影厅配置界面确定
-        // 如果没有初始化过，使用默认配置
-        if (window.CinemaData) {
-            const currentConfig = window.CinemaData.getCurrentConfig();
-            if (!currentConfig || currentConfig.TOTAL_SEATS === 0) {
-                // 只有在没有配置时才使用默认值
-                window.CinemaData.initializeCinemaSeats(10, 20);
-                console.log('使用默认配置初始化座位数据');
-            }
+        const currentConfig = window.CinemaData.getCurrentConfig();
+        
+        // 检查是否已有有效的座位数据
+        const currentSeats = window.CinemaData.getCinemaSeats();
+        
+        if (!currentSeats || currentSeats.length === 0 || currentSeats.flat().length === 0) {
+            // 如果没有座位数据，使用默认配置初始化
+            console.log('座位数据为空，使用默认配置初始化');
+            window.CinemaData.initializeCinemaSeats(10, 20);
+        } else {
+            console.log(`发现现有座位数据: ${currentSeats.length}排，共${currentSeats.flat().length}个座位`);
         }
+    } else {
+        console.error('CinemaData模块未加载或initializeCinemaSeats函数不可用');
+        return;
     }
 
-    // ===== 检查座位数据是否可用 =====
-    // 检查main.js模块是否已加载
+    // ===== 再次检查座位数据是否可用 =====
     if (!window.CinemaData || !window.CinemaData.getCinemaSeats) {
         console.error('CinemaData模块未加载或getCinemaSeats函数不可用');
         return;
@@ -545,11 +549,11 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
     const seatsData = window.CinemaData.getCinemaSeats().flat(); // 将二维数组转为一维数组
 
     if (!seatsData || seatsData.length === 0) {
-        console.error('无法获取座位数据');
+        console.error('初始化后仍无法获取座位数据');
         return;
     }
 
-    console.log(`从main.js获取到${seatsData.length}个座位数据`);
+    console.log(`成功获取${seatsData.length}个座位数据`);
 
     // 设置状态
     GLOBAL_STATE.isInitialized = true;
@@ -565,6 +569,7 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
 
     return seatsData;
 }
+
 
 /**
  * 刷新Canvas显示（用于数据更新后重绘）
@@ -604,18 +609,16 @@ function toggleLayout() {
 }
 
 // ========================= 页面加载初始化 =========================
-
-// 页面加载后执行 - 修改版本
 window.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('cinema-canvas');
     const toggleBtn = document.getElementById('toggle-layout-btn');
 
     if (canvas && toggleBtn) {
-        // 等待所有模块加载完成
+        // 增加等待时间，确保所有模块完全加载
         setTimeout(() => {
             // 初始化并绘制Cinema
             initializeAndDrawCinema();
-        }, 100);
+        }, 200); // 增加到200ms
 
         // 为按钮添加点击事件
         toggleBtn.addEventListener('click', () => {
