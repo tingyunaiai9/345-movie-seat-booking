@@ -157,40 +157,35 @@ function handleCanvasClick(event) {
             return;
         }
 
-        let stateChanged = false;
-        
         // 根据Ctrl键状态决定选择模式
         if (globalState.isCtrlPressed) {
             // 多选模式
             if (hitSeat.status === 'available') {
-                stateChanged = selectSeat(hitSeat);
+                selectSeat(hitSeat);
             } else if (hitSeat.status === 'selected') {
-                stateChanged = deselectSeat(hitSeat);
+                deselectSeat(hitSeat);
             }
         } else {
             // 单选模式：如果点击的是已选中的座位，则取消选择；否则清除其他选择，选择当前座位
             if (hitSeat.status === 'selected') {
-                // 直接取消选择当前座位
-                stateChanged = deselectSeat(hitSeat);
+                deselectSeat(hitSeat);
             } else {
-                // 清除其他选择，选择当前座位
                 clearAllSelections();
-                stateChanged = selectSeat(hitSeat);
+                selectSeat(hitSeat);
             }
         }
 
-        // 如果状态发生变化，触发界面重绘
-        if (stateChanged) {
-            if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-                window.CanvasRenderer.drawCinema();
-            }
-            
-            // 重要：无论是单选还是多选模式，都确保调用通知函数
-            notifySelectionChange();
+        // 触发界面重绘
+        if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
+            console.log('触发界面重绘');
+            window.CanvasRenderer.refreshCinemaDisplay();
         }
+
+        // 重要：无论是单选还是多选模式，都确保调用通知函数
+        notifySelectionChange();
+        console.log('通知选座状态变化');
     }
-}
-/**
+}/**
  * 处理Canvas鼠标移动事件
  * @param {MouseEvent} event - 鼠标移动事件
  */
@@ -214,7 +209,7 @@ function handleCanvasMouseMove(event) {
 
     // 直接调用Canvas重绘
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-        window.CanvasRenderer.drawCinema();
+        window.CanvasRenderer.refreshCinemaDisplay();
     }
 }
 
@@ -230,7 +225,7 @@ function handleCanvasMouseLeave() {
 
     // 直接调用Canvas重绘
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-        window.CanvasRenderer.drawCinema();
+        window.CanvasRenderer.refreshCinemaDisplay();
     }
 }
 
@@ -288,7 +283,7 @@ function deselectSeat(seat) {
 
             // 立即更新UI和重绘
             if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-                window.CanvasRenderer.drawCinema();
+                window.CanvasRenderer.refreshCinemaDisplay();
             }
             notifySelectionChange();
             return true;
@@ -310,7 +305,7 @@ function clearAllSelections() {
 
     console.log('已清除所有选择');
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-        window.CanvasRenderer.drawCinema();
+        window.CanvasRenderer.refreshCinemaDisplay();
     }
     notifySelectionChange();
 }
@@ -335,7 +330,7 @@ function performAutoIndividualSelection(userInfo) {
             selectSeat(seat);
         });
         if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-            window.CanvasRenderer.drawCinema();
+            window.CanvasRenderer.refreshCinemaDisplay();
         }
         notifySelectionChange();
         console.log(`自动选座成功：${recommendedSeat.length}个座位`);
@@ -363,7 +358,7 @@ function performAutoGroupSelection(groupInfo) {
         });
 
         if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-            window.CanvasRenderer.drawCinema();
+            window.CanvasRenderer.refreshCinemaDisplay();
         }
         notifySelectionChange();
         console.log(`自动团体选座成功：${recommendedSeats.length}个座位`);
@@ -393,7 +388,7 @@ function performReservation(customerInfo) {
 
     if (result.success) {
         if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-            window.CanvasRenderer.drawCinema();
+            window.CanvasRenderer.refreshCinemaDisplay();
         }
         notifySelectionChange();
     }
@@ -422,7 +417,7 @@ function performPurchase(customerInfo) {
 
     if (result.success) {
         if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-            window.CanvasRenderer.drawCinema();
+            window.CanvasRenderer.refreshCinemaDisplay();
         }
         notifySelectionChange();
     }
@@ -565,7 +560,7 @@ function resetStateManager() {
     globalState.isCtrlPressed = false;
 
     if (window.CanvasRenderer && typeof window.CanvasRenderer.drawCinema === 'function') {
-        window.CanvasRenderer.drawCinema();
+        window.CanvasRenderer.refreshCinemaDisplay();
     }
     notifySelectionChange();
     console.log('状态管理器已重置');
