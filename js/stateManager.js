@@ -107,9 +107,9 @@ function getMousePosition(event) {
  */
 function performSeatHitDetection(mousePos) {
     if (!window.CinemaData) return null;
-    
+
     const config = window.CinemaData.getCurrentConfig();
-    
+
     // 直接在此函数中遍历所有座位，避免创建临时数组
     for (let row = 1; row <= config.TOTAL_ROWS; row++) {
         for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
@@ -119,7 +119,7 @@ function performSeatHitDetection(mousePos) {
                 seat.isHovered = (globalState.hoveredSeat &&
                     globalState.hoveredSeat.row === seat.row &&
                     globalState.hoveredSeat.col === seat.col);
-                
+
                 // 计算座位位置并检查命中
                 const seatPos = window.CanvasRenderer.calculateSeatPosition(seat);
                 const distance = Math.sqrt(Math.pow(mousePos.x - seatPos.x, 2) + Math.pow(mousePos.y - seatPos.y, 2));
@@ -336,6 +336,7 @@ function performAutoIndividualSelection(userInfo) {
         console.log(`自动选座成功：${recommendedSeat.length}个座位`);
     } else {
         console.log('未找到合适的座位');
+        alert('未找到合适的座位，请手动选择或调整个人信息');
     }
 }
 
@@ -364,6 +365,7 @@ function performAutoGroupSelection(groupInfo) {
         console.log(`自动团体选座成功：${recommendedSeats.length}个座位`);
     } else {
         console.log('未找到合适的座位组合');
+        alert('未找到合适的座位组合，请手动选择或调整团体人数');
     }
 }
 
