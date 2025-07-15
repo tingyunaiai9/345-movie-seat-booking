@@ -252,9 +252,30 @@
     border-left: 4px solid #68a530;
 }
 
-.order-item.cancelled {
+/* 统一失效状态样式 - 已退款、已过期、已取消 */
+.order-item.cancelled,
+.order-item.refunded,
+.order-item.expired {
     border-left: 4px solid #dc3545;
-    opacity: 0.7;
+    opacity: 0.6;
+    background: rgba(248, 249, 250, 0.95);
+    filter: grayscale(20%);
+}
+
+.order-item.cancelled:hover,
+.order-item.refunded:hover,
+.order-item.expired:hover {
+    border-color: #dc3545;
+    background: rgba(248, 249, 250, 0.98);
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.15);
+    transform: translateY(-1px);
+    opacity: 0.8;
+}
+
+.order-item.cancelled::before,
+.order-item.refunded::before,
+.order-item.expired::before {
+    background: #dc3545;
 }
 
 /* 最新订单高亮样式 */
@@ -338,10 +359,14 @@
     border: 1px solid #68a530;
 }
 
-.order-status.cancelled {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.2) 100%);
+/* 统一失效状态的订单状态样式 */
+.order-status.cancelled,
+.order-status.refunded,
+.order-status.expired {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.15) 100%);
     color: #dc3545;
-    border: 1px solid #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    font-weight: 600;
 }
 
 .order-content {
@@ -648,6 +673,15 @@
     font-size: 12px;
     font-weight: 600;
     box-shadow: 0 2px 4px rgba(104, 165, 48, 0.3);
+}
+
+/* 详情模态框中的状态样式 */
+.detail-value.order-status.cancelled,
+.detail-value.order-status.refunded,
+.detail-value.order-status.expired {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.15) 100%);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
 }
 
 /* 响应式调整 */
