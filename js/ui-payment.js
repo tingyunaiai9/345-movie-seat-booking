@@ -42,7 +42,7 @@ function updatePaymentMovieInfo() {
     // 判断影厅类型
     let cinemaInfo = '中厅 (10排×20座)';
     if (movieData && movieData.rows && movieData.cols) {
-        if (movieData.rows === 8 && movieData.cols === 15) {
+        if (movieData.rows === 8 && movieData.cols === 12) {
             cinemaInfo = '小厅 (8排×15座)';
         } else if (movieData.rows === 10 && movieData.cols === 20) {
             cinemaInfo = '中厅 (10排×20座)';
@@ -246,7 +246,7 @@ function updateConfirmMovieInfo() {
     // 判断影厅类型
     let cinemaInfo = '中厅 (10排×20座)';
     if (movieData && movieData.rows && movieData.cols) {
-        if (movieData.rows === 8 && movieData.cols === 15) {
+        if (movieData.rows === 8 && movieData.cols === 12) {
             cinemaInfo = '小厅 (8排×15座)';
         } else if (movieData.rows === 10 && movieData.cols === 20) {
             cinemaInfo = '中厅 (10排×20座)';
@@ -448,36 +448,36 @@ function handleFinalPayment() {
  */
 function bindPaymentMethodEvents() {
     const paymentOptions = document.querySelectorAll('.payment-option');
-    
+
     paymentOptions.forEach(option => {
         // 单击事件 - 选择支付方式
-        option.addEventListener('click', function() {
+        option.addEventListener('click', function () {
             // 移除其他选项的active状态
             paymentOptions.forEach(opt => opt.classList.remove('active'));
-            
+
             // 为当前选项添加active状态
             this.classList.add('active');
-            
+
             // 获取选择的支付方式
             const radioInput = this.querySelector('input[type="radio"]');
             if (radioInput) {
                 radioInput.checked = true;
                 const selectedPayment = radioInput.value;
                 console.log('选择的支付方式:', selectedPayment);
-                
+
                 // 保存到localStorage
                 localStorage.setItem('selectedPaymentMethod', selectedPayment);
-                
+
                 // 更新支付方式信息
                 updatePaymentMethod(selectedPayment);
             }
         });
 
         // 双击事件 - 显示支付方式详细图片
-        option.addEventListener('dblclick', function(e) {
+        option.addEventListener('dblclick', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const radioInput = this.querySelector('input[type="radio"]');
             if (radioInput) {
                 const paymentType = radioInput.value;
@@ -599,7 +599,7 @@ function bindPaymentImageModalEvents() {
 
     // 点击遮罩层关闭
     if (overlay) {
-        overlay.addEventListener('click', function(e) {
+        overlay.addEventListener('click', function (e) {
             if (e.target === overlay) {
                 closePaymentImageModal();
             }
@@ -607,7 +607,7 @@ function bindPaymentImageModalEvents() {
     }
 
     // ESC键关闭
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
             closePaymentImageModal();
         }
@@ -637,7 +637,7 @@ function updatePaymentMethod(paymentType) {
         'Arknights': '源石支付',
         'IdentityV': '回声支付'
     };
-    
+
     // 更新确认页面的支付方式显示
     const confirmPaymentMethod = document.getElementById('confirm-payment-method');
     if (confirmPaymentMethod) {
@@ -741,7 +741,7 @@ if (typeof window !== 'undefined') {
 }
 
 // 页面加载时初始化支付方式事件
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 等待页面完全加载后绑定事件
     setTimeout(() => {
         if (document.getElementById('payment-view')) {
