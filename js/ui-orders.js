@@ -243,7 +243,7 @@ function renderMyOrdersList() {
         );
     }
 
-    // 🔑 修改：按时间排序 - 最新的在上，最旧的在下
+    // 按时间排序 - 最新的在上，最旧的在下
     filteredOrders.sort((a, b) => {
         const timeA = new Date(a.createdAt || 0).getTime();
         const timeB = new Date(b.createdAt || 0).getTime();
@@ -395,8 +395,11 @@ function createMyOrderItem(order, isLatest = false) {
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
     const totalPrice = order.totalPrice || (seatCount * unitPrice);
 
+    // 在createMyOrderItem函数中添加调试
+    console.log('isLatest:', isLatest);    
     // 最新订单标识
     const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
+    console.log('生成的latestBadge:', latestBadge);
 
     orderItem.innerHTML = `
         <div class="order-card">

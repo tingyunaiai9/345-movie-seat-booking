@@ -260,13 +260,13 @@
     align-items: center;
 }
 
-.movie-poster-container {
+.order-item .movie-poster-container {
     position: relative;
     width: 80px;
     height: 120px;
 }
 
-.movie-poster {
+.order-item .movie-poster {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -473,11 +473,7 @@
 .order-item:hover .action-hint {
     color: #68a530;
     transform: translateX(4px);
-}
-
-.click-text {
-    font-style: italic;
-}
+}   
 
 .arrow {
     font-size: 16px;
