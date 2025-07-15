@@ -338,6 +338,18 @@ function canNavigateToView(viewName) {
 
     console.log(`当前视图索引: ${currentIndex}, 目标视图索引: ${targetIndex}`);
 
+    // 特殊处理：如果当前在 final 界面，只能回到 config 界面
+    if (viewState.currentView === 'final') {
+        if (viewName === 'config') {
+            console.log('从最终结算页面返回到配置页面');
+            return true;
+        } else {
+            console.log('导航失败: 在最终结算页面只能返回到配置页面开始新的订单');
+            showMessage('请返回配置页面开始新的订单', 'warning');
+            return false;
+        }
+    }
+
     // 特殊处理：允许从 seat 界面直接跳转到 final 界面
     if (viewName === 'final' && viewState.currentView === 'seat') {
         console.log('允许从选座页面直接跳转到最终结算页面');
