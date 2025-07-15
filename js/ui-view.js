@@ -942,13 +942,14 @@ function resetToStart() {
         item.classList.remove('active');
     });
 
-    const firstMovie = document.querySelector('.movie-item');
-    if (firstMovie) {
-        firstMovie.classList.add('active');
-        if (window.movieSelector) {
-            window.movieSelector.selectMovie(firstMovie);
-        }
-    }
+    // 默认选中第一个电影
+    // const firstMovie = document.querySelector('.movie-item');
+    // if (firstMovie) {
+    //     firstMovie.classList.add('active');
+    //     if (window.movieSelector) {
+    //         window.movieSelector.selectMovie(firstMovie);
+    //     }
+    // }
 
     // 显示提示信息
     showMessage('已重置，可以开始新的订单', 'info');
@@ -1050,7 +1051,7 @@ if (typeof window !== 'undefined') {
 
         // 工具函数
         showMessage,
-        
+
         // 状态访问
         getViewState: () => viewState,
         VIEW_CONFIG,
