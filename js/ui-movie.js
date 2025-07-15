@@ -106,7 +106,7 @@ function formatMovieShowTime(showTime) {
         return '时间待定';
     }
     
-    // 格式化为 "2025年7月16日 12:00" 的格式
+    // 格式化为 "2025-7-16 12:00" 的格式
     const year = showTime.getFullYear();
     const month = showTime.getMonth() + 1; // getMonth() 返回 0-11，需要加1
     const day = showTime.getDate();
@@ -118,7 +118,7 @@ function formatMovieShowTime(showTime) {
         hour12: false
     });
     
-    return `${year}年${month}月${day}日 ${timeStr}`;
+    return `${year}-${month}-${day} ${timeStr}`;
 }
 
 /**
