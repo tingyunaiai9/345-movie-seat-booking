@@ -664,6 +664,15 @@ function getSeat(row, col) {
     return rowSeats[col - 1] || null;
 }
 
+
+/**
+ * 获取当前影院所有座位的深拷贝
+ * @returns {Array} 座位二维数组的深拷贝
+ */
+function getCinemaSeats(){
+    return cinemaSeats.map(row => row.map(seat => ({ ...seat }))); // 返回座位的深拷贝，避免外部修改
+}
+
 /**
  * 设置座位状态
  * @param {number} row - 行号 (1-based)
@@ -771,6 +780,7 @@ window.CinemaData = {
 
     // 查询函数
     getSeat,
+    getCinemaSeats,
     setSeat,
     getCinemaStatus,
     getCurrentConfig, // V3 新增

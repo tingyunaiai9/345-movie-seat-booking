@@ -108,29 +108,24 @@ function getMousePosition(event) {
 function performSeatHitDetection(mousePos) {
     if (!window.CinemaData) return null;
 
-    const config = window.CinemaData.getCurrentConfig();
+    // 直接获取所有座位数据，避免双重遍历调用getSeat
+    const allSeats = window.CinemaData.getCinemaSeats().flat();
 
-    // 直接在此函数中遍历所有座位，避免创建临时数组
-    for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-        for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-            const seat = window.CinemaData.getSeat(row, col);
-            if (seat) {
-                // 为UI添加悬停状态
-                seat.isHovered = (globalState.hoveredSeat &&
-                    globalState.hoveredSeat.row === seat.row &&
-                    globalState.hoveredSeat.col === seat.col);
+    for (const seat of allSeats) {
+        // 为UI添加悬停状态
+        seat.isHovered = (globalState.hoveredSeat &&
+            globalState.hoveredSeat.row === seat.row &&
+            globalState.hoveredSeat.col === seat.col);
 
-                // 计算座位位置并检查命中
-                const seatPos = window.CanvasRenderer.calculateSeatPosition(seat);
-                const distance = Math.sqrt(Math.pow(mousePos.x - seatPos.x, 2) + Math.pow(mousePos.y - seatPos.y, 2));
-                const detectionRadius = seat.isHovered ?
-                    window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS * 1.2 :
-                    window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS;
+        // 计算座位位置并检查命中
+        const seatPos = window.CanvasRenderer.calculateSeatPosition(seat);
+        const distance = Math.sqrt(Math.pow(mousePos.x - seatPos.x, 2) + Math.pow(mousePos.y - seatPos.y, 2));
+        const detectionRadius = seat.isHovered ?
+            window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS * 1.2 :
+            window.CanvasRenderer.CANVAS_CONFIG.SEAT_RADIUS;
 
-                if (distance <= detectionRadius) {
-                    return seat;
-                }
-            }
+        if (distance <= detectionRadius) {
+            return seat;
         }
     }
 
@@ -514,19 +509,10 @@ function notifySelectionChange() {
 function getSelectedSeats() {
     if (!window.CinemaData) return [];
 
-    const config = window.CinemaData.getCurrentConfig();
-    const selectedSeats = [];
+    // 直接获取所有座位数据
+    const allSeats = window.CinemaData.getCinemaSeats().flat();
 
-    for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-        for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-            const seat = window.CinemaData.getSeat(row, col);
-            if (seat && seat.status === 'selected') {
-                selectedSeats.push(seat);
-            }
-        }
-    }
-
-    return selectedSeats;
+    return allSeats.filter(seat => seat.status === 'selected');
 }
 
 /**

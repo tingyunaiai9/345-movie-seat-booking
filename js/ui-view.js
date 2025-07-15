@@ -278,10 +278,6 @@ function handleSpecialViewLogic(viewName, options) {
                     console.log('座位视图已刷新');
                 }
             }
-
-
-            // 添加：在控制台显示当前所有座位的状态
-            logSeatStatus();
         }, 100);
     }
 
@@ -341,6 +337,18 @@ function canNavigateToView(viewName) {
     const targetIndex = VIEW_CONFIG.VIEW_ORDER.indexOf(viewName);
 
     console.log(`当前视图索引: ${currentIndex}, 目标视图索引: ${targetIndex}`);
+
+    // 特殊处理：如果当前在 final 界面，只能回到 config 界面
+    if (viewState.currentView === 'final') {
+        if (viewName === 'config') {
+            console.log('从最终结算页面返回到配置页面');
+            return true;
+        } else {
+            console.log('导航失败: 在最终结算页面只能返回到配置页面开始新的订单');
+            showMessage('请返回配置页面开始新的订单', 'warning');
+            return false;
+        }
+    }
 
     // 特殊处理：允许从 seat 界面直接跳转到 final 界面
     if (viewName === 'final' && viewState.currentView === 'seat') {
@@ -828,48 +836,6 @@ function handleBackgroundForView(viewName) {
     }
 }
 
-/**
- * 记录座位状态（从ui-core.js移过来）
- */
-function logSeatStatus() {
-    if (window.CinemaData) {
-        const config = window.CinemaData.getCurrentConfig();
-        console.log('=== 当前座位状态 ===');
-
-        // 创建状态统计对象
-        let statusStats = {
-            'available': 0,
-            'selected': 0,
-            'sold': 0,
-            'reserved': 0
-        };
-
-        // 获取并记录所有座位状态
-        for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-            for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-                const seat = window.CinemaData.getSeat(row, col);
-                if (seat) {
-                    statusStats[seat.status] = (statusStats[seat.status] || 0) + 1;
-                }
-            }
-        }
-
-        // 输出状态统计
-        console.log('状态统计:', statusStats);
-
-        // 获取已选座位并输出详细信息
-        if (window.StateManager && window.StateManager.getSelectedSeats) {
-            const selectedSeats = window.StateManager.getSelectedSeats();
-            console.log('已选座位:', selectedSeats.length > 0 ?
-                selectedSeats.map(s => `${s.row}排${s.col}座`).join(', ') :
-                '无');
-        }
-
-        console.log('=====================');
-    } else {
-        console.warn('CinemaData模块未加载，无法获取座位状态');
-    }
-}
 
 /**
  * 将配置应用到各个模块
@@ -1057,7 +1023,6 @@ if (typeof window !== 'undefined') {
         // 其他功能
         handlePaymentConfirmation,
         resetToStart,
-        logSeatStatus,
         updateCinemaStatusDisplay,
 
         // 工具函数
