@@ -86,7 +86,7 @@ function updatePaymentSeatInfo() {
 
     // 从验证模块获取真实选中座位数据
     const selectedSeats = window.UIValidation ?
-        window.UIValidation.getMySelectedSeatsData() :
+        window.StateManager.getSelectedSeats() :
         [{ row: 5, col: 8 }, { row: 5, col: 9 }];
 
     selectedSeats.forEach(seat => {
@@ -116,7 +116,7 @@ function updatePaymentPriceInfo() {
 
     // 获取已选座位数量
     const selectedSeats = window.UIValidation ?
-        window.UIValidation.getMySelectedSeatsData() :
+        window.StateManager.getSelectedSeats() :
         [{ row: 5, col: 8 }, { row: 5, col: 9 }];
 
     const quantity = selectedSeats.length;
@@ -263,7 +263,7 @@ function updateConfirmSeatInfo() {
 
     // 获取选中的座位数据
     const selectedSeats = window.UIValidation ?
-        window.UIValidation.getMySelectedSeatsData() : [];
+        window.StateManager.getSelectedSeats() : [];
 
     if (selectedSeats.length === 0) {
         seatListEl.innerHTML = '<span class="no-seats">未选择座位</span>';
@@ -301,7 +301,7 @@ function updateConfirmPriceInfo() {
 
     // 获取已选座位数量
     const selectedSeats = window.UIValidation ?
-        window.UIValidation.getMySelectedSeatsData() : [];
+        window.StateManager.getSelectedSeats() : [];
     quantity = selectedSeats.length;
 
     // 计算费用
@@ -379,7 +379,7 @@ function handleFinalPayment() {
             unitPrice = Number(movieData.price);
         }
     } catch (e) { }
-    const selectedSeats = window.UIValidation ? window.UIValidation.getMySelectedSeatsData() : [];
+    const selectedSeats = window.StateManager ? window.StateManager.getSelectedSeats() : [];
     totalCost = unitPrice * selectedSeats.length;
 
     // 获取客户信息
