@@ -222,6 +222,18 @@
     font-weight: 600;
 }
 
+.confirm-seat-tag {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(104, 165, 48, 0.3);
+    display: inline-block;
+    margin-left: auto; /* 推送到右侧 */
+}
+
 /* 费用明细区块 */
 .cost-breakdown {
     background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
