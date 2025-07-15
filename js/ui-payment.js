@@ -31,31 +31,38 @@ function updatePaymentMovieInfo() {
     const movieCinemaEl = document.getElementById('payment-cinema-info');
     const moviePosterEl = document.querySelector('.payment-panel .movie-poster img');
 
-    // 获取当前选中的电影
-    const selectedMovieEl = document.querySelector('.movie-item.active');
+    // 优先从 localStorage 获取选中的电影信息
+    let movieData = null;
+    try {
+        movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
+    } catch (e) {
+        movieData = null;
+    }
 
-    if (selectedMovieEl) {
-        const movieData = {
-            title: selectedMovieEl.querySelector('h3').textContent,
-            time: selectedMovieEl.querySelector('.movie-time').textContent,
-            image: selectedMovieEl.querySelector('img').src,
-            cinema: '中厅 (10排×20座)'
-        };
+    // 判断影厅类型
+    let cinemaInfo = '中厅 (10排×20座)';
+    if (movieData && movieData.rows && movieData.cols) {
+        if (movieData.rows === 8 && movieData.cols === 15) {
+            cinemaInfo = '小厅 (8排×15座)';
+        } else if (movieData.rows === 10 && movieData.cols === 20) {
+            cinemaInfo = '中厅 (10排×20座)';
+        } else if (movieData.rows === 12 && movieData.cols === 25) {
+            cinemaInfo = '大厅 (12排×25座)';
+        } else {
+            cinemaInfo = `自定义影厅 (${movieData.rows}排×${movieData.cols}座)`;
+        }
+    }
 
-        // 更新文本信息
-        if (movieTitleEl) movieTitleEl.textContent = movieData.title;
-        if (movieTimeEl) movieTimeEl.textContent = movieData.time;
-        if (movieCinemaEl) movieCinemaEl.textContent = movieData.cinema;
-
-        // 安全设置图片
+    if (movieData) {
+        if (movieTitleEl) movieTitleEl.textContent = movieData.title || '-';
+        if (movieTimeEl) movieTimeEl.textContent = movieData.time || '-';
+        if (movieCinemaEl) movieCinemaEl.textContent = cinemaInfo;
         setSafeImageSrc(moviePosterEl, movieData.image, movieData.title);
-
     } else {
         // 使用默认数据
         if (movieTitleEl) movieTitleEl.textContent = '罗小黑战记';
         if (movieTimeEl) movieTimeEl.textContent = '2025-6-1 19:30';
         if (movieCinemaEl) movieCinemaEl.textContent = '中厅 (10排×20座)';
-
         setSafeImageSrc(moviePosterEl, 'img/LUOXIAOHEI.webp', '罗小黑战记');
     }
 }
