@@ -331,11 +331,11 @@
                                 <div class="selection-summary">
                                     <div class="summary-item">
                                         <span>已选座位数:</span>
-                                        <span id="selected-count">0</span>
+                                        <span id="selected-count"></span>
                                     </div>
                                     <div class="summary-item">
                                         <span>总金额:</span>
-                                        <span id="total-price">¥0</span>
+                                        <span id="total-price"></span>
                                     </div>
                                 </div>
                             </div>
@@ -353,28 +353,23 @@
                                 <div class="cinema-stats" id="cinema-stats">
                                     <div class="stat-item">
                                         <span>可选座位:</span>
-                                        <span id="available-count">200</span>
+                                        <span id="available-count"></span>
                                     </div>
                                     <div class="stat-item">
                                         <span>已售座位:</span>
-                                        <span id="sold-count">0</span>
+                                        <span id="sold-count"></span>
                                     </div>
                                     <div class="stat-item">
                                         <span>已预订:</span>
-                                        <span id="reserved-count">0</span>
+                                        <span id="reserved-count"></span>
                                     </div>
                                     <div class="stat-item">
                                         <span>上座率:</span>
-                                        <span id="occupancy-rate">0%</span>
+                                        <span id="occupancy-rate"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="seat-actions">
-                        <button class="btn btn-secondary" id="back-to-movie">上一步</button>
-                        <button class="btn btn-primary" id="next-to-payment" disabled>下一步：支付确认</button>
                     </div>
                 </div>
             </section>
@@ -391,9 +386,9 @@
                                     <img src="img/LUOXIAOHEI.webp" alt="电影海报">
                                 </div>
                                 <div class="movie-details">
-                                    <h4 id="payment-movie-title">复仇者联盟：终局之战</h4>
-                                    <p id="payment-movie-time">2024-12-25 19:30</p>
-                                    <p id="payment-cinema-info">中厅 (10排×20座)</p>
+                                    <h4 id="payment-movie-title"></h4>
+                                    <p id="payment-movie-time"></p>
+                                    <p id="payment-cinema-info"></p>
                                 </div>
                             </div>
 
@@ -407,15 +402,15 @@
                             <div class="price-breakdown">
                                 <div class="price-item">
                                     <span>票价:</span>
-                                    <span id="unit-price">¥45</span>
+                                    <span id="unit-price"></span>
                                 </div>
                                 <div class="price-item">
                                     <span>数量:</span>
-                                    <span id="ticket-quantity">1</span>
+                                    <span id="ticket-quantity"></span>
                                 </div>
                                 <div class="price-item total">
                                     <span>总计:</span>
-                                    <span id="final-total">¥45</span>
+                                    <span id="final-total"></span>
                                 </div>
                             </div>
                         </div>
@@ -423,21 +418,15 @@
                         <div class="payment-method">
                             <h3>支付方式</h3>
                             <div class="payment-options">
-                                <label class="payment-option active">
-                                    <input type="radio" name="payment-method" value="wechat" checked>
-                                    <span class="payment-icon">💳</span>
-                                    <span>微信支付</span>
-                                </label>
-                                <label class="payment-option">
-                                    <input type="radio" name="payment-method" value="alipay">
-                                    <span class="payment-icon">💰</span>
-                                    <span>支付宝</span>
-                                </label>
-                                <label class="payment-option">
-                                    <input type="radio" name="payment-method" value="card">
-                                    <span class="payment-icon">💳</span>
-                                    <span>银行卡</span>
-                                </label>
+                                <button class="payment-btn active" data-payment="wechat">
+                                    <img src="img/WeChatPay.png" alt="微信支付" class="payment-icon">
+                                </button>
+                                <button class="payment-btn" data-payment="alipay">
+                                    <img src="img/AliPay.png" alt="支付宝" class="payment-icon">
+                                </button>
+                                <button class="payment-btn" data-payment="card">
+                                    <img src="img/UnionPay.png" alt="银行卡支付" class="payment-icon">
+                                </button>
                             </div>
                         </div>
 
@@ -508,11 +497,11 @@
                             <h3>费用明细</h3>
                             <div class="cost-item">
                                 <span class="label">票价 × 数量:</span>
-                                <span class="amount" id="ticket-cost">¥0</span>
+                                <span class="amount" id="ticket-cost"></span>
                             </div>
                             <div class="cost-item">
                                 <span class="label">总计:</span>
-                                <span class="amount" id="total-cost">¥0</span>
+                                <span class="amount" id="total-cost"></span>
                             </div>
                         </div>
 
@@ -679,21 +668,17 @@
     </footer>
 
     <!-- 引入JavaScript模块 -->
-    <script src="js/ui-movieSelector.js"></script>
-    <script src="js/ui-view.js"></script>
     <script src="js/main.js"></script>
     <script src="js/canvas.js"></script>
     <script src="js/stateManager.js"></script>
-
-    <!-- 新的模块化UI文件 -->
     <script src="js/ui-core.js"></script>
     <script src="js/ui-member.js"></script>
+    <script src="js/ui-movieSelector.js"></script>
+    <script src="js/ui-view.js"></script>
     <script src="js/ui-validation.js"></script>
     <script src="js/ui-payment.js"></script>
     <script src="js/ui-orders.js"></script>
 
-    <!-- 保持原有ui.js文件作为备用 -->
-    <!-- <script src="js/ui.js"></script> -->
 </body>
 
 </html>
