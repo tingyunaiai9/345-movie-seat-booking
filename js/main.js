@@ -15,7 +15,7 @@ const CINEMA_CONFIG = {
     FRONT_RESTRICTED_ROWS: 3,  // 少年不可坐的前排数
     BACK_RESTRICTED_ROWS: 3,   // 老人不可坐的后排数
     MAX_GROUP_SIZE: 20,         // 团体票最大人数
-    // 预订票在电影开始前多少分钟必须付款，否则作废
+    // 预订票在购买后多少分钟必须付款，否则作废
     RESERVATION_EXPIRY_MINUTES: 30,
     movieId: null // 电影ID，用于标识当前正在放映的电影
 };
@@ -66,6 +66,8 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
     currentCinemaConfig.SEATS_PER_ROW = seatsPerRow;
     currentCinemaConfig.TOTAL_SEATS = rows * seatsPerRow;
     currentCinemaConfig.movieId = movieId;
+    
+    // 处理电影时间设置
     if (movieTime) {
         if (typeof movieTime === 'string') {
             currentCinemaConfig.movieStartTime = new Date(movieTime.replace(/-/g, '/'));
@@ -73,8 +75,28 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
             currentCinemaConfig.movieStartTime = movieTime;
         }
     } else {
-        currentCinemaConfig.movieStartTime = null;
+        // 如果没有传入时间，根据电影ID设置默认时间
+        const movieTimeMapping = {
+            'cat': '10:00',      // 罗小黑战记 - 10:00
+            'girl': '12:00',     // 蓦然回首 - 12:00
+            'love': '18:00'      // 情书 - 18:00
+        };
+        
+        if (movieId && movieTimeMapping[movieId]) {
+            // 创建明天的指定时间
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1); // 设置为明天
+            
+            const [hours, minutes] = movieTimeMapping[movieId].split(':');
+            tomorrow.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            
+            currentCinemaConfig.movieStartTime = tomorrow;
+            console.log(`为电影 ${movieId} 设定默认放映时间: ${tomorrow.toLocaleString()}`);
+        } else {
+            currentCinemaConfig.movieStartTime = null;
+        }
     }
+    
     if (currentCinemaConfig.movieStartTime) {
         console.log(`电影开始时间已设定: ${currentCinemaConfig.movieStartTime.toLocaleString()}`);
     }
@@ -106,21 +128,33 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
         }
     }
 
-    // 处理传入的时间，确保其为Date对象
-    /*if (movieTime) {
-        if (typeof movieTime === 'string') {
-            const [hours, minutes] = movieTime.split(':');
-            const startTime = new Date();
-            startTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-            currentCinemaConfig.movieStartTime = startTime;
-        } else if (movieTime instanceof Date) {
-            currentCinemaConfig.movieStartTime = movieTime;
-        }
-    } else {
-        currentCinemaConfig.movieStartTime = null;
-    }*/
-
     return cinemaSeats;
+}
+
+/**
+ * 获取指定电影的放映时间
+ * @param {string} movieId - 电影ID
+ * @returns {Date|null} 电影放映时间
+ */
+function getMovieShowTime(movieId) {
+    const movieTimeMapping = {
+        'cat': '10:00',      // 罗小黑战记 - 10:00
+        'girl': '12:00',     // 蓦然回首 - 12:00
+        'love': '18:00'      // 情书 - 18:00
+    };
+    
+    if (movieId && movieTimeMapping[movieId]) {
+        // 创建明天的指定时间
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1); // 设置为明天
+        
+        const [hours, minutes] = movieTimeMapping[movieId].split(':');
+        tomorrow.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+        
+        return tomorrow;
+    }
+    
+    return null;
 }
 
 /**
@@ -760,7 +794,7 @@ function getOrderById(orderId) {
 
 // ========================= 模块导出 =========================
 
-// 通过在window对象上挂载，让其他<script>标签可以访问
+// 在模块导出中添加新函数
 window.CinemaData = {
     // 初始化函数
     initializeCinemaSeats,
@@ -783,7 +817,8 @@ window.CinemaData = {
     getCinemaSeats,
     setSeat,
     getCinemaStatus,
-    getCurrentConfig, // V3 新增
+    getCurrentConfig,
+    getMovieShowTime, // 新增
 
     // 工具函数
     getAgeGroup,

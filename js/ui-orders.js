@@ -315,16 +315,27 @@ function createMyOrderItem(order, isLatest = false) {
 
     // 计算过期状态
     let expiryWarning = '';
-    if (order.status === 'reserved' && order.expiresAt) {
-        const expiryTime = new Date(order.expiresAt);
-        const now = new Date();
-        const timeLeft = expiryTime - now;
+    if (order.status === 'reserved') {
+        let expiryTime;
+        
+        // 过期时间设置为创建时间后30分钟
+        const createdTime = new Date(order.createdAt);
+        expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟 = 30 * 60 * 1000毫秒
+        
+        // 更新订单对象的过期时间（如果需要持久化，应该调用相应的保存函数）
+        order.expiresAt = expiryTime.toISOString();
+        
+        
+        if (expiryTime) {
+            const now = new Date();
+            const timeLeft = expiryTime - now;
 
-        if (timeLeft > 0) {
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">还剩 ${minutes} 分钟支付时间</span>`;
-        } else {
-            expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">预约已过期</span>`;
+            if (timeLeft > 0) {
+                const minutes = Math.floor(timeLeft / (1000 * 60));
+                expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">还剩 ${minutes} 分钟支付时间</span>`;
+            } else {
+                expiryWarning = `<span class=\"expiry-warning\" style=\"color: #dc3545; font-weight: 600;\">预约已过期</span>`;
+            }
         }
     }
 
@@ -375,7 +386,6 @@ function createMyOrderItem(order, isLatest = false) {
 
     return orderItem;
 }
-
 // ========================= 订单详情管理 =========================
 
 /**

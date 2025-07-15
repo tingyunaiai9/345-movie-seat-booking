@@ -21,9 +21,13 @@ let movieSelectorState = {
  * 初始化电影选择器
  * - 绑定电影选择事件
  * - 恢复背景（如果有保存的电影选择）
+ * - 设置电影时间显示
  */
 function initializeMovieSelector() {
     console.log('初始化电影选择器...');
+    
+    // 设置电影时间显示
+    setMovieShowTimes();
     
     // 获取所有电影元素并绑定点击事件
     const movieItems = document.querySelectorAll('.movie-item');
@@ -55,6 +59,74 @@ function initializeMovieSelector() {
         // 如果是配置页面，保持默认田野背景
         console.log('当前在配置页面，保持田野背景');
     }
+}
+
+/**
+ * 设置电影放映时间显示
+ * 从主模块获取各电影的放映时间并更新到页面上
+ */
+function setMovieShowTimes() {
+    console.log('设置电影放映时间...');
+    
+    // 电影ID到放映时间的映射
+    const movieIds = ['cat', 'girl', 'love'];
+    
+    movieIds.forEach(movieId => {
+        const movieElement = document.querySelector(`.movie-item[data-movie="${movieId}"]`);
+        if (movieElement) {
+            const timeElement = movieElement.querySelector('.movie-time');
+            if (timeElement && window.CinemaData && window.CinemaData.getMovieShowTime) {
+                // 从主模块获取电影放映时间
+                const showTime = window.CinemaData.getMovieShowTime(movieId);
+                if (showTime) {
+                    // 格式化时间显示
+                    const timeString = formatMovieShowTime(showTime);
+                    timeElement.textContent = timeString;
+                    console.log(`设置电影 ${movieId} 的放映时间: ${timeString}`);
+                } else {
+                    timeElement.textContent = '时间待定';
+                    console.warn(`无法获取电影 ${movieId} 的放映时间`);
+                }
+            } else {
+                console.warn(`未找到电影 ${movieId} 的时间显示元素或主模块未加载`);
+            }
+        } else {
+            console.warn(`未找到电影 ${movieId} 的DOM元素`);
+        }
+    });
+}
+
+/**
+ * 格式化电影放映时间显示
+ * @param {Date} showTime - 电影放映时间
+ * @returns {string} 格式化的时间字符串
+ */
+function formatMovieShowTime(showTime) {
+    if (!(showTime instanceof Date) || isNaN(showTime.getTime())) {
+        return '时间待定';
+    }
+    
+    // 格式化为 "2025年7月16日 12:00" 的格式
+    const year = showTime.getFullYear();
+    const month = showTime.getMonth() + 1; // getMonth() 返回 0-11，需要加1
+    const day = showTime.getDate();
+    
+    // 格式化时间部分 (HH:MM)
+    const timeStr = showTime.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+    
+    return `${year}年${month}月${day}日 ${timeStr}`;
+}
+
+/**
+ * 更新电影时间显示
+ * 当配置改变时重新设置时间显示
+ */
+function updateMovieShowTimes() {
+    setMovieShowTimes();
 }
 
 /**
@@ -127,12 +199,18 @@ if (typeof window !== 'undefined') {
     window.UIMovieSelector = {
         initializeMovieSelector, // 初始化电影选择器
         selectMovie,             // 选择电影
-        getSelectedMovie         // 获取选中的电影
+        getSelectedMovie,        // 获取选中的电影
+        setMovieShowTimes,       // 设置电影放映时间
+        updateMovieShowTimes,    // 更新电影时间显示
+        formatMovieShowTime      // 格式化电影放映时间
     };
 }
 
 // 页面加载完成后自动初始化
 document.addEventListener('DOMContentLoaded', function () {
     console.log('页面加载完成，初始化电影选择器');
-    initializeMovieSelector();
+    // 延迟初始化，确保主模块已加载
+    setTimeout(() => {
+        initializeMovieSelector();
+    }, 100);
 });

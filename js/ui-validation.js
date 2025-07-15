@@ -272,7 +272,7 @@ function handleReservation() {
         // 根据返回结果处理
         if (result && result.success) {
             console.log('✅ 预订成功');
-            alert('预订成功！请在电影开始前30分钟前支付');
+            alert('预订成功！请在30分钟内支付');
             // 订单已由 main.js 创建，UI 层无需再创建订单
 
             // 清空当前的用户数据
@@ -290,8 +290,6 @@ function handleReservation() {
                 var finalView = document.getElementById('final-view');
                 if (finalView) finalView.classList.add('active');
             }
-            // 兜底方案：保持在当前页面
-            console.warn('UIViewController 不可用，保持在当前页面');
         } else {
             // 预订失败 - 显示错误信息
             const errorMessage = result && result.message ? result.message : '预订失败，请重试';
