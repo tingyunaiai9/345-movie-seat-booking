@@ -89,6 +89,22 @@ function initializeEventListeners() {
                     viewState.selectedMovie // movieId 参数，现在保证有值
                 );
 
+                let nowSelectedMovie = localStorage.getItem('selectedMovieInfo');
+                if (nowSelectedMovie) {
+                    // 1. 解析为对象
+                    let movieObj = JSON.parse(nowSelectedMovie);
+
+                    // 2. 修改 rows 和 cols
+                    movieObj.rows = viewState.selectedCinemaSize.rows;
+                    movieObj.cols = viewState.selectedCinemaSize.cols;
+
+                    // 3. 存回 localStorage
+                    localStorage.setItem('selectedMovieInfo', JSON.stringify(movieObj));
+
+                    console.log('已更新 rows/cols 并存回 localStorage:', movieObj);
+                }
+
+
                 // 初始化成功后，才切换视图
                 switchToView('seat');
 
