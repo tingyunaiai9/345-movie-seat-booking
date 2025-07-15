@@ -448,16 +448,37 @@ function updateNavigationSteps(activeViewName) {
 }
 
 /**
- * 检查指定视图是否已完成
- * @param {string} viewName - 要检查的视图名称
- * @param {string} currentView - 当前视图名称
- * @returns {boolean}
+ * 隐藏导航步骤
  */
+function hideNavigationSteps() {
+    const navSteps = document.querySelector('.nav-steps');
+    if (navSteps) {
+        navSteps.style.display = 'none';
+        console.log('导航步骤已隐藏');
+    }
+}
+
+/**
+ * 检查视图是否已完成
+ * @param {string} viewName - 视图名称
+ * @param {string} currentView - 当前视图名称
+ * */
 function isViewCompleted(viewName, currentView) {
     const viewIndex = VIEW_CONFIG.VIEW_ORDER.indexOf(viewName);
     const currentIndex = VIEW_CONFIG.VIEW_ORDER.indexOf(currentView);
 
     return viewIndex < currentIndex;
+}
+
+/**
+ * 显示导航步骤
+ */
+function showNavigationSteps() {
+    const navSteps = document.querySelector('.nav-steps');
+    if (navSteps) {
+        navSteps.style.display = 'flex';
+        console.log('导航步骤已显示');
+    }
 }
 
 // ========================= 视图激活回调函数 =========================
@@ -1001,6 +1022,8 @@ if (typeof window !== 'undefined') {
         // 导航管理
         updateNavigationSteps,
         isViewCompleted,
+        hideNavigationSteps,
+        showNavigationSteps,
 
         // 视图激活回调
         onViewChanged,
