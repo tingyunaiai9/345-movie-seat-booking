@@ -231,18 +231,28 @@ function updateConfirmMovieInfo() {
     let movieData = null;
     try {
         movieData = JSON.parse(localStorage.getItem('selectedMovieInfo'));
-        if (movieData && movieData.price) {
-            unitPrice = Number(movieData.price);
-        }
     } catch (e) {
         movieData = null;
     }
 
+    // 判断影厅类型
+    let cinemaInfo = '中厅 (10排×20座)';
+    if (movieData && movieData.rows && movieData.cols) {
+        if (movieData.rows === 8 && movieData.cols === 15) {
+            cinemaInfo = '小厅 (8排×15座)';
+        } else if (movieData.rows === 10 && movieData.cols === 20) {
+            cinemaInfo = '中厅 (10排×20座)';
+        } else if (movieData.rows === 12 && movieData.cols === 25) {
+            cinemaInfo = '大厅 (12排×25座)';
+        } else {
+            cinemaInfo = `自定义影厅 (${movieData.rows}排×${movieData.cols}座)`;
+        }
+    }
 
     if (movieData) {
         if (movieTitleEl) movieTitleEl.textContent = movieData.title || '-';
         if (movieTimeEl) movieTimeEl.textContent = movieData.time || '-';
-        if (movieCinemaEl) movieCinemaEl.textContent = movieData.cinema || '中厅 (10排×20座)';
+        if (movieCinemaEl) movieCinemaEl.textContent = cinemaInfo;
     } else {
         // 默认值
         if (movieTitleEl) movieTitleEl.textContent = '罗小黑战记';
