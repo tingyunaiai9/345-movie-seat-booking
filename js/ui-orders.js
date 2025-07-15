@@ -310,6 +310,34 @@ function createMyOrderItem(order, isLatest = false) {
         'refunded': '已退款'
     };
 
+    // 获取电影信息
+    const selectedMovieId = localStorage.getItem('selectedMovie');
+    const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
+    let movieTitle = '未知电影';
+    let movieTime = '时间待定';
+    
+    // 电影名称映射
+    const movieTitleMapping = {
+        'cat': '罗小黑战记',
+        'girl': '蓦然回首', 
+        'love': '情书'
+    };
+    
+    if (selectedMovieId && movieTitleMapping[selectedMovieId]) {
+        movieTitle = movieTitleMapping[selectedMovieId];
+    }
+    
+    if (selectedMovieInfo) {
+        try {
+            const movieInfo = JSON.parse(selectedMovieInfo);
+            if (movieInfo.time) {
+                movieTime = movieInfo.time;
+            }
+        } catch (e) {
+            console.warn('解析电影信息失败:', e);
+        }
+    }
+
     // 格式化座位信息
     const seatsText = Array.isArray(order.seats) ? order.seats.map(seatIdToText).join('、') : '';
 
@@ -318,13 +346,17 @@ function createMyOrderItem(order, isLatest = false) {
     if (order.status === 'reserved') {
         let expiryTime;
         
-        // 过期时间设置为创建时间后30分钟
-        const createdTime = new Date(order.createdAt);
-        expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟 = 30 * 60 * 1000毫秒
-        
-        // 更新订单对象的过期时间（如果需要持久化，应该调用相应的保存函数）
-        order.expiresAt = expiryTime.toISOString();
-        
+        if (order.expiresAt) {
+            // 如果已有过期时间，使用现有的
+            expiryTime = new Date(order.expiresAt);
+        } else if (order.createdAt) {
+            // 如果没有过期时间但有创建时间，设置为创建时间后30分钟
+            const createdTime = new Date(order.createdAt);
+            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
+            
+            // 更新订单对象的过期时间
+            order.expiresAt = expiryTime.toISOString();
+        }
         
         if (expiryTime) {
             const now = new Date();
@@ -355,6 +387,13 @@ function createMyOrderItem(order, isLatest = false) {
             <span class=\"order-status ${order.status}\">${statusText[order.status] || order.status}</span>
         </div>
         <div class=\"order-content\">
+            <div class=\"order-movie\">
+                <div class=\"movie-info\">
+                    <h4>${movieTitle}</h4>
+                    <p>放映时间: ${movieTime}</p>
+                    <p>座位: ${seatsText}</p>
+                </div>
+            </div>
             <div class=\"order-details\">
                 <h5>客户信息</h5>
                 <div class=\"order-meta\">
@@ -370,7 +409,6 @@ function createMyOrderItem(order, isLatest = false) {
                 <div class=\"price-details\">
                     共 ${seatCount} 张票<br>
                     单价：¥${unitPrice}<br>
-                    座位: ${seatsText}<br>
                     点击查看详情
                 </div>
             </div>
@@ -386,7 +424,6 @@ function createMyOrderItem(order, isLatest = false) {
 
     return orderItem;
 }
-// ========================= 订单详情管理 =========================
 
 /**
  * 显示订单详情
@@ -405,6 +442,34 @@ function showMyOrderDetail(order) {
         'refunded': '已退款'
     };
 
+    // 获取电影信息
+    const selectedMovieId = localStorage.getItem('selectedMovie');
+    const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
+    let movieTitle = '未知电影';
+    let movieTime = '时间待定';
+    
+    // 电影名称映射
+    const movieTitleMapping = {
+        'cat': '罗小黑战记',
+        'girl': '蓦然回首', 
+        'love': '情书'
+    };
+    
+    if (selectedMovieId && movieTitleMapping[selectedMovieId]) {
+        movieTitle = movieTitleMapping[selectedMovieId];
+    }
+    
+    if (selectedMovieInfo) {
+        try {
+            const movieInfo = JSON.parse(selectedMovieInfo);
+            if (movieInfo.time) {
+                movieTime = movieInfo.time;
+            }
+        } catch (e) {
+            console.warn('解析电影信息失败:', e);
+        }
+    }
+
     const customer = order.customerInfo || {};
 
     // 更新订单信息
@@ -413,6 +478,16 @@ function showMyOrderDetail(order) {
     const statusElement = document.getElementById('detail-order-status');
     statusElement.textContent = statusText[order.status] || order.status;
     statusElement.className = `detail-value order-status ${order.status}`;
+
+    // 更新电影信息
+    const movieTitleElement = document.getElementById('detail-movie-title');
+    const movieTimeElement = document.getElementById('detail-movie-time');
+    if (movieTitleElement) {
+        movieTitleElement.textContent = movieTitle;
+    }
+    if (movieTimeElement) {
+        movieTimeElement.textContent = movieTime;
+    }
 
     document.getElementById('detail-created-time').textContent = formatDate(order.createdAt);
 
@@ -431,10 +506,29 @@ function showMyOrderDetail(order) {
     // 支付截止时间（仅在预约状态时显示）
     const expiresLabel = document.getElementById('detail-expires-label');
     const expiresTime = document.getElementById('detail-expires-time');
-    if (order.expiresAt && order.status === 'reserved') {
-        expiresLabel.style.display = 'inline';
-        expiresTime.style.display = 'inline';
-        expiresTime.textContent = formatDate(order.expiresAt);
+    if (order.status === 'reserved') {
+        let expiryTime;
+        
+        if (order.expiresAt) {
+            // 如果已有过期时间，使用现有的
+            expiryTime = new Date(order.expiresAt);
+        } else if (order.createdAt) {
+            // 如果没有过期时间但有创建时间，设置为创建时间后30分钟
+            const createdTime = new Date(order.createdAt);
+            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
+            
+            // 更新订单对象的过期时间
+            order.expiresAt = expiryTime.toISOString();
+        }
+        
+        if (expiryTime) {
+            expiresLabel.style.display = 'inline';
+            expiresTime.style.display = 'inline';
+            expiresTime.textContent = formatDate(expiryTime);
+        } else {
+            expiresLabel.style.display = 'none';
+            expiresTime.style.display = 'none';
+        }
     } else {
         expiresLabel.style.display = 'none';
         expiresTime.style.display = 'none';
@@ -475,11 +569,11 @@ function showMyOrderDetail(order) {
         if (refundBtn) refundBtn.style.display = 'inline-block';
     }
 
+    // 根据订单状态添加模态框类名（用于CSS样式）
+    modal.className = `order-detail-modal ${order.status}`;
+
     // 显示模态框并确保在视口中央
     modal.style.display = 'flex';
-
-    // 防止页面滚动
-    // document.body.style.overflow = 'hidden';
 
     // 确保模态框聚焦（便于键盘操作）
     modal.focus();
