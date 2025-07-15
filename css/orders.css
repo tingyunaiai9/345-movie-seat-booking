@@ -104,6 +104,24 @@
     background-clip: text;
 }
 
+/* 订单信息显示 */
+.order-info {
+    margin-top: 20px;
+}
+
+.order-number {
+    display: inline-block;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin: 10px 0;
+}
+
 /* 订单筛选器 */
 .orders-filter {
     display: flex;
@@ -278,6 +296,27 @@
     background: #dc3545;
 }
 
+/* 失效状态订单的订单号和价格样式 */
+.order-item.cancelled .order-header,
+.order-item.refunded .order-header,
+.order-item.expired .order-header {
+    color: #6c757d !important;
+}
+
+/* 失效状态订单的订单号背景样式 */
+.order-item.cancelled .order-number,
+.order-item.refunded .order-number,
+.order-item.expired .order-number {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    color: white !important;
+}
+
+.order-item.cancelled .price-amount,
+.order-item.refunded .price-amount,
+.order-item.expired .price-amount {
+    color: #6c757d !important;
+}
+
 /* 最新订单高亮样式 */
 .order-item.latest-order {
     border: 2px solid #398d37;
@@ -335,7 +374,6 @@
 .order-number {
     font-family: 'Courier New', monospace;
     font-weight: 600;
-    color: #2c3e50;
     font-size: 16px;
 }
 
@@ -683,6 +721,48 @@
     color: #dc3545;
     border: 1px solid rgba(220, 53, 69, 0.3);
 }
+
+
+/* 已终结状态订单详情的字体颜色修改为灰色 */
+.order-detail-modal.cancelled .detail-value,
+.order-detail-modal.refunded .detail-value,
+.order-detail-modal.expired .detail-value {
+    color: #6c757d !important;
+}
+
+.order-detail-modal.cancelled .detail-label,
+.order-detail-modal.refunded .detail-label,
+.order-detail-modal.expired .detail-label {
+    color: #6c757d !important;
+}
+
+.order-detail-modal.cancelled .order-detail-section h4,
+.order-detail-modal.refunded .order-detail-section h4,
+.order-detail-modal.expired .order-detail-section h4 {
+    color: #6c757d !important;
+}
+
+.order-detail-modal.cancelled .modal-header h3,
+.order-detail-modal.refunded .modal-header h3,
+.order-detail-modal.expired .modal-header h3 {
+    color: #6c757d !important;
+}
+
+/* 已终结状态订单详情的section装饰线也改为灰色 */
+.order-detail-modal.cancelled .order-detail-section h4::before,
+.order-detail-modal.refunded .order-detail-section h4::before,
+.order-detail-modal.expired .order-detail-section h4::before {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+}
+
+/* 已终结状态订单的座位标签也改为灰色 */
+.order-detail-modal.cancelled .seat-tag,
+.order-detail-modal.refunded .seat-tag,
+.order-detail-modal.expired .seat-tag {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    color: white !important;
+}
+
 
 /* 响应式调整 */
 @media (max-height: 700px) {

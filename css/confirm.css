@@ -480,20 +480,3 @@
     color: #398d37;
 }
 
-/* 订单信息显示 */
-.order-info {
-    margin-top: 20px;
-}
-
-.order-number {
-    display: inline-block;
-    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 1px;
-    margin: 10px 0;
-}
