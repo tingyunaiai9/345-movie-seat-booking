@@ -67,9 +67,6 @@ const CANVAS_CONFIG = {
  * 全局状态管理对象
  */
 const GLOBAL_STATE = {
-    // 座位数据
-    seatsArray: [],
-
     // 预加载的图片
     seatImages: {},
 
@@ -158,10 +155,23 @@ function drawSeat(x, y, seat) {
  * 包含屏幕绘制、过道绘制、座位绘制和中心区域标识
  */
 function drawCinema() {
-    const { canvas, ctx, seatsArray, currentLayout } = GLOBAL_STATE;
+    const { canvas, ctx, currentLayout } = GLOBAL_STATE;
 
     if (!canvas || !ctx) {
         console.error('Canvas未初始化');
+        return;
+    }
+
+    // 从 main.js 获取座位数据
+    if (!window.CinemaData || !window.CinemaData.getCinemaSeats) {
+        console.error('CinemaData模块未加载或getCinemaSeats函数不可用');
+        return;
+    }
+
+    const seatsArray = window.CinemaData.getCinemaSeats().flat(); // 将二维数组转为一维数组
+
+    if (!seatsArray || seatsArray.length === 0) {
+        console.error('座位数据为空');
         return;
     }
 
@@ -175,7 +185,6 @@ function drawCinema() {
     canvas.height = canvasDimensions.height;
     GLOBAL_STATE.canvasWidth = canvasDimensions.width;
     GLOBAL_STATE.canvasHeight = canvasDimensions.height;
-
 
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -285,10 +294,14 @@ function calculateSeatPosition(seat) {
  */
 function calculateCenterZone() {
     const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
-    const { totalRows, totalCols, seatsArray } = GLOBAL_STATE;
+    const { totalRows, totalCols } = GLOBAL_STATE;
 
-    const targetCenterCount = Math.floor(seatsArray.length * CENTER_ZONE_RATIO);
-    const layoutRatio = Math.sqrt(targetCenterCount / seatsArray.length);
+    // 从 main.js 获取座位总数
+    const config = window.CinemaData ? window.CinemaData.getCurrentConfig() : null;
+    const totalSeats = config ? config.TOTAL_SEATS : totalRows * totalCols;
+
+    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
+    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
     const numCenterCols = Math.ceil(totalCols * layoutRatio);
     const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
 
@@ -522,35 +535,23 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
         }
     }
 
-    // ===== 获取实际座位数据 =====
+    // ===== 检查座位数据是否可用 =====
     // 检查main.js模块是否已加载
-    if (!window.CinemaData) {
-        console.error('CinemaData模块未加载，无法获取座位数据');
+    if (!window.CinemaData || !window.CinemaData.getCinemaSeats) {
+        console.error('CinemaData模块未加载或getCinemaSeats函数不可用');
         return;
     }
 
-    const config = window.CinemaData.getCurrentConfig();
-    const seatsData = [];
+    const seatsData = window.CinemaData.getCinemaSeats().flat(); // 将二维数组转为一维数组
 
-    // 遍历所有座位并获取实际数据
-    for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-        for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-            const seat = window.CinemaData.getSeat(row, col);
-            if (seat) {
-                seatsData.push({
-                    row: seat.row,
-                    col: seat.col,
-                    status: seat.status,
-                    id: seat.id
-                });
-            }
-        }
+    if (!seatsData || seatsData.length === 0) {
+        console.error('无法获取座位数据');
+        return;
     }
 
     console.log(`从main.js获取到${seatsData.length}个座位数据`);
 
-    // 设置座位数据和状态
-    GLOBAL_STATE.seatsArray = seatsData;
+    // 设置状态
     GLOBAL_STATE.isInitialized = true;
     GLOBAL_STATE.currentLayout = layoutType;
 
@@ -562,7 +563,7 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
         drawCinema();
     });
 
-    return GLOBAL_STATE.seatsArray;
+    return seatsData;
 }
 
 /**
@@ -580,30 +581,7 @@ function refreshCinemaDisplay(layoutType) {
         GLOBAL_STATE.currentLayout = layoutType;
     }
 
-    // 刷新座位数据
-    if (window.CinemaData) {
-        const config = window.CinemaData.getCurrentConfig();
-        const seatsData = [];
-
-        // 遍历所有座位并获取实际数据
-        for (let row = 1; row <= config.TOTAL_ROWS; row++) {
-            for (let col = 1; col <= config.SEATS_PER_ROW; col++) {
-                const seat = window.CinemaData.getSeat(row, col);
-                if (seat) {
-                    seatsData.push({
-                        row: seat.row,
-                        col: seat.col,
-                        status: seat.status,
-                        id: seat.id
-                    });
-                }
-            }
-        }
-
-        GLOBAL_STATE.seatsArray = seatsData;
-    }
-
-    // 重绘Canvas
+    // 重绘Canvas（座位数据将直接从main.js获取）
     drawCinema();
 }
 
