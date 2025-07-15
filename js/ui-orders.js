@@ -457,7 +457,7 @@ function showMyOrderDetail(order) {
     modal.style.display = 'flex';
 
     // 防止页面滚动
-    document.body.style.overflow = 'hidden';
+    // document.body.style.overflow = 'hidden';
 
     // 确保模态框聚焦（便于键盘操作）
     modal.focus();
