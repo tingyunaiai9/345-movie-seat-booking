@@ -36,6 +36,12 @@ function bindMyOrdersEvents() {
         myOrdersBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            
+            // 隐藏导航栏
+            if (window.UIViewController && window.UIViewController.hideNavigationSteps) {
+                window.UIViewController.hideNavigationSteps();
+            }
+            
             showMyOrdersPage();
         });
     }
@@ -46,6 +52,12 @@ function bindMyOrdersEvents() {
         closeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            
+            // 显示导航栏
+            if (window.UIViewController && window.UIViewController.showNavigationSteps) {
+                window.UIViewController.showNavigationSteps();
+            }
+            
             hideMyOrdersPage();
         });
     }
