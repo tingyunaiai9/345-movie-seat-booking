@@ -529,11 +529,11 @@ function reserveTickets(seats, customerInfo) {
     if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
     if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
-    const expiresAt = new Date(currentCinemaConfig.movieStartTime.getTime() - currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
+    // 修改预订过期时间计算：设置为当前时间的30分钟后
+    const expiresAt = new Date(Date.now() + currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
     console.log('电影开始时间:', currentCinemaConfig.movieStartTime);
     console.log('预订过期时间:', expiresAt);
-    if (new Date() > expiresAt) return { success: false, message: `已超过预订时间，请直接购票。` };
-
+    
     // 获取电影信息
     let movieInfo = null;
     if (currentCinemaConfig.movieId && window.UIMovieSelector && window.UIMovieSelector.getMovieInfo) {
