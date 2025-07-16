@@ -33,6 +33,14 @@ const SEAT_STATUS = {
     SELECTED: 'selected',   // 已选中 (UI临时状态，由数据层管理)
 };
 
+const ORDER_STATUS = {
+    SOLD: 'sold',
+    RESERVED: 'reserved',
+    EXPIRED: 'expired',
+    CANCELLED: 'cancelled',
+    REFUNDED: 'refunded'
+};
+
 // ========================= 数据结构定义 =========================
 
 /**
@@ -488,8 +496,8 @@ function checkAndReleaseExpiredReservations() {
     const now = new Date();
     const releasedSeatIds = [];
     ticketRecords.forEach(ticket => {
-        if (ticket.status === SEAT_STATUS.RESERVED && ticket.expiresAt && now > ticket.expiresAt) {
-            ticket.status = 'expired';
+        if (ticket.status === ORDER_STATUS.RESERVED && ticket.expiresAt && now > ticket.expiresAt) {
+            ticket.status = ORDER_STATUS.EXPIRED;
             ticket.seats.forEach(seatId => {
                 const [_, row, col] = seatId.split('-');
                 if (validateSeatParams(row, col)) {
@@ -526,13 +534,20 @@ function reserveTickets(seats, customerInfo) {
     console.log('预订过期时间:', expiresAt);
     if (new Date() > expiresAt) return { success: false, message: `已超过预订时间，请直接购票。` };
 
+    // 获取电影信息
+    let movieInfo = null;
+    if (currentCinemaConfig.movieId && window.UIMovieSelector && window.UIMovieSelector.getMovieInfo) {
+        movieInfo = window.UIMovieSelector.getMovieInfo(currentCinemaConfig.movieId);
+    }
+
     const ticketId = `r-${Date.now()}`;
     // 使用标准化后的 fullSeatObjects 来创建票据
     ticketRecords.push({
         ticketId,
-        status: SEAT_STATUS.RESERVED,
+        status: ORDER_STATUS.RESERVED,
         seats: fullSeatObjects.map(s => s.id),
         customerInfo,
+        movieInfo, // 添加电影信息
         unitPrice: customerInfo.unitPrice || 45,
         totalCost: customerInfo.totalCost || (customerInfo.unitPrice || 45) * fullSeatObjects.length,
         createdAt: new Date(),
@@ -560,12 +575,19 @@ function purchaseTickets(seats, customerInfo) {
     if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
     if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
+    // 获取电影信息
+    let movieInfo = null;
+    if (currentCinemaConfig.movieId && window.UIMovieSelector && window.UIMovieSelector.getMovieInfo) {
+        movieInfo = window.UIMovieSelector.getMovieInfo(currentCinemaConfig.movieId);
+    }
+
     const ticketId = `s-${Date.now()}`;
     ticketRecords.push({
         ticketId,
-        status: SEAT_STATUS.SOLD,
+        status: ORDER_STATUS.SOLD,
         seats: fullSeatObjects.map(s => s.id),
         customerInfo,
+        movieInfo, // 添加电影信息
         createdAt: new Date(),
         paidAt: new Date(),
         unitPrice: customerInfo.unitPrice || 45,
@@ -586,13 +608,13 @@ function purchaseTickets(seats, customerInfo) {
 function payForReservation(reservationId) {
     const ticket = ticketRecords.find(t => t.ticketId === reservationId);
     if (!ticket) return { success: false, message: '未找到该预订记录。' };
-    if (ticket.status !== SEAT_STATUS.RESERVED) return { success: false, message: `该票据状态为[${ticket.status}]，无法支付。` };
+    if (ticket.status !== ORDER_STATUS.RESERVED) return { success: false, message: `该票据状态为[${ticket.status}]，无法支付。` };
     if (new Date() > ticket.expiresAt) {
         checkAndReleaseExpiredReservations();
         return { success: false, message: '该预订已过期。' };
     }
 
-    ticket.status = SEAT_STATUS.SOLD;
+    ticket.status = ORDER_STATUS.SOLD;
     ticket.paidAt = new Date();
     delete ticket.expiresAt;
 
@@ -614,9 +636,9 @@ function payForReservation(reservationId) {
 function cancelReservation(reservationId) {
     const ticket = ticketRecords.find(t => t.ticketId === reservationId);
     if (!ticket) return { success: false, message: '未找到对应的预订记录' };
-    if (ticket.status !== SEAT_STATUS.RESERVED) return { success: false, message: `操作失败：该票据已[${ticket.status}]，无法取消预订。` };
+    if (ticket.status !== ORDER_STATUS.RESERVED) return { success: false, message: `操作失败：该票据已[${ticket.status}]，无法取消预订。` };
 
-    ticket.status = 'cancelled';
+    ticket.status = ORDER_STATUS.CANCELLED;
     ticket.seats.forEach(seatId => {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
@@ -635,10 +657,10 @@ function cancelReservation(reservationId) {
 function refundTicket(ticketId) {
     const ticket = ticketRecords.find(t => t.ticketId === ticketId);
     if (!ticket) return { success: false, message: '未找到对应的票务记录' };
-    if (ticket.status !== SEAT_STATUS.SOLD) return { success: false, message: `操作失败：该票据未付款或已取消，无法退票。` };
+    if (ticket.status !== ORDER_STATUS.SOLD) return { success: false, message: `操作失败：该票据未付款或已取消，无法退票。` };
     if (currentCinemaConfig.movieStartTime && new Date() > currentCinemaConfig.movieStartTime) return { success: false, message: '电影已开始，无法退票。' };
 
-    ticket.status = 'refunded';
+    ticket.status = ORDER_STATUS.REFUNDED;
     ticket.seats.forEach(seatId => {
         const [_, row, col] = seatId.split('-');
         if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
