@@ -75,23 +75,15 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
             currentCinemaConfig.movieStartTime = movieTime;
         }
     } else {
-        // 如果没有传入时间，根据电影ID设置默认时间
-        const movieTimeMapping = {
-            'cat': '10:00',      // 罗小黑战记 - 10:00
-            'girl': '12:00',     // 蓦然回首 - 12:00
-            'love': '18:00'      // 情书 - 18:00
-        };
-        
-        if (movieId && movieTimeMapping[movieId]) {
-            // 创建明天的指定时间
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1); // 设置为明天
-            
-            const [hours, minutes] = movieTimeMapping[movieId].split(':');
-            tomorrow.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-            
-            currentCinemaConfig.movieStartTime = tomorrow;
-            console.log(`为电影 ${movieId} 设定默认放映时间: ${tomorrow.toLocaleString()}`);
+        // 如果没有传入时间，尝试从UI模块获取默认时间
+        if (movieId && window.UIMovieSelector && window.UIMovieSelector.getMovieShowTime) {
+            const defaultTime = window.UIMovieSelector.getMovieShowTime(movieId);
+            if (defaultTime) {
+                currentCinemaConfig.movieStartTime = defaultTime;
+                console.log(`为电影 ${movieId} 设定默认放映时间: ${defaultTime.toLocaleString()}`);
+            } else {
+                currentCinemaConfig.movieStartTime = null;
+            }
         } else {
             currentCinemaConfig.movieStartTime = null;
         }
@@ -721,33 +713,6 @@ function getCurrentConfig() {
     return { ...currentCinemaConfig };
 }
 
-/**
- * 获取指定电影的放映时间
- * @param {string} movieId - 电影ID
- * @returns {Date|null} 电影放映时间
- */
-function getMovieShowTime(movieId) {
-    const movieTimeMapping = {
-        'cat': '10:00',      // 罗小黑战记 - 10:00
-        'girl': '12:00',     // 蓦然回首 - 12:00
-        'love': '18:00'      // 情书 - 18:00
-    };
-
-    if (movieId && movieTimeMapping[movieId]) {
-        // 创建明天的指定时间
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1); // 设置为明天
-
-        const [hours, minutes] = movieTimeMapping[movieId].split(':');
-        tomorrow.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-
-        return tomorrow;
-    }
-
-    return null;
-}
-
-
 // ========================= 数据验证函数 =========================
 
 /**
@@ -796,7 +761,7 @@ function getOrderById(orderId) {
 
 // ========================= 模块导出 =========================
 
-// 在模块导出中添加新函数
+// 在模块导出中移除 getMovieShowTime 函数
 window.CinemaData = {
     // 初始化函数
     initializeCinemaSeats,
@@ -820,7 +785,6 @@ window.CinemaData = {
     setSeat,
     getCinemaStatus,
     getCurrentConfig,
-    getMovieShowTime, 
 
     // 工具函数
     getAgeGroup,

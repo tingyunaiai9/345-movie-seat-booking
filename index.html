@@ -422,23 +422,27 @@
                                     <input type="radio" name="payment-method" value="Genshin" checked>
                                     <img src="img/2.png" alt="原石支付" class="payment-icon-img">
                                     <span>原石支付</span>
+                                    <span class="payment-help-icon" title="你说的对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「提瓦特」的幻想世界，在这里，被神选中的人将被授予「神之眼」，导引元素之力。你将扮演一位名为「旅行者」的神秘角色，在自由的旅行中邂逅性格各异、能力独特的同伴们，和他们一起击败强敌，找回失散的亲人。">?</span>
                                 </label>
                                 <label class="payment-option">
                                     <input type="radio" name="payment-method" value="Deltaforce">
                                     <img src="img/3.png" alt="哈夫币支付" class="payment-icon-img">
                                     <span>哈夫币支付</span>
+                                    <span class="payment-help-icon" title="你说的对，但是《三角洲行动》是由腾讯旗下琳琅天上工作室自主研发的一款全新战术射击游戏。游戏发生在2035年的阿萨拉与哈夫克冲突地带。你将扮演「全球应急组织」GTI 中的一位「特战干员」，在动态的任务中协同风格迥异、技能独特的队友们，和他们一起突破防线，揭开战争背后的阴谋。">?</span>
                                 </label>
                                 <label class="payment-option">
                                     <input type="radio" name="payment-method" value="Arknights">
                                     <img src="img/4.png" alt="源石支付" class="payment-icon-img">
                                     <span>源石支付</span>
+                                    <span class="payment-help-icon" title="你说的对，但是《明日方舟》是由鹰角网络自主研发的一款全新策略塔防游戏。游戏发生在一个被称作「泰拉」的末世大陆，在这里，感染矿石病的人们将面临「源石技艺」的抉择，操控生死与秩序。你将扮演一位「博士」，在纷争的废墟中结识立场各异、天赋卓绝的干员们，和他们一起对抗天灾，寻找治愈世界的希望。">?</span>
                                 </label>
                                 <label class="payment-option">
                                     <input type="radio" name="payment-method" value="IdentityV">
                                     <img src="img/5.png" alt="回声支付" class="payment-icon-img">
                                     <span>回声支付</span>
+                                    <span class="payment-help-icon" title="你说的对，但是《第五人格》是由网易游戏自主研发的一款全新非对称对抗游戏。游戏发生在一个被称作「欧利蒂丝庄园」的诡谲谜局中，在这里，被卷入游戏的参与者将陷入「追逃博弈」，体验心跳与智谋的较量。你将扮演一位名为「侦探」的关键角色，在迷雾重重的对局中邂逅身份成谜、技能迥异的求生者与监管者，和他们一起揭开真相，逃离这场疯狂的游戏。">?</span>
                                 </label>
-
+                            </div>
                             </div>
                         </div>
 
@@ -558,7 +562,7 @@
                         </div>
                     </div>
 
-                    <!-- 订单列表 -->
+                    <!-- 在订单列表容器后添加订单项模板 -->
                     <div class="orders-container">
                         <div class="orders-list" id="orders-list">
                             <!-- 订单项将通过 JavaScript 动态生成 -->
@@ -569,6 +573,67 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- 添加订单项模板 -->
+                    <template id="order-item-template">
+                        <div class="order-item" data-order-id="">
+                            <div class="order-card">
+                                <!-- 左侧：电影海报和基本信息 -->
+                                <div class="order-left">
+                                    <div class="movie-poster-container">
+                                        <img class="movie-poster" src="" alt="" onerror="this.src='img/poster_cat.jpg'">
+                                        <div class="order-status-badge">
+                                            <span class="status-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <!-- 中间：主要信息区域 -->
+                                <div class="order-center">
+                                    <!-- 电影标题区 - 突出显示 -->
+                                    <div class="movie-title-section">
+                                        <h3 class="movie-title">
+                                            <span class="title-text"></span>
+                                            <span class="latest-badge" style="display: none;">最新</span>
+                                        </h3>
+                                        <div class="movie-subtitle">
+                                            <span class="showtime">🎬 <span class="showtime-text"></span></span>
+                                            <span class="seats">🎫 <span class="seats-text"></span></span>
+                                        </div>
+                                    </div>
+                    
+                                    <!-- 时间信息区 -->
+                                    <div class="time-section">
+                                        <div class="order-time">
+                                            <span class="time-label">下单时间:</span>
+                                            <span class="time-value created-time"></span>
+                                        </div>
+                                        <div class="additional-time" style="display: none;">
+                                            <span class="time-label additional-time-label"></span>
+                                            <span class="time-value additional-time-value"></span>
+                                        </div>
+                                    </div>
+                    
+                                    <!-- 订单号信息 -->
+                                    <div class="order-meta">
+                                        <span class="order-id">订单号: <span class="order-id-text"></span></span>
+                                    </div>
+                                </div>
+                    
+                                <!-- 右侧：价格和操作 -->
+                                <div class="order-right">
+                                    <div class="price-section">
+                                        <div class="total-price"></div>
+                                        <div class="price-breakdown"></div>
+                                    </div>
+                                    <div class="action-hint">
+                                        <span class="click-text">点击查看详情</span>
+                                        <span class="arrow">→</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
 
                     <!-- 订单详情模态框 -->
                     <div class="order-detail-modal" id="order-detail-modal" style="display: none;">

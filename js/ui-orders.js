@@ -3,12 +3,142 @@
  * 负责我的订单功能：订单CRUD操作、状态管理、订单详情等
  */
 
-// ========================= 订单管理状态 =========================
+// ========================= 全局常量和配置 =========================
+
+// 订单状态文本映射
+const statusText = {
+    'reserved': '已预约',
+    'sold': '已支付',
+    'paid': '已支付',
+    'cancelled': '已取消',
+    'expired': '已过期',
+    'refunded': '已退款'
+};
+
+// 预约过期时间常量（分钟）
+const RESERVATION_EXPIRE_MINUTES = 30;
+
+// 电影信息映射
+const MOVIE_MAPPING = {
+    'cat': {
+        id: 'cat',
+        title: '罗小黑战记',
+        image: 'img/poster_cat.jpg',
+        defaultTime: '2025-07-16 19:30'
+    },
+    'girl': {
+        id: 'girl',
+        title: '蓦然回首',
+        image: 'img/poster_girl.jpg',
+        defaultTime: '2025-07-16 21:00'
+    },
+    'love': {
+        id: 'love',
+        title: '情书',
+        image: 'img/poster_love.jpg',
+        defaultTime: '2025-07-16 20:15'
+    }
+};
+
+// 订单筛选类型
+const ORDER_FILTER_TYPES = {
+    ALL: 'all',
+    RESERVED: 'reserved',
+    PAID: 'paid',
+    EXPIRED: 'expired',
+    CANCELLED: 'cancelled',
+    REFUNDED: 'refunded'
+};
+
+// 订单管理状态
 const MyOrdersState = {
     orders: [],
-    currentFilter: 'all',
+    currentFilter: ORDER_FILTER_TYPES.ALL,
     searchKeyword: ''
 };
+
+// ========================= 工具函数 =========================
+
+/**
+ * 获取电影信息
+ * @param {string} movieId - 电影ID
+ * @returns {Object} - 电影信息对象
+ */
+function getMovieInfo(movieId) {
+    return MOVIE_MAPPING[movieId] || {
+        id: movieId,
+        title: '未知电影',
+        image: 'img/poster_cat.jpg',
+        defaultTime: '时间待定'
+    };
+}
+
+// ========================= 订单状态检查和更新 =========================
+
+/**
+ * 检查并更新订单状态
+ * @param {Object} order - 订单对象
+ * @returns {Object} - 更新后的订单对象
+ */
+function checkAndUpdateOrderStatus(order) {
+    const now = new Date();
+    let shouldUpdate = false;
+    
+    // 检查预约订单是否过期
+    if (order.status === 'reserved') {
+        let expiryTime;
+        
+        if (order.expiresAt) {
+            expiryTime = new Date(order.expiresAt);
+        } else if (order.createdAt) {
+            // 直接计算预约过期时间
+            const createdTime = new Date(order.createdAt);
+            expiryTime = new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
+            order.expiresAt = expiryTime.toISOString();
+        }
+        
+        if (expiryTime && now > expiryTime) {
+            order.status = 'expired';
+            shouldUpdate = true;
+        }
+    }
+    
+    // 检查已支付订单的电影时间是否已过
+    if (order.status === 'sold' || order.status === 'paid') {
+        const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
+        if (selectedMovieInfo) {
+            try {
+                const movieInfo = JSON.parse(selectedMovieInfo);
+                if (movieInfo.time) {
+                    // 解析电影时间
+                    const movieTime = new Date(movieInfo.time);
+                    if (!isNaN(movieTime.getTime()) && now > movieTime) {
+                        order.status = 'expired';
+                        shouldUpdate = true;
+                    }
+                }
+            } catch (e) {
+                console.warn('解析电影时间信息失败:', e);
+            }
+        }
+    }
+    
+    // 如果状态发生变化，更新到数据存储
+    if (shouldUpdate && window.CinemaData && window.CinemaData.updateOrderStatus) {
+        window.CinemaData.updateOrderStatus(order.ticketId, order.status);
+    }
+    
+    return order;
+}
+
+/**
+ * 批量检查和更新所有订单状态
+ */
+function checkAllOrdersStatus() {
+    if (MyOrdersState.orders.length > 0) {
+        MyOrdersState.orders = MyOrdersState.orders.map(order => checkAndUpdateOrderStatus(order));
+    }
+}
 
 // ========================= 订单页面管理 =========================
 
@@ -23,6 +153,10 @@ function initializeMyOrdersFeature() {
 
     // 从 main.js 统一加载订单数据
     loadMyOrdersFromMain();
+    
+    // 检查并更新订单状态
+    checkAllOrdersStatus();
+    
     renderMyOrdersList();
 }
 
@@ -215,20 +349,29 @@ function loadMyOrdersFromMain() {
  */
 function renderMyOrdersList() {
     loadMyOrdersFromMain();
+    
+    // 检查并更新所有订单状态
+    checkAllOrdersStatus();
+    
     const ordersList = document.getElementById('orders-list');
     const noOrders = document.getElementById('no-orders');
 
     if (!ordersList) return;
 
+    console.log('渲染我的订单列表', MyOrdersState.orders);
+    
     // 筛选订单
     let filteredOrders = MyOrdersState.orders;
 
     // 按状态筛选
-    if (MyOrdersState.currentFilter !== 'all') {
+    if (MyOrdersState.currentFilter !== ORDER_FILTER_TYPES.ALL) {
         filteredOrders = filteredOrders.filter(order => {
             switch (MyOrdersState.currentFilter) {
-                case 'reserved': return order.status === 'reserved';
-                case 'paid': return order.status === 'sold' || order.status === 'paid';
+                case ORDER_FILTER_TYPES.RESERVED: return order.status === 'reserved';
+                case ORDER_FILTER_TYPES.PAID: return order.status === 'sold' || order.status === 'paid';
+                case ORDER_FILTER_TYPES.EXPIRED: return order.status === 'expired';
+                case ORDER_FILTER_TYPES.CANCELLED: return order.status === 'cancelled';
+                case ORDER_FILTER_TYPES.REFUNDED: return order.status === 'refunded';
                 default: return true;
             }
         });
@@ -269,7 +412,7 @@ function renderMyOrdersList() {
 }
 
 /**
- * 座位ID转换为“排座”格式
+ * 座位ID转换为"排座"格式
  */
 function seatIdToText(seatId) {
     // seatId 格式为 'seat-8-12'
@@ -297,56 +440,42 @@ function formatDate(date) {
  * 创建订单项元素
  */
 function createMyOrderItem(order, isLatest = false) {
-    // order 即 ticket 对象
-    const orderItem = document.createElement('div');
+    // 检查并更新订单状态
+    order = checkAndUpdateOrderStatus(order);
+    
+    // 获取模板
+    const template = document.getElementById('order-item-template');
+    if (!template) {
+        console.error('订单项模板未找到');
+        return document.createElement('div');
+    }
+    
+    // 克隆模板内容
+    const orderItem = template.content.cloneNode(true).querySelector('.order-item');
+    
+    // 设置基本属性
     orderItem.className = `order-item ${order.status}${isLatest ? ' latest-order' : ''}`;
     orderItem.dataset.orderId = order.ticketId;
-
-    const statusText = {
-        'reserved': '已预约',
-        'sold': '已支付',
-        'cancelled': '已取消',
-        'expired': '已过期',
-        'refunded': '已退款'
-    };
 
     // 获取电影信息
     const selectedMovieId = localStorage.getItem('selectedMovie');
     const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
-    let movieTitle = '未知电影';
-    let movieTime = '时间待定';
-    let movieImage = 'img/poster_cat.jpg'; // 默认海报
     
-    // 电影名称和海报映射
-    const movieMapping = {
-        'cat': {
-            title: '罗小黑战记',
-            image: 'img/poster_cat.jpg'
-        },
-        'girl': {
-            title: '蓦然回首',
-            image: 'img/poster_girl.jpg'
-        },
-        'love': {
-            title: '情书',
-            image: 'img/poster_love.jpg'
-        }
-    };
+    // 使用常量获取电影信息
+    const movieInfo = getMovieInfo(selectedMovieId);
+    let movieTitle = movieInfo.title;
+    let movieTime = movieInfo.defaultTime;
+    let movieImage = movieInfo.image;
     
-    if (selectedMovieId && movieMapping[selectedMovieId]) {
-        movieTitle = movieMapping[selectedMovieId].title;
-        movieImage = movieMapping[selectedMovieId].image;
-    }
-    
+    // 如果有存储的电影信息，则使用存储的信息
     if (selectedMovieInfo) {
         try {
-            const movieInfo = JSON.parse(selectedMovieInfo);
-            if (movieInfo.time) {
-                movieTime = movieInfo.time;
+            const storedMovieInfo = JSON.parse(selectedMovieInfo);
+            if (storedMovieInfo.time) {
+                movieTime = storedMovieInfo.time;
             }
-            // 如果存储的信息中有图片路径，使用存储的图片
-            if (movieInfo.image) {
-                movieImage = movieInfo.image;
+            if (storedMovieInfo.image) {
+                movieImage = storedMovieInfo.image;
             }
         } catch (e) {
             console.warn('解析电影信息失败:', e);
@@ -359,105 +488,94 @@ function createMyOrderItem(order, isLatest = false) {
     // 计算时间相关信息
     let timeInfo = '';
     let statusBadgeClass = '';
+    let timeLabel = '';
+    
     if (order.status === 'reserved') {
         let expiryTime;
         
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
+            // 直接计算预约过期时间
             const createdTime = new Date(order.createdAt);
-            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
+            expiryTime = new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
             order.expiresAt = expiryTime.toISOString();
         }
         
         if (expiryTime) {
+            // 直接计算剩余时间（分钟）
             const now = new Date();
             const timeLeft = expiryTime - now;
+            const remainingMinutes = Math.floor(timeLeft / (60 * 1000));
 
-            if (timeLeft > 0) {
-                const minutes = Math.floor(timeLeft / (1000 * 60));
-                timeInfo = `过期时间: ${formatDate(expiryTime)} <span class="time-warning">(还剩 ${minutes} 分钟)</span>`;
+            if (remainingMinutes > 0) {
+                timeInfo = `${formatDate(expiryTime)} <span class="time-warning">(还剩 ${remainingMinutes} 分钟)</span>`;
                 statusBadgeClass = 'urgent';
+                timeLabel = '过期时间:';
             } else {
-                timeInfo = `已过期: ${formatDate(expiryTime)}`;
+                timeInfo = `${formatDate(expiryTime)}`;
                 statusBadgeClass = 'expired';
+                timeLabel = '过期时间:';
             }
         }
+    } else if (order.status === 'expired') {
+        timeInfo = `已过期`;
+        statusBadgeClass = 'expired';
+        timeLabel = '状态:';
     } else if (order.paidAt) {
-        timeInfo = `支付时间: ${formatDate(order.paidAt)}`;
+        timeInfo = `${formatDate(order.paidAt)}`;
         statusBadgeClass = 'paid';
+        timeLabel = '支付时间:';
     }
 
-    // 客户信息
-    const customer = order.customerInfo || {};
-    // 价格
+    // 价格计算
     const unitPrice = order.unitPrice || 45;
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
     const totalPrice = order.totalPrice || (seatCount * unitPrice);
 
-    // 在createMyOrderItem函数中添加调试
-    console.log('isLatest:', isLatest);    
-    // 最新订单标识
-    const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
-    console.log('生成的latestBadge:', latestBadge);
-
-    orderItem.innerHTML = `
-        <div class="order-card">
-            <!-- 左侧：电影海报和基本信息 -->
-            <div class="order-left">
-                <div class="movie-poster-container">
-                    <img src="${movieImage}" alt="${movieTitle}" onerror="this.src='img/poster_cat.jpg'" class="movie-poster">
-                    <div class="order-status-badge ${order.status} ${statusBadgeClass}">
-                        ${statusText[order.status] || order.status}
-                    </div>
-                </div>
-            </div>
-
-            <!-- 中间：主要信息区域 -->
-            <div class="order-center">
-                <!-- 电影标题区 - 突出显示 -->
-                <div class="movie-title-section">
-                    <h3 class="movie-title">${movieTitle} ${latestBadge}</h3>
-                    <div class="movie-subtitle">
-                        <span class="showtime">🎬 ${movieTime}</span>
-                        <span class="seats">🎫 ${seatsText}</span>
-                    </div>
-                </div>
-
-                <!-- 时间信息区 -->
-                <div class="time-section">
-                    <div class="order-time">
-                        <span class="time-label">下单时间:</span>
-                        <span class="time-value">${formatDate(order.createdAt)}</span>
-                    </div>
-                    ${timeInfo ? `
-                    <div class="additional-time">
-                        <span class="time-label">${order.status === 'reserved' ? '过期信息:' : '支付信息:'}</span>
-                        <span class="time-value">${timeInfo}</span>
-                    </div>` : ''}
-                </div>
-
-                <!-- 订单号信息 -->
-                <div class="order-meta">
-                    <span class="order-id">订单号: ${order.ticketId}</span>
-                </div>
-            </div>
-
-            <!-- 右侧：价格和操作 -->
-            <div class="order-right">
-                <div class="price-section">
-                    <div class="total-price">¥${totalPrice}</div>
-                    <div class="price-breakdown">
-                        ${seatCount} 张票 × ¥${unitPrice}
-                    </div>
-                </div>
-                <div class="action-hint">
-                    <span class="click-text">点击查看详情</span>
-                    <span class="arrow">→</span>
-                </div>
-            </div>
-        </div>
-    `;
+    // 填充模板数据
+    // 电影海报和标题
+    const moviePoster = orderItem.querySelector('.movie-poster');
+    moviePoster.src = movieImage;
+    moviePoster.alt = movieTitle;
+    
+    // 状态徽章
+    const statusBadge = orderItem.querySelector('.order-status-badge');
+    statusBadge.className = `order-status-badge ${order.status} ${statusBadgeClass}`;
+    orderItem.querySelector('.status-text').textContent = statusText[order.status] || order.status;
+    
+    // 电影标题和最新标识
+    orderItem.querySelector('.title-text').textContent = movieTitle;
+    const latestBadge = orderItem.querySelector('.latest-badge');
+    if (isLatest) {
+        latestBadge.style.display = 'inline';
+    } else {
+        latestBadge.style.display = 'none';
+    }
+    
+    // 电影时间和座位
+    orderItem.querySelector('.showtime-text').textContent = movieTime;
+    orderItem.querySelector('.seats-text').textContent = seatsText;
+    
+    // 下单时间
+    orderItem.querySelector('.created-time').textContent = formatDate(order.createdAt);
+    
+    // 附加时间信息
+    const additionalTime = orderItem.querySelector('.additional-time');
+    if (timeInfo) {
+        additionalTime.style.display = 'block';
+        orderItem.querySelector('.additional-time-label').textContent = timeLabel;
+        orderItem.querySelector('.additional-time-value').innerHTML = timeInfo;
+    } else {
+        additionalTime.style.display = 'none';
+    }
+    
+    // 订单号
+    orderItem.querySelector('.order-id-text').textContent = order.ticketId;
+    
+    // 价格信息
+    orderItem.querySelector('.total-price').textContent = `¥${totalPrice}`;
+    orderItem.querySelector('.price-breakdown').textContent = `${seatCount} 张票 × ¥${unitPrice}`;
 
     // 添加点击事件
     orderItem.addEventListener('click', (e) => {
@@ -473,41 +591,28 @@ function createMyOrderItem(order, isLatest = false) {
  * 显示订单详情
  */
 function showMyOrderDetail(order) {
+    // 检查并更新订单状态
+    order = checkAndUpdateOrderStatus(order);
+    
     const modal = document.getElementById('order-detail-modal');
     if (!modal) return;
 
     modal.dataset.currentOrderId = order.ticketId;
 
-    const statusText = {
-        'reserved': '已预约',
-        'sold': '已支付',
-        'cancelled': '已取消',
-        'expired': '已过期',
-        'refunded': '已退款'
-    };
-
     // 获取电影信息
     const selectedMovieId = localStorage.getItem('selectedMovie');
     const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
-    let movieTitle = '未知电影';
-    let movieTime = '时间待定';
     
-    // 电影名称映射
-    const movieTitleMapping = {
-        'cat': '罗小黑战记',
-        'girl': '蓦然回首', 
-        'love': '情书'
-    };
-    
-    if (selectedMovieId && movieTitleMapping[selectedMovieId]) {
-        movieTitle = movieTitleMapping[selectedMovieId];
-    }
+    // 使用常量获取电影信息
+    const movieInfo = getMovieInfo(selectedMovieId);
+    let movieTitle = movieInfo.title;
+    let movieTime = movieInfo.defaultTime;
     
     if (selectedMovieInfo) {
         try {
-            const movieInfo = JSON.parse(selectedMovieInfo);
-            if (movieInfo.time) {
-                movieTime = movieInfo.time;
+            const storedMovieInfo = JSON.parse(selectedMovieInfo);
+            if (storedMovieInfo.time) {
+                movieTime = storedMovieInfo.time;
             }
         } catch (e) {
             console.warn('解析电影信息失败:', e);
@@ -538,7 +643,7 @@ function showMyOrderDetail(order) {
     // 支付时间（仅在已支付时显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
     const paidTime = document.getElementById('detail-paid-time');
-    if (order.paidAt) {
+    if (order.paidAt && (order.status === 'sold' || order.status === 'paid')) {
         paidTimeLabel.style.display = 'inline';
         paidTime.style.display = 'inline';
         paidTime.textContent = formatDate(order.paidAt);
@@ -554,14 +659,11 @@ function showMyOrderDetail(order) {
         let expiryTime;
         
         if (order.expiresAt) {
-            // 如果已有过期时间，使用现有的
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            // 如果没有过期时间但有创建时间，设置为创建时间后30分钟
+            // 直接计算预约过期时间
             const createdTime = new Date(order.createdAt);
-            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
-            
-            // 更新订单对象的过期时间
+            expiryTime = new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
             order.expiresAt = expiryTime.toISOString();
         }
         
@@ -590,7 +692,7 @@ function showMyOrderDetail(order) {
 
     // 更新费用明细
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const unitPrice = order.unitPrice || 45; // 默认票价
+    const unitPrice = order.unitPrice || 45;
     const totalPrice = seatCount * unitPrice;
     document.getElementById('detail-ticket-price').textContent = `¥${unitPrice} × ${seatCount}`;
     document.getElementById('detail-total-price').textContent = `¥${totalPrice}`;
@@ -612,6 +714,7 @@ function showMyOrderDetail(order) {
     } else if (order.status === 'paid' || order.status === 'sold') {
         if (refundBtn) refundBtn.style.display = 'inline-block';
     }
+    // 已过期订单不显示任何操作按钮
 
     // 根据订单状态添加模态框类名（用于CSS样式）
     modal.className = `order-detail-modal ${order.status}`;
@@ -730,7 +833,15 @@ if (typeof window !== 'undefined') {
         handleMyRefundOrder,
 
         // 状态访问
-        getMyOrdersState: () => MyOrdersState
+        getMyOrdersState: () => MyOrdersState,
+        
+        // 常量访问
+        getConstants: () => ({
+            RESERVATION_EXPIRE_MINUTES,
+            MOVIE_MAPPING,
+            ORDER_FILTER_TYPES,
+            statusText
+        })
     };
 }
 
