@@ -489,6 +489,27 @@ function bindPaymentMethodEvents() {
 }
 
 /**
+ * 清除所有支付方式的高亮状态
+ */
+function clearPaymentMethodHighlight() {
+    const paymentOptions = document.querySelectorAll('.payment-option');
+
+    paymentOptions.forEach(option => {
+        option.classList.remove('active');
+        const radioInput = option.querySelector('input[type="radio"]');
+        if (radioInput) {
+            radioInput.checked = false;
+        }
+    });
+
+    // 清除localStorage中的支付方式
+    localStorage.removeItem('selectedPaymentMethod');
+
+    // 更新支付方式显示为默认状态
+    updatePaymentMethod('');
+}
+
+/**
  * 显示支付方式详细图片
  * @param {string} paymentType - 支付方式类型
  */
@@ -734,6 +755,7 @@ if (typeof window !== 'undefined') {
         bindPaymentMethodEvents,
         showPaymentMethodImage,
         initializePaymentView,
+        clearPaymentMethodHighlight,
 
         // 图片处理工具
         checkImageCompatibility,

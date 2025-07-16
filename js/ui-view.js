@@ -649,39 +649,42 @@ function initializeCinemaConfigSelector() {
 
     // 监听预设选项变化
     presetRadios.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            console.log(`预设选项变化: ${e.target.value}`);
-            if (e.target.checked) {
-                const selectedPreset = e.target.value;
-                viewState.cinemaConfigSelected = true;
+        if (!radio._cinemaPresetBound) {
+            radio.addEventListener('change', (e) => {
+                console.log(`预设选项变化: ${e.target.value}`);
+                if (e.target.checked) {
+                    const selectedPreset = e.target.value;
+                    viewState.cinemaConfigSelected = true;
 
-                if (selectedPreset === 'custom') {
-                    console.log('选择了自定义配置');
-                    // 显示自定义配置
-                    if (customConfig) {
-                        customConfig.style.display = 'block';
-                    }
-                    // 检查自定义配置是否有效
-                    validateCustomConfig();
-                } else {
-                    console.log(`选择了预设配置: ${selectedPreset}`);
-                    // 隐藏自定义配置
-                    if (customConfig) {
-                        customConfig.style.display = 'none';
+                    if (selectedPreset === 'custom') {
+                        console.log('选择了自定义配置');
+                        // 显示自定义配置
+                        if (customConfig) {
+                            customConfig.style.display = 'block';
+                        }
+                        // 检查自定义配置是否有效
+                        validateCustomConfig();
+                    } else {
+                        console.log(`选择了预设配置: ${selectedPreset}`);
+                        // 隐藏自定义配置
+                        if (customConfig) {
+                            customConfig.style.display = 'none';
+                        }
+
+                        // 应用预设配置
+                        const config = VIEW_CONFIG.PRESET_CONFIGS[selectedPreset];
+                        if (config) {
+                            console.log(`应用预设配置: ${JSON.stringify(config)}`);
+                            viewState.selectedCinemaSize = config;
+                        }
                     }
 
-                    // 应用预设配置
-                    const config = VIEW_CONFIG.PRESET_CONFIGS[selectedPreset];
-                    if (config) {
-                        console.log(`应用预设配置: ${JSON.stringify(config)}`);
-                        viewState.selectedCinemaSize = config;
-                    }
+                    // 更新按钮状态
+                    updateConfigNextButton();
                 }
-
-                // 更新按钮状态
-                updateConfigNextButton();
-            }
-        });
+            });
+            radio._cinemaPresetBound = true; // 标记已绑定
+        }
     });
 
     // 监听自定义配置变化
@@ -942,30 +945,60 @@ function resetToStart() {
     viewState.cinemaConfigSelected = false;
     viewState.configSelectorInitialized = false;
 
-    console.log('viewState 已重置:', viewState);
+    // 先清除当前的电影背景
+    document.body.style.background = '';
+    document.body.style.backgroundImage = '';
+    document.body.style.backgroundSize = '';
+    document.body.className = document.body.className.replace(/movie-\w+/g, '');
 
-    // 重置背景为田野背景
-    if (window.movieSelector) {
-        window.movieSelector.restoreConfigBackground();
+    // 重新设置为田野背景
+    document.body.style.background = "url('./img/background-field.png') no-repeat center center fixed";
+    document.body.style.backgroundSize = 'cover';
+
+    console.log('已重置背景为田野背景');
+
+    // 如果存在 movieSelector 模块，也调用其恢复背景方法
+    if (window.UIMovieSelector && typeof window.UIMovieSelector.restoreConfigBackground === 'function') {
+        window.UIMovieSelector.restoreConfigBackground();
     }
 
-    // 切换到配置视图
-    switchToView('config');
-
-    // 重置所有表单数据
+    // 清除电影高亮
     const allMovieItems = document.querySelectorAll('.movie-item');
     allMovieItems.forEach(item => {
         item.classList.remove('active');
     });
 
-    // 默认选中第一个电影
-    // const firstMovie = document.querySelector('.movie-item');
-    // if (firstMovie) {
-    //     firstMovie.classList.add('active');
-    //     if (window.movieSelector) {
-    //         window.movieSelector.selectMovie(firstMovie);
-    //     }
-    // }
+    const allPresetRadios = document.querySelectorAll('input[name="cinema-preset"]');
+    allPresetRadios.forEach(radio => {
+        radio.checked = false;
+    });
+
+    // 隐藏自定义配置区域
+    const customConfig = document.querySelector('.custom-config');
+    if (customConfig) {
+        customConfig.style.display = 'none';
+    }
+
+    // 重置自定义配置输入值
+    const customRowsInput = document.getElementById('custom-rows');
+    const customSeatsInput = document.getElementById('custom-seats');
+    const totalSeatsSpan = document.getElementById('total-seats');
+
+    if (customRowsInput) customRowsInput.value = '10';
+    if (customSeatsInput) customSeatsInput.value = '20';
+    if (totalSeatsSpan) totalSeatsSpan.textContent = '200';
+
+    // 切换到配置视图
+    switchToView('config');
+
+    // 清除支付方式高亮
+    if (window.UIPayment && window.UIPayment.clearPaymentMethodHighlight) {
+        window.UIPayment.clearPaymentMethodHighlight();
+        console.log('已清除支付方式高亮');
+    }
+
+    localStorage.removeItem('selectedMovie'); // 清除选中的电影
+    localStorage.removeItem('selectedMovieInfo'); // 清除选中的电影信息
 
     // 显示提示信息
     showMessage('已重置，可以开始新的订单', 'info');
