@@ -394,19 +394,47 @@ function addCountdownToOrder(orderContainer, order) {
     const orderId = order.ticketId;
     const expiresAt = new Date(order.expiresAt);
     
-    // 创建倒计时元素，使用与时间信息区相同的结构
+    // 立即计算初始倒计时值
+    const now = new Date();
+    const timeLeft = expiresAt.getTime() - now.getTime();
+    
+    let initialText = '已过期';
+    let initialClass = 'time-value countdown-time expired';
+    
+    if (timeLeft > 0) {
+        // 计算剩余时间
+        const minutes = Math.floor(timeLeft / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        initialText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // 根据剩余时间设置初始样式
+        if (timeLeft <= 5 * 60 * 1000) { // 最后5分钟
+            initialClass = 'time-value countdown-time urgent';
+        } else if (timeLeft <= 10 * 60 * 1000) { // 最后10分钟
+            initialClass = 'time-value countdown-time warning';
+        } else {
+            initialClass = 'time-value countdown-time normal';
+        }
+    }
+    
+    // 创建倒计时元素，使用与时间信息区相同的结构，并设置初始值
     const countdownElement = document.createElement('div');
     countdownElement.className = 'additional-time';
     countdownElement.style.display = 'block';
     countdownElement.innerHTML = `
         <span class="time-label countdown-label">支付剩余时间:</span>
-        <span class="time-value countdown-time" id="countdown-${orderId}">计算中...</span>
+        <span class="${initialClass}" id="countdown-${orderId}">${initialText}</span>
     `;
     
     // 将倒计时插入到时间信息区域
     const timeSection = orderContainer.querySelector('.time-section');
     if (timeSection) {
         timeSection.appendChild(countdownElement);
+    }
+    
+    // 如果已经过期，不需要设置定时器
+    if (timeLeft <= 0) {
+        return;
     }
     
     // 清除可能存在的旧定时器
@@ -460,10 +488,7 @@ function addCountdownToOrder(orderContainer, order) {
         }
     };
     
-    // 立即更新一次
-    updateCountdown();
-    
-    // 设置定时器，每秒更新
+    // 设置定时器，每秒更新（不需要立即调用 updateCountdown，因为已经设置了初始值）
     const intervalId = setInterval(updateCountdown, 1000);
     countdownIntervals.set(orderId, intervalId);
 }
@@ -574,7 +599,6 @@ function renderMyOrdersList() {
     }
 }
 
-// ...existing code...
 /**
  * 座位ID转换为"排座"格式
  */
