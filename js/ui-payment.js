@@ -502,11 +502,22 @@ function clearPaymentMethodHighlight() {
         }
     });
 
-    // 清除localStorage中的支付方式
-    localStorage.removeItem('selectedPaymentMethod');
+    // 设置原石支付为默认选中
+    paymentOptions.forEach(option => {
+        const radioInput = option.querySelector('input[type="radio"]');
+        if (radioInput && radioInput.value === 'Genshin') {
+            option.classList.add('active');
+            radioInput.checked = true;
 
-    // 更新支付方式显示为默认状态
-    updatePaymentMethod('');
+            // 存入localStorage
+            localStorage.setItem('selectedPaymentMethod', 'Genshin');
+
+            // 更新支付方式显示
+            updatePaymentMethod('Genshin');
+
+            console.log('已设置原石支付为默认选中');
+        }
+    });
 }
 
 /**
