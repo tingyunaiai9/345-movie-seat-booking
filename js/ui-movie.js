@@ -10,6 +10,31 @@ const movieBackgrounds = {
     'love': './img/background_love.webp'    // 情书 -> 爱情背景
 };
 
+// 电影信息常量
+const movieInfo = {
+    'cat': {
+        id: 'cat',
+        title: '罗小黑战记',
+        time: '时间待定',
+        price: '45',
+        image: './img/movie_cat.jpg'
+    },
+    'girl': {
+        id: 'girl',
+        title: '蓦然回首',
+        time: '时间待定',
+        price: '50',
+        image: './img/movie_girl.jpg'
+    },
+    'love': {
+        id: 'love',
+        title: '情书',
+        time: '时间待定',
+        price: '55',
+        image: './img/movie_love.jpg'
+    }
+};
+
 // ========================= 全局状态变量 =========================
 let movieSelectorState = {
     selectedMovie: null // 当前选中的电影数据
@@ -63,7 +88,7 @@ function initializeMovieSelector() {
 
 /**
  * 设置电影放映时间显示
- * 从主模块获取各电影的放映时间并更新到页面上
+ * 从本模块获取各电影的放映时间并更新到页面上
  */
 function setMovieShowTimes() {
     console.log('设置电影放映时间...');
@@ -75,25 +100,54 @@ function setMovieShowTimes() {
         const movieElement = document.querySelector(`.movie-item[data-movie="${movieId}"]`);
         if (movieElement) {
             const timeElement = movieElement.querySelector('.movie-time');
-            if (timeElement && window.CinemaData && window.CinemaData.getMovieShowTime) {
-                // 从主模块获取电影放映时间
-                const showTime = window.CinemaData.getMovieShowTime(movieId);
+            if (timeElement) {
+                // 从本模块获取电影放映时间
+                const showTime = getMovieShowTime(movieId);
                 if (showTime) {
                     // 格式化时间显示
                     const timeString = formatMovieShowTime(showTime);
                     timeElement.textContent = timeString;
+                    // 更新常量中的时间信息
+                    movieInfo[movieId].time = timeString;
                     console.log(`设置电影 ${movieId} 的放映时间: ${timeString}`);
                 } else {
                     timeElement.textContent = '时间待定';
+                    movieInfo[movieId].time = '时间待定';
                     console.warn(`无法获取电影 ${movieId} 的放映时间`);
                 }
             } else {
-                console.warn(`未找到电影 ${movieId} 的时间显示元素或主模块未加载`);
+                console.warn(`未找到电影 ${movieId} 的时间显示元素`);
             }
         } else {
             console.warn(`未找到电影 ${movieId} 的DOM元素`);
         }
     });
+}
+
+/**
+ * 获取指定电影的放映时间
+ * @param {string} movieId - 电影ID
+ * @returns {Date|null} 电影放映时间
+ */
+function getMovieShowTime(movieId) {
+    const movieTimeMapping = {
+        'cat': '10:00',      // 罗小黑战记 - 10:00
+        'girl': '12:00',     // 蓦然回首 - 12:00
+        'love': '18:00'      // 情书 - 18:00
+    };
+
+    if (movieId && movieTimeMapping[movieId]) {
+        // 创建明天的指定时间
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1); // 设置为明天
+
+        const [hours, minutes] = movieTimeMapping[movieId].split(':');
+        tomorrow.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+
+        return tomorrow;
+    }
+
+    return null;
 }
 
 /**
@@ -130,6 +184,15 @@ function updateMovieShowTimes() {
 }
 
 /**
+ * 获取电影信息
+ * @param {string} movieId - 电影ID
+ * @returns {Object|null} - 电影信息对象，如果找不到则返回null
+ */
+function getMovieInfo(movieId) {
+    return movieInfo[movieId] || null;
+}
+
+/**
  * 选择电影
  * @param {HTMLElement} movieElement - 被点击的电影元素
  * - 更新选中状态
@@ -146,17 +209,45 @@ function selectMovie(movieElement) {
     // 设置当前点击的电影为选中状态
     movieElement.classList.add('active');
 
-    // 提取电影数据
-    const rawPrice = movieElement.querySelector('.movie-price').textContent;
-    const priceNumber = rawPrice.match(/\d+/) ? rawPrice.match(/\d+/)[0] : '0';
+    // 获取电影ID
+    const movieId = movieElement.dataset.movie;
+    
+    // 从常量中获取基本电影信息
+    let movieData = getMovieInfo(movieId);
+    
+    if (!movieData) {
+        // 如果常量中没有，则从DOM元素提取（兜底方案）
+        const rawPrice = movieElement.querySelector('.movie-price').textContent;
+        const priceNumber = rawPrice.match(/\d+/) ? rawPrice.match(/\d+/)[0] : '0';
 
-    const movieData = {
-        id: movieElement.dataset.movie, // 电影ID
-        title: movieElement.querySelector('h3').textContent, // 电影标题
-        time: movieElement.querySelector('.movie-time').textContent, // 电影时间
-        price: priceNumber, // 电影票价
-        image: movieElement.querySelector('img').src // 电影图片
-    };
+        movieData = {
+            id: movieId,
+            title: movieElement.querySelector('h3').textContent,
+            time: movieElement.querySelector('.movie-time').textContent,
+            price: priceNumber,
+            image: movieElement.querySelector('img').src
+        };
+    } else {
+        // 使用常量中的信息，但更新实时的时间和价格
+        const timeElement = movieElement.querySelector('.movie-time');
+        const priceElement = movieElement.querySelector('.movie-price');
+        
+        if (timeElement) {
+            movieData.time = timeElement.textContent;
+        }
+        
+        if (priceElement) {
+            const rawPrice = priceElement.textContent;
+            const priceNumber = rawPrice.match(/\d+/) ? rawPrice.match(/\d+/)[0] : movieData.price;
+            movieData.price = priceNumber;
+        }
+        
+        // 获取实际的图片路径
+        const imgElement = movieElement.querySelector('img');
+        if (imgElement) {
+            movieData.image = imgElement.src;
+        }
+    }
 
     // 更新全局状态
     movieSelectorState.selectedMovie = movieData;
@@ -200,6 +291,8 @@ if (typeof window !== 'undefined') {
         initializeMovieSelector, // 初始化电影选择器
         selectMovie,             // 选择电影
         getSelectedMovie,        // 获取选中的电影
+        getMovieInfo,            // 获取电影信息
+        getMovieShowTime,        // 获取电影放映时间
         setMovieShowTimes,       // 设置电影放映时间
         updateMovieShowTimes,    // 更新电影时间显示
         formatMovieShowTime      // 格式化电影放映时间

@@ -358,6 +358,8 @@ function renderMyOrdersList() {
 
     if (!ordersList) return;
 
+    console.log('渲染我的订单列表', MyOrdersState.orders);
+    
     // 筛选订单
     let filteredOrders = MyOrdersState.orders;
 
