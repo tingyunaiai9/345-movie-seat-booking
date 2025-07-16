@@ -9,7 +9,6 @@
 const statusText = {
     'reserved': '已预约',
     'sold': '已支付',
-    'paid': '已支付',
     'cancelled': '已取消',
     'expired': '已过期',
     'refunded': '已退款'
@@ -18,12 +17,11 @@ const statusText = {
 // 预约过期时间常量（分钟）
 const RESERVATION_EXPIRE_MINUTES = 30;
 
-
 // 订单筛选类型
 const ORDER_FILTER_TYPES = {
     ALL: 'all',
     RESERVED: 'reserved',
-    PAID: 'paid',
+    SOLD: 'sold',
     EXPIRED: 'expired',
     CANCELLED: 'cancelled',
     REFUNDED: 'refunded'
@@ -363,7 +361,7 @@ function createMyOrderItem(order, isLatest = false) {
         
         // 为预约订单添加倒计时
         addCountdownToOrder(orderContainer, order);
-    } else if ((order.status === 'sold' || order.status === 'paid') && order.paidAt) {
+    } else if (order.status === 'sold' && order.paidAt) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付时间:';
         additionalTimeValue.textContent = formatDate(order.paidAt);
@@ -512,7 +510,7 @@ function renderMyOrdersList() {
         filteredOrders = filteredOrders.filter(order => {
             switch (MyOrdersState.currentFilter) {
                 case ORDER_FILTER_TYPES.RESERVED: return order.status === 'reserved';
-                case ORDER_FILTER_TYPES.PAID: return order.status === 'sold' || order.status === 'paid';
+                case ORDER_FILTER_TYPES.SOLD: return order.status === 'sold';
                 case ORDER_FILTER_TYPES.EXPIRED: return order.status === 'expired';
                 case ORDER_FILTER_TYPES.CANCELLED: return order.status === 'cancelled';
                 case ORDER_FILTER_TYPES.REFUNDED: return order.status === 'refunded';
@@ -538,8 +536,7 @@ function renderMyOrdersList() {
         const getStatusPriority = (status) => {
             switch (status) {
                 case 'reserved': return 1; // 预约状态最优先
-                case 'sold':
-                case 'paid': return 2; // 已支付状态次之
+                case 'sold': return 2; // 已支付状态次之
                 case 'cancelled': return 3; // 失效状态放在后面
                 case 'expired': return 4;
                 case 'refunded': return 5;
@@ -573,7 +570,7 @@ function renderMyOrdersList() {
         // 渲染订单项
         filteredOrders.forEach((order, index) => {
             // 只有在活跃状态订单中的第一个才标记为最新
-            const isLatest = index === 0 && (order.status === 'reserved' || order.status === 'sold' || order.status === 'paid');
+            const isLatest = index === 0 && (order.status === 'reserved' || order.status === 'sold');
             const orderItem = createMyOrderItem(order, isLatest);
             ordersList.appendChild(orderItem);
         });
@@ -660,7 +657,7 @@ function showMyOrderDetail(order) {
     // 支付时间（仅在已支付时显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
     const paidTime = document.getElementById('detail-paid-time');
-    if (order.paidAt && (order.status === 'sold' || order.status === 'paid')) {
+    if (order.paidAt && order.status === 'sold') {
         paidTimeLabel.style.display = 'inline';
         paidTime.style.display = 'inline';
         paidTime.textContent = formatDate(order.paidAt);
@@ -728,7 +725,7 @@ function showMyOrderDetail(order) {
     if (order.status === 'reserved') {
         if (cancelBtn) cancelBtn.style.display = 'inline-block';
         if (payBtn) payBtn.style.display = 'inline-block';
-    } else if (order.status === 'paid' || order.status === 'sold') {
+    } else if (order.status === 'sold') {
         if (refundBtn) refundBtn.style.display = 'inline-block';
     }
     // 已过期订单不显示任何操作按钮

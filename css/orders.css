@@ -299,7 +299,6 @@
     color: white;
 }
 
-.order-status-badge.paid,
 .order-status-badge.sold {
     background: linear-gradient(135deg, #68a530, #398d37);
     color: white;
