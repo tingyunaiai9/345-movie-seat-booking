@@ -633,41 +633,44 @@ function showMyOrderDetail(order) {
 
     const customer = order.customerInfo || {};
 
-    // 更新订单信息
-    document.getElementById('detail-order-id').textContent = order.ticketId;
-
-    const statusElement = document.getElementById('detail-order-status');
-    statusElement.textContent = statusText[order.status] || order.status;
-    statusElement.className = `detail-value order-status ${order.status}`;
-
-    // 更新电影信息
+    // 按新的顺序更新订单信息：电影名称、订单号、放映时间、状态、创建时间、支付时间/支付截止时间
+    
+    // 1. 电影名称（第一个显示）
     const movieTitleElement = document.getElementById('detail-movie-title');
-    const movieTimeElement = document.getElementById('detail-movie-time');
     if (movieTitleElement) {
         movieTitleElement.textContent = movieTitle;
     }
+
+    // 2. 订单号（第二个显示）
+    document.getElementById('detail-order-id').textContent = order.ticketId;
+
+    // 3. 放映时间（第三个显示）
+    const movieTimeElement = document.getElementById('detail-movie-time');
     if (movieTimeElement) {
         movieTimeElement.textContent = movieTime;
     }
 
+    // 4. 状态（第四个显示）
+    const statusElement = document.getElementById('detail-order-status');
+    statusElement.textContent = statusText[order.status] || order.status;
+    statusElement.className = `detail-value order-status ${order.status}`;
+
+    // 5. 创建时间（第五个显示）
     document.getElementById('detail-created-time').textContent = formatDate(order.createdAt);
 
-    // 支付时间（仅在已支付时显示）
+    // 6. 支付时间/支付截止时间（第六个显示，根据状态动态显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
     const paidTime = document.getElementById('detail-paid-time');
-    if (order.paidAt && order.status === 'sold') {
-        paidTimeLabel.style.display = 'inline';
-        paidTime.style.display = 'inline';
-        paidTime.textContent = formatDate(order.paidAt);
-    } else {
-        paidTimeLabel.style.display = 'none';
-        paidTime.style.display = 'none';
-    }
-
-    // 支付截止时间（仅在预约状态时显示）
     const expiresLabel = document.getElementById('detail-expires-label');
     const expiresTime = document.getElementById('detail-expires-time');
+
+    // 重置所有时间相关显示
+    [paidTimeLabel, paidTime, expiresLabel, expiresTime].forEach(element => {
+        if (element) element.style.display = 'none';
+    });
+
     if (order.status === 'reserved') {
+        // 预约状态：显示支付截止时间
         let expiryTime;
         
         if (order.expiresAt) {
@@ -683,13 +686,12 @@ function showMyOrderDetail(order) {
             expiresLabel.style.display = 'inline';
             expiresTime.style.display = 'inline';
             expiresTime.textContent = formatDate(expiryTime);
-        } else {
-            expiresLabel.style.display = 'none';
-            expiresTime.style.display = 'none';
         }
-    } else {
-        expiresLabel.style.display = 'none';
-        expiresTime.style.display = 'none';
+    } else if (order.paidAt && order.status === 'sold') {
+        // 已支付状态：显示支付时间
+        paidTimeLabel.style.display = 'inline';
+        paidTime.style.display = 'inline';
+        paidTime.textContent = formatDate(order.paidAt);
     }
 
     // 更新座位信息
