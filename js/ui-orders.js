@@ -386,8 +386,17 @@ function createMyOrderItem(order, isLatest = false) {
     // 检查并更新订单状态
     order = checkAndUpdateOrderStatus(order);
     
-    // order 即 ticket 对象
-    const orderItem = document.createElement('div');
+    // 获取模板
+    const template = document.getElementById('order-item-template');
+    if (!template) {
+        console.error('订单项模板未找到');
+        return document.createElement('div');
+    }
+    
+    // 克隆模板内容
+    const orderItem = template.content.cloneNode(true).querySelector('.order-item');
+    
+    // 设置基本属性
     orderItem.className = `order-item ${order.status}${isLatest ? ' latest-order' : ''}`;
     orderItem.dataset.orderId = order.ticketId;
 
@@ -425,7 +434,6 @@ function createMyOrderItem(order, isLatest = false) {
             if (movieInfo.time) {
                 movieTime = movieInfo.time;
             }
-            // 如果存储的信息中有图片路径，使用存储的图片
             if (movieInfo.image) {
                 movieImage = movieInfo.image;
             }
@@ -440,6 +448,7 @@ function createMyOrderItem(order, isLatest = false) {
     // 计算时间相关信息
     let timeInfo = '';
     let statusBadgeClass = '';
+    let timeLabel = '';
     
     if (order.status === 'reserved') {
         let expiryTime;
@@ -458,88 +467,73 @@ function createMyOrderItem(order, isLatest = false) {
 
             if (timeLeft > 0) {
                 const minutes = Math.floor(timeLeft / (1000 * 60));
-                timeInfo = `过期时间: ${formatDate(expiryTime)} <span class="time-warning">(还剩 ${minutes} 分钟)</span>`;
+                timeInfo = `${formatDate(expiryTime)} <span class="time-warning">(还剩 ${minutes} 分钟)</span>`;
                 statusBadgeClass = 'urgent';
+                timeLabel = '过期时间:';
             } else {
-                timeInfo = `已过期: ${formatDate(expiryTime)}`;
+                timeInfo = `${formatDate(expiryTime)}`;
                 statusBadgeClass = 'expired';
+                timeLabel = '过期时间:';
             }
         }
     } else if (order.status === 'expired') {
         timeInfo = `已过期`;
         statusBadgeClass = 'expired';
+        timeLabel = '状态:';
     } else if (order.paidAt) {
-        timeInfo = `支付时间: ${formatDate(order.paidAt)}`;
+        timeInfo = `${formatDate(order.paidAt)}`;
         statusBadgeClass = 'paid';
+        timeLabel = '支付时间:';
     }
 
-    // 客户信息
-    const customer = order.customerInfo || {};
-    // 价格
+    // 价格计算
     const unitPrice = order.unitPrice || 45;
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
     const totalPrice = order.totalPrice || (seatCount * unitPrice);
 
-    // 最新订单标识
-    const latestBadge = isLatest ? '<span class="latest-badge">最新</span>' : '';
-
-    orderItem.innerHTML = `
-        <div class="order-card">
-            <!-- 左侧：电影海报和基本信息 -->
-            <div class="order-left">
-                <div class="movie-poster-container">
-                    <img src="${movieImage}" alt="${movieTitle}" onerror="this.src='img/poster_cat.jpg'" class="movie-poster">
-                    <div class="order-status-badge ${order.status} ${statusBadgeClass}">
-                        ${statusText[order.status] || order.status}
-                    </div>
-                </div>
-            </div>
-
-            <!-- 中间：主要信息区域 -->
-            <div class="order-center">
-                <!-- 电影标题区 - 突出显示 -->
-                <div class="movie-title-section">
-                    <h3 class="movie-title">${movieTitle} ${latestBadge}</h3>
-                    <div class="movie-subtitle">
-                        <span class="showtime">🎬 ${movieTime}</span>
-                        <span class="seats">🎫 ${seatsText}</span>
-                    </div>
-                </div>
-
-                <!-- 时间信息区 -->
-                <div class="time-section">
-                    <div class="order-time">
-                        <span class="time-label">下单时间:</span>
-                        <span class="time-value">${formatDate(order.createdAt)}</span>
-                    </div>
-                    ${timeInfo ? `
-                    <div class="additional-time">
-                        <span class="time-label">${order.status === 'reserved' ? '过期时间:' : order.status === 'expired' ? '状态:' : '支付时间:'}</span>
-                        <span class="time-value">${timeInfo}</span>
-                    </div>` : ''}
-                </div>
-
-                <!-- 订单号信息 -->
-                <div class="order-meta">
-                    <span class="order-id">订单号: ${order.ticketId}</span>
-                </div>
-            </div>
-
-            <!-- 右侧：价格和操作 -->
-            <div class="order-right">
-                <div class="price-section">
-                    <div class="total-price">¥${totalPrice}</div>
-                    <div class="price-breakdown">
-                        ${seatCount} 张票 × ¥${unitPrice}
-                    </div>
-                </div>
-                <div class="action-hint">
-                    <span class="click-text">点击查看详情</span>
-                    <span class="arrow">→</span>
-                </div>
-            </div>
-        </div>
-    `;
+    // 填充模板数据
+    // 电影海报和标题
+    const moviePoster = orderItem.querySelector('.movie-poster');
+    moviePoster.src = movieImage;
+    moviePoster.alt = movieTitle;
+    
+    // 状态徽章
+    const statusBadge = orderItem.querySelector('.order-status-badge');
+    statusBadge.className = `order-status-badge ${order.status} ${statusBadgeClass}`;
+    orderItem.querySelector('.status-text').textContent = statusText[order.status] || order.status;
+    
+    // 电影标题和最新标识
+    orderItem.querySelector('.title-text').textContent = movieTitle;
+    const latestBadge = orderItem.querySelector('.latest-badge');
+    if (isLatest) {
+        latestBadge.style.display = 'inline';
+    } else {
+        latestBadge.style.display = 'none';
+    }
+    
+    // 电影时间和座位
+    orderItem.querySelector('.showtime-text').textContent = movieTime;
+    orderItem.querySelector('.seats-text').textContent = seatsText;
+    
+    // 下单时间
+    orderItem.querySelector('.created-time').textContent = formatDate(order.createdAt);
+    
+    // 附加时间信息
+    const additionalTime = orderItem.querySelector('.additional-time');
+    if (timeInfo) {
+        additionalTime.style.display = 'block';
+        orderItem.querySelector('.additional-time-label').textContent = timeLabel;
+        orderItem.querySelector('.additional-time-value').innerHTML = timeInfo;
+    } else {
+        additionalTime.style.display = 'none';
+    }
+    
+    // 订单号
+    orderItem.querySelector('.order-id-text').textContent = order.ticketId;
+    
+    // 价格信息
+    orderItem.querySelector('.total-price').textContent = `¥${totalPrice}`;
+    orderItem.querySelector('.price-breakdown').textContent = `${seatCount} 张票 × ¥${unitPrice}`;
 
     // 添加点击事件
     orderItem.addEventListener('click', (e) => {
