@@ -299,7 +299,6 @@
     color: white;
 }
 
-.order-status-badge.paid,
 .order-status-badge.sold {
     background: linear-gradient(135deg, #68a530, #398d37);
     color: white;
@@ -352,17 +351,6 @@
     gap: 12px;
 }
 
-.latest-badge {
-    background: linear-gradient(135deg, #398d37, #4a9f43);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    box-shadow: 0 2px 6px rgba(57, 141, 55, 0.3);
-    animation: highlight-glow 2s ease-in-out;
-}
-
 @keyframes highlight-glow {
     0%, 100% { box-shadow: 0 2px 6px rgba(57, 141, 55, 0.3); }
     50% { box-shadow: 0 4px 12px rgba(57, 141, 55, 0.5); }
@@ -397,12 +385,13 @@
     align-items: center;
     margin: 4px 0;
     font-size: 13px;
+    gap: 0; /* 移除间距，防止额外空格 */
 }
 
 .time-label {
     color: #6c757d;
     font-weight: 500;
-    min-width: 80px;
+    min-width: 60px;
 }
 
 .time-value {
@@ -415,6 +404,7 @@
     font-weight: 700;
     margin-left: 8px;
 }
+
 
 /* 订单号信息 */
 .order-meta {
@@ -485,31 +475,62 @@
 }
 
 /* ========================= 失效状态订单样式 ========================= */
-.order-item.cancelled,
-.order-item.refunded,
-.order-item.expired {
+
+/* 通过CSS属性选择器和伪类来识别失效状态的订单 */
+.order-item:has(.order-status-badge.cancelled),
+.order-item:has(.order-status-badge.refunded), 
+.order-item:has(.order-status-badge.expired) {
     opacity: 0.7;
     background: rgba(248, 249, 250, 0.95);
 }
 
-.order-item.cancelled .movie-poster,
-.order-item.refunded .movie-poster,
-.order-item.expired .movie-poster {
+.order-item:has(.order-status-badge.cancelled) .movie-poster,
+.order-item:has(.order-status-badge.refunded) .movie-poster,
+.order-item:has(.order-status-badge.expired) .movie-poster {
     filter: grayscale(50%);
 }
 
-.order-item.cancelled .movie-title,
-.order-item.refunded .movie-title,
-.order-item.expired .movie-title {
+.order-item:has(.order-status-badge.cancelled) .movie-title,
+.order-item:has(.order-status-badge.refunded) .movie-title,
+.order-item:has(.order-status-badge.expired) .movie-title {
     background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.order-item.cancelled .total-price,
-.order-item.refunded .total-price,
-.order-item.expired .total-price {
+.order-item:has(.order-status-badge.cancelled) .total-price,
+.order-item:has(.order-status-badge.refunded) .total-price,
+.order-item:has(.order-status-badge.expired) .total-price {
+    color: #6c757d;
+}
+
+/* 兼容性方案：对于不支持:has()的浏览器，使用JS添加的类名 */
+.order-item.order-cancelled,
+.order-item.order-refunded,
+.order-item.order-expired {
+    opacity: 0.7;
+    background: rgba(248, 249, 250, 0.95);
+}
+
+.order-item.order-cancelled .movie-poster,
+.order-item.order-refunded .movie-poster,
+.order-item.order-expired .movie-poster {
+    filter: grayscale(50%);
+}
+
+.order-item.order-cancelled .movie-title,
+.order-item.order-refunded .movie-title,
+.order-item.order-expired .movie-title {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.order-item.order-cancelled .total-price,
+.order-item.order-refunded .total-price,
+.order-item.order-expired .total-price {
     color: #6c757d;
 }
 
@@ -672,6 +693,24 @@
     border: 1px solid rgba(220, 53, 69, 0.3);
 }
 
+/* 座位标签样式 */
+.seat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.seat-tag {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(104, 165, 48, 0.3);
+}
+
 /* ========================= 订单详情模态框 - 失效状态样式 ========================= */
 .order-detail-modal.cancelled .detail-value,
 .order-detail-modal.refunded .detail-value,
@@ -768,117 +807,97 @@
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
-/* ========================= 响应式布局调整 ========================= */
-@media (max-width: 768px) {
-    .order-content {
-        flex-direction: column;
-        gap: 15px;
-    }
+/* ========================= 预约倒计时样式 ========================= */
+.countdown-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 13px;
+    min-width: 60px;
+}
 
-    .order-movie,
-    .order-details,
-    .order-price {
-        flex: none;
-        min-width: auto;
-    }
+.countdown-time {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    min-width: 50px;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
 
-    .order-price {
-        text-align: left;
-    }
+.countdown-time.normal {
+    color: #398d37;
+    background: rgba(57, 141, 55, 0.1);
+}
 
-    .price-amount {
-        font-size: 20px;
-    }
+.countdown-time.warning {
+    color: #ffc107;
+    background: rgba(255, 193, 7, 0.2);
+}
 
-    .order-detail-modal {
-        padding: 15px;
-    }
+.countdown-time.urgent {
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.2);
+    font-weight: 900;
+}
 
-    .order-detail-modal .modal-content {
-        max-width: none;
-        width: 100%;
-    }
+.countdown-time.expired {
+    color: #6c757d;
+    background: rgba(108, 117, 125, 0.1);
+    text-decoration: line-through;
+}
 
-    .order-detail-modal .modal-header,
-    .order-detail-modal .modal-footer {
-        padding: 20px;
+/* 倒计时动画效果 */
+@keyframes warning-pulse {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+        transform: scale(1);
     }
-
-    .order-detail-modal .modal-body {
-        padding: 20px;
-    }
-
-    .order-detail-modal .modal-footer {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .order-detail-modal .btn {
-        width: 100%;
-        min-width: auto;
-    }
-
-    .detail-grid {
-        grid-template-columns: 100px 1fr;
-        gap: 10px 15px;
+    50% {
+        box-shadow: 0 4px 16px rgba(255, 193, 7, 0.4);
+        transform: scale(1.02);
     }
 }
 
-@media (max-height: 700px) {
-    .order-detail-modal {
-        padding: 10px;
+@keyframes urgent-pulse {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        transform: scale(1);
     }
-
-    .order-detail-modal .modal-content {
-        max-height: 95vh;
+    50% {
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+        transform: scale(1.03);
     }
+}
 
-    .order-detail-modal .modal-header,
-    .order-detail-modal .modal-footer {
-        padding: 20px 25px;
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .countdown-label {
+        font-size: 11px;
     }
-
-    .order-detail-modal .modal-body {
-        padding: 25px;
+    
+    .countdown-time {
+        font-size: 13px;
+        min-width: 45px;
     }
 }
 
 @media (max-width: 480px) {
-    .order-item {
-        padding: 15px;
+    .countdown-time {
+        font-size: 12px;
+        min-width: 40px;
     }
+}
 
-    .order-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
+/* 确保倒计时不影响订单卡片的整体布局 */
+.time-section {
+    margin-bottom: 8px;
+}
 
-    .movie-info h4 {
-        font-size: 16px;
-    }
-
-    .price-amount {
-        font-size: 18px;
-    }
-
-    .order-detail-modal .modal-header h3 {
-        font-size: 18px;
-    }
-
-    .detail-grid {
-        grid-template-columns: 1fr;
-        gap: 5px;
-    }
-
-    .detail-label {
-        font-weight: 500;
-        color: #6c757d;
-    }
-
-    .detail-value {
-        margin-bottom: 15px;
-        padding-left: 10px;
-        border-left: 3px solid #68a530;
-    }
+/* 在订单详情模态框中的倒计时样式 */
+.order-detail-modal .countdown-time {
+    font-size: 16px;
+    min-width: 60px;
 }

@@ -17,21 +17,21 @@ const movieInfo = {
         title: '罗小黑战记',
         time: '时间待定',
         price: '45',
-        image: './img/movie_cat.jpg'
+        image: 'img/poster_cat.jpg'
     },
     'girl': {
         id: 'girl',
         title: '蓦然回首',
         time: '时间待定',
         price: '50',
-        image: './img/movie_girl.jpg'
+        image: 'img/poster_girl.jpg'
     },
     'love': {
         id: 'love',
         title: '情书',
         time: '时间待定',
         price: '55',
-        image: './img/movie_love.jpg'
+        image: 'img/poster_love.jpg'
     }
 };
 
