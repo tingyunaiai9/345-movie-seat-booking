@@ -50,10 +50,10 @@ let movieSelectorState = {
  */
 function initializeMovieSelector() {
     console.log('初始化电影选择器...');
-    
+
     // 设置电影时间显示
     setMovieShowTimes();
-    
+
     // 获取所有电影元素并绑定点击事件
     const movieItems = document.querySelectorAll('.movie-item');
     movieItems.forEach(item => {
@@ -92,10 +92,10 @@ function initializeMovieSelector() {
  */
 function setMovieShowTimes() {
     console.log('设置电影放映时间...');
-    
+
     // 电影ID到放映时间的映射
     const movieIds = ['cat', 'girl', 'love'];
-    
+
     movieIds.forEach(movieId => {
         const movieElement = document.querySelector(`.movie-item[data-movie="${movieId}"]`);
         if (movieElement) {
@@ -130,21 +130,16 @@ function setMovieShowTimes() {
  * @returns {Date|null} 电影放映时间
  */
 function getMovieShowTime(movieId) {
+    // 固定时间映射
     const movieTimeMapping = {
-        'cat': '10:00',      // 罗小黑战记 - 10:00
-        'girl': '12:00',     // 蓦然回首 - 12:00
-        'love': '18:00'      // 情书 - 18:00
+        'cat': '2026-06-01 18:00',   // 罗小黑战记
+        'girl': '2026-07-18 19:00',  // 蓦然回首
+        'love': '2026-05-20 17:20'   // 情书
     };
 
     if (movieId && movieTimeMapping[movieId]) {
-        // 创建明天的指定时间
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1); // 设置为明天
-
-        const [hours, minutes] = movieTimeMapping[movieId].split(':');
-        tomorrow.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-
-        return tomorrow;
+        // 直接返回指定的时间
+        return new Date(movieTimeMapping[movieId].replace(/-/g, '/'));
     }
 
     return null;
@@ -159,19 +154,19 @@ function formatMovieShowTime(showTime) {
     if (!(showTime instanceof Date) || isNaN(showTime.getTime())) {
         return '时间待定';
     }
-    
+
     // 格式化为 "2025-7-16 12:00" 的格式
     const year = showTime.getFullYear();
     const month = showTime.getMonth() + 1; // getMonth() 返回 0-11，需要加1
     const day = showTime.getDate();
-    
+
     // 格式化时间部分 (HH:MM)
     const timeStr = showTime.toLocaleTimeString('zh-CN', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
     });
-    
+
     return `${year}-${month}-${day} ${timeStr}`;
 }
 
@@ -211,10 +206,10 @@ function selectMovie(movieElement) {
 
     // 获取电影ID
     const movieId = movieElement.dataset.movie;
-    
+
     // 从常量中获取基本电影信息
     let movieData = getMovieInfo(movieId);
-    
+
     if (!movieData) {
         // 如果常量中没有，则从DOM元素提取（兜底方案）
         const rawPrice = movieElement.querySelector('.movie-price').textContent;
@@ -231,17 +226,17 @@ function selectMovie(movieElement) {
         // 使用常量中的信息，但更新实时的时间和价格
         const timeElement = movieElement.querySelector('.movie-time');
         const priceElement = movieElement.querySelector('.movie-price');
-        
+
         if (timeElement) {
             movieData.time = timeElement.textContent;
         }
-        
+
         if (priceElement) {
             const rawPrice = priceElement.textContent;
             const priceNumber = rawPrice.match(/\d+/) ? rawPrice.match(/\d+/)[0] : movieData.price;
             movieData.price = priceNumber;
         }
-        
+
         // 获取实际的图片路径
         const imgElement = movieElement.querySelector('img');
         if (imgElement) {
