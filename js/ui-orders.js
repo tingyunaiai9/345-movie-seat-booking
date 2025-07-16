@@ -4,6 +4,7 @@
  */
 
 // ========================= 全局常量和配置 =========================
+
 // 订单状态文本映射
 const statusText = {
     'reserved': '已预约',
@@ -14,12 +15,115 @@ const statusText = {
     'refunded': '已退款'
 };
 
+// 时间相关常量
+const TIME_CONSTANTS = {
+    RESERVATION_EXPIRE_MINUTES: 30,  // 预约过期时间（分钟）
+    MILLISECONDS_PER_MINUTE: 60 * 1000,  // 每分钟的毫秒数
+    DATE_FORMAT: {
+        YEAR_MONTH_DAY: 'YYYY-MM-DD',
+        HOUR_MINUTE: 'HH:mm',
+        FULL: 'YYYY-MM-DD HH:mm'
+    },
+    TIME_LABELS: {
+        ORDER_TIME: '下单时间:',
+        EXPIRE_TIME: '过期时间:',
+        PAY_TIME: '支付时间:',
+        STATUS: '状态:'
+    }
+};
+
+// 电影信息映射
+const MOVIE_MAPPING = {
+    'cat': {
+        id: 'cat',
+        title: '罗小黑战记',
+        image: 'img/poster_cat.jpg',
+        defaultTime: '2025-07-16 19:30'
+    },
+    'girl': {
+        id: 'girl',
+        title: '蓦然回首',
+        image: 'img/poster_girl.jpg',
+        defaultTime: '2025-07-16 21:00'
+    },
+    'love': {
+        id: 'love',
+        title: '情书',
+        image: 'img/poster_love.jpg',
+        defaultTime: '2025-07-16 20:15'
+    }
+};
+
+// 默认配置
+const DEFAULT_CONFIG = {
+    MOVIE: {
+        TITLE: '未知电影',
+        TIME: '时间待定',
+        IMAGE: 'img/poster_cat.jpg'
+    },
+    TICKET: {
+        UNIT_PRICE: 45,
+        CURRENCY: '¥'
+    },
+    CUSTOMER: {
+        DEFAULT_NAME: '未填写',
+        DEFAULT_AGE: '未填写'
+    }
+};
+
+// 订单筛选类型
+const ORDER_FILTER_TYPES = {
+    ALL: 'all',
+    RESERVED: 'reserved',
+    PAID: 'paid',
+    EXPIRED: 'expired',
+    CANCELLED: 'cancelled',
+    REFUNDED: 'refunded'
+};
+
 // ========================= 订单管理状态 =========================
 const MyOrdersState = {
     orders: [],
-    currentFilter: 'all',
+    currentFilter: ORDER_FILTER_TYPES.ALL,
     searchKeyword: ''
 };
+
+// ========================= 工具函数 =========================
+
+/**
+ * 获取电影信息
+ * @param {string} movieId - 电影ID
+ * @returns {Object} - 电影信息对象
+ */
+function getMovieInfo(movieId) {
+    return MOVIE_MAPPING[movieId] || {
+        id: movieId,
+        title: DEFAULT_CONFIG.MOVIE.TITLE,
+        image: DEFAULT_CONFIG.MOVIE.IMAGE,
+        defaultTime: DEFAULT_CONFIG.MOVIE.TIME
+    };
+}
+
+/**
+ * 计算预约过期时间
+ * @param {Date|string} createdAt - 创建时间
+ * @returns {Date} - 过期时间
+ */
+function calculateExpiryTime(createdAt) {
+    const createdTime = new Date(createdAt);
+    return new Date(createdTime.getTime() + TIME_CONSTANTS.RESERVATION_EXPIRE_MINUTES * TIME_CONSTANTS.MILLISECONDS_PER_MINUTE);
+}
+
+/**
+ * 计算剩余时间（分钟）
+ * @param {Date} expiryTime - 过期时间
+ * @returns {number} - 剩余分钟数
+ */
+function calculateRemainingMinutes(expiryTime) {
+    const now = new Date();
+    const timeLeft = expiryTime - now;
+    return Math.floor(timeLeft / TIME_CONSTANTS.MILLISECONDS_PER_MINUTE);
+}
 
 // ========================= 订单状态检查和更新 =========================
 
@@ -39,8 +143,7 @@ function checkAndUpdateOrderStatus(order) {
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            const createdTime = new Date(order.createdAt);
-            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
+            expiryTime = calculateExpiryTime(order.createdAt);
             order.expiresAt = expiryTime.toISOString();
         }
         
@@ -57,7 +160,7 @@ function checkAndUpdateOrderStatus(order) {
             try {
                 const movieInfo = JSON.parse(selectedMovieInfo);
                 if (movieInfo.time) {
-                    // 解析电影时间 (格式假设为 "YYYY-MM-DD HH:mm" 或类似格式)
+                    // 解析电影时间
                     const movieTime = new Date(movieInfo.time);
                     if (!isNaN(movieTime.getTime()) && now > movieTime) {
                         order.status = 'expired';
@@ -309,12 +412,14 @@ function renderMyOrdersList() {
     let filteredOrders = MyOrdersState.orders;
 
     // 按状态筛选
-    if (MyOrdersState.currentFilter !== 'all') {
+    if (MyOrdersState.currentFilter !== ORDER_FILTER_TYPES.ALL) {
         filteredOrders = filteredOrders.filter(order => {
             switch (MyOrdersState.currentFilter) {
-                case 'reserved': return order.status === 'reserved';
-                case 'paid': return order.status === 'sold' || order.status === 'paid';
-                case 'expired': return order.status === 'expired'; // 添加过期状态筛选
+                case ORDER_FILTER_TYPES.RESERVED: return order.status === 'reserved';
+                case ORDER_FILTER_TYPES.PAID: return order.status === 'sold' || order.status === 'paid';
+                case ORDER_FILTER_TYPES.EXPIRED: return order.status === 'expired';
+                case ORDER_FILTER_TYPES.CANCELLED: return order.status === 'cancelled';
+                case ORDER_FILTER_TYPES.REFUNDED: return order.status === 'refunded';
                 default: return true;
             }
         });
@@ -355,7 +460,7 @@ function renderMyOrdersList() {
 }
 
 /**
- * 座位ID转换为“排座”格式
+ * 座位ID转换为"排座"格式
  */
 function seatIdToText(seatId) {
     // seatId 格式为 'seat-8-12'
@@ -403,39 +508,22 @@ function createMyOrderItem(order, isLatest = false) {
     // 获取电影信息
     const selectedMovieId = localStorage.getItem('selectedMovie');
     const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
-    let movieTitle = '未知电影';
-    let movieTime = '时间待定';
-    let movieImage = 'img/poster_cat.jpg'; // 默认海报
     
-    // 电影名称和海报映射
-    const movieMapping = {
-        'cat': {
-            title: '罗小黑战记',
-            image: 'img/poster_cat.jpg'
-        },
-        'girl': {
-            title: '蓦然回首',
-            image: 'img/poster_girl.jpg'
-        },
-        'love': {
-            title: '情书',
-            image: 'img/poster_love.jpg'
-        }
-    };
+    // 使用常量获取电影信息
+    const movieInfo = getMovieInfo(selectedMovieId);
+    let movieTitle = movieInfo.title;
+    let movieTime = movieInfo.defaultTime;
+    let movieImage = movieInfo.image;
     
-    if (selectedMovieId && movieMapping[selectedMovieId]) {
-        movieTitle = movieMapping[selectedMovieId].title;
-        movieImage = movieMapping[selectedMovieId].image;
-    }
-    
+    // 如果有存储的电影信息，则使用存储的信息
     if (selectedMovieInfo) {
         try {
-            const movieInfo = JSON.parse(selectedMovieInfo);
-            if (movieInfo.time) {
-                movieTime = movieInfo.time;
+            const storedMovieInfo = JSON.parse(selectedMovieInfo);
+            if (storedMovieInfo.time) {
+                movieTime = storedMovieInfo.time;
             }
-            if (movieInfo.image) {
-                movieImage = movieInfo.image;
+            if (storedMovieInfo.image) {
+                movieImage = storedMovieInfo.image;
             }
         } catch (e) {
             console.warn('解析电影信息失败:', e);
@@ -456,38 +544,35 @@ function createMyOrderItem(order, isLatest = false) {
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            const createdTime = new Date(order.createdAt);
-            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
+            expiryTime = calculateExpiryTime(order.createdAt);
             order.expiresAt = expiryTime.toISOString();
         }
         
         if (expiryTime) {
-            const now = new Date();
-            const timeLeft = expiryTime - now;
+            const remainingMinutes = calculateRemainingMinutes(expiryTime);
 
-            if (timeLeft > 0) {
-                const minutes = Math.floor(timeLeft / (1000 * 60));
-                timeInfo = `${formatDate(expiryTime)} <span class="time-warning">(还剩 ${minutes} 分钟)</span>`;
+            if (remainingMinutes > 0) {
+                timeInfo = `${formatDate(expiryTime)} <span class="time-warning">(还剩 ${remainingMinutes} 分钟)</span>`;
                 statusBadgeClass = 'urgent';
-                timeLabel = '过期时间:';
+                timeLabel = TIME_CONSTANTS.TIME_LABELS.EXPIRE_TIME;
             } else {
                 timeInfo = `${formatDate(expiryTime)}`;
                 statusBadgeClass = 'expired';
-                timeLabel = '过期时间:';
+                timeLabel = TIME_CONSTANTS.TIME_LABELS.EXPIRE_TIME;
             }
         }
     } else if (order.status === 'expired') {
         timeInfo = `已过期`;
         statusBadgeClass = 'expired';
-        timeLabel = '状态:';
+        timeLabel = TIME_CONSTANTS.TIME_LABELS.STATUS;
     } else if (order.paidAt) {
         timeInfo = `${formatDate(order.paidAt)}`;
         statusBadgeClass = 'paid';
-        timeLabel = '支付时间:';
+        timeLabel = TIME_CONSTANTS.TIME_LABELS.PAY_TIME;
     }
 
     // 价格计算
-    const unitPrice = order.unitPrice || 45;
+    const unitPrice = order.unitPrice || DEFAULT_CONFIG.TICKET.UNIT_PRICE;
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
     const totalPrice = order.totalPrice || (seatCount * unitPrice);
 
@@ -532,8 +617,8 @@ function createMyOrderItem(order, isLatest = false) {
     orderItem.querySelector('.order-id-text').textContent = order.ticketId;
     
     // 价格信息
-    orderItem.querySelector('.total-price').textContent = `¥${totalPrice}`;
-    orderItem.querySelector('.price-breakdown').textContent = `${seatCount} 张票 × ¥${unitPrice}`;
+    orderItem.querySelector('.total-price').textContent = `${DEFAULT_CONFIG.TICKET.CURRENCY}${totalPrice}`;
+    orderItem.querySelector('.price-breakdown').textContent = `${seatCount} 张票 × ${DEFAULT_CONFIG.TICKET.CURRENCY}${unitPrice}`;
 
     // 添加点击事件
     orderItem.addEventListener('click', (e) => {
@@ -560,25 +645,17 @@ function showMyOrderDetail(order) {
     // 获取电影信息
     const selectedMovieId = localStorage.getItem('selectedMovie');
     const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
-    let movieTitle = '未知电影';
-    let movieTime = '时间待定';
     
-    // 电影名称映射
-    const movieTitleMapping = {
-        'cat': '罗小黑战记',
-        'girl': '蓦然回首', 
-        'love': '情书'
-    };
-    
-    if (selectedMovieId && movieTitleMapping[selectedMovieId]) {
-        movieTitle = movieTitleMapping[selectedMovieId];
-    }
+    // 使用常量获取电影信息
+    const movieInfo = getMovieInfo(selectedMovieId);
+    let movieTitle = movieInfo.title;
+    let movieTime = movieInfo.defaultTime;
     
     if (selectedMovieInfo) {
         try {
-            const movieInfo = JSON.parse(selectedMovieInfo);
-            if (movieInfo.time) {
-                movieTime = movieInfo.time;
+            const storedMovieInfo = JSON.parse(selectedMovieInfo);
+            if (storedMovieInfo.time) {
+                movieTime = storedMovieInfo.time;
             }
         } catch (e) {
             console.warn('解析电影信息失败:', e);
@@ -627,8 +704,7 @@ function showMyOrderDetail(order) {
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            const createdTime = new Date(order.createdAt);
-            expiryTime = new Date(createdTime.getTime() + 30 * 60 * 1000); // 30分钟
+            expiryTime = calculateExpiryTime(order.createdAt);
             order.expiresAt = expiryTime.toISOString();
         }
         
@@ -652,15 +728,15 @@ function showMyOrderDetail(order) {
     seatTagsContainer.innerHTML = seatsHtml;
 
     // 更新客户信息
-    document.getElementById('detail-customer-name').textContent = customer.name || '未填写';
-    document.getElementById('detail-customer-age').textContent = customer.age || '未填写';
+    document.getElementById('detail-customer-name').textContent = customer.name || DEFAULT_CONFIG.CUSTOMER.DEFAULT_NAME;
+    document.getElementById('detail-customer-age').textContent = customer.age || DEFAULT_CONFIG.CUSTOMER.DEFAULT_AGE;
 
     // 更新费用明细
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const unitPrice = order.unitPrice || 45; // 默认票价
+    const unitPrice = order.unitPrice || DEFAULT_CONFIG.TICKET.UNIT_PRICE;
     const totalPrice = seatCount * unitPrice;
-    document.getElementById('detail-ticket-price').textContent = `¥${unitPrice} × ${seatCount}`;
-    document.getElementById('detail-total-price').textContent = `¥${totalPrice}`;
+    document.getElementById('detail-ticket-price').textContent = `${DEFAULT_CONFIG.TICKET.CURRENCY}${unitPrice} × ${seatCount}`;
+    document.getElementById('detail-total-price').textContent = `${DEFAULT_CONFIG.TICKET.CURRENCY}${totalPrice}`;
 
     // 显示/隐藏操作按钮
     const cancelBtn = document.getElementById('cancel-order');
@@ -798,7 +874,16 @@ if (typeof window !== 'undefined') {
         handleMyRefundOrder,
 
         // 状态访问
-        getMyOrdersState: () => MyOrdersState
+        getMyOrdersState: () => MyOrdersState,
+        
+        // 常量访问
+        getConstants: () => ({
+            TIME_CONSTANTS,
+            MOVIE_MAPPING,
+            DEFAULT_CONFIG,
+            ORDER_FILTER_TYPES,
+            statusText
+        })
     };
 }
 
