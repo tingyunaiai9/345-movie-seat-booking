@@ -36,6 +36,9 @@ const MyOrdersState = {
     searchKeyword: ''
 };
 
+// 在全局变量部分添加倒计时管理器
+let countdownIntervals = new Map(); // 存储每个订单的倒计时定时器
+
 // ========================= 订单页面管理 =========================
 
 /**
@@ -205,6 +208,9 @@ function showMyOrdersPage() {
  */
 function hideMyOrdersPage() {
     console.log('隐藏我的订单页面');
+    
+    // 清理所有倒计时
+    clearAllCountdowns();
 
     const myOrdersView = document.getElementById('my-orders-view');
     if (myOrdersView) {
@@ -276,9 +282,216 @@ function checkAndUpdateOrderStatus(order) {
 // ========================= 订单列表渲染 =========================
 
 /**
+ * 创建订单项元素
+ */
+function createMyOrderItem(order, isLatest = false) {
+    // 更新订单状态
+    order = checkAndUpdateOrderStatus(order);
+    
+    const template = document.getElementById('order-item-template');
+    const orderItem = template.content.cloneNode(true);
+    
+    // 获取电影信息
+    let movieTitle = '未知电影';
+    let movieImage = 'img/poster_cat.jpg';
+    let movieTime = '时间待定';
+    
+    if (order.movieInfo) {
+        movieTitle = order.movieInfo.title || movieTitle;
+        movieImage = order.movieInfo.image || movieImage;
+        movieTime = order.movieInfo.time || movieTime;
+    } else {
+        // 从电影ID获取信息
+        const selectedMovieId = localStorage.getItem('selectedMovie');
+        if (selectedMovieId) {
+            const movieInfo = getMovieInfo(selectedMovieId);
+            if (movieInfo) {
+                movieTitle = movieInfo.title;
+                movieImage = movieInfo.image;
+            }
+        }
+    }
+
+    // 设置订单ID
+    const orderContainer = orderItem.querySelector('.order-item');
+    orderContainer.dataset.orderId = order.ticketId;
+
+    // 设置电影海报
+    const moviePoster = orderItem.querySelector('.movie-poster');
+    moviePoster.src = movieImage;
+    moviePoster.alt = movieTitle;
+
+    // 设置状态标签
+    const statusBadge = orderItem.querySelector('.order-status-badge .status-text');
+    statusBadge.textContent = statusText[order.status] || order.status;
+    statusBadge.parentElement.className = `order-status-badge ${order.status}`;
+
+    // 设置电影标题
+    const titleText = orderItem.querySelector('.title-text');
+    titleText.textContent = movieTitle;
+
+    // 设置最新标签
+    const latestBadge = orderItem.querySelector('.latest-badge');
+    if (isLatest) {
+        latestBadge.style.display = 'inline';
+    }
+
+    // 设置放映时间
+    const showtimeText = orderItem.querySelector('.showtime-text');
+    showtimeText.textContent = movieTime;
+
+    // 设置座位信息
+    const seatsText = orderItem.querySelector('.seats-text');
+    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
+    const seatList = Array.isArray(order.seats) ? 
+        order.seats.map(seatId => seatIdToText(seatId)).join(', ') : '无座位信息';
+    seatsText.textContent = `${seatCount}张票 (${seatList})`;
+
+    // 设置下单时间
+    const createdTime = orderItem.querySelector('.created-time');
+    createdTime.textContent = formatDate(order.createdAt);
+
+    // 设置额外时间信息（支付时间或过期时间）
+    const additionalTime = orderItem.querySelector('.additional-time');
+    const additionalTimeLabel = orderItem.querySelector('.additional-time-label');
+    const additionalTimeValue = orderItem.querySelector('.additional-time-value');
+    
+    if (order.status === 'reserved' && order.expiresAt) {
+        additionalTime.style.display = 'block';
+        additionalTimeLabel.textContent = '支付截止:';
+        additionalTimeValue.textContent = formatDate(order.expiresAt);
+        
+        // 为预约订单添加倒计时
+        addCountdownToOrder(orderContainer, order);
+    } else if ((order.status === 'sold' || order.status === 'paid') && order.paidAt) {
+        additionalTime.style.display = 'block';
+        additionalTimeLabel.textContent = '支付时间:';
+        additionalTimeValue.textContent = formatDate(order.paidAt);
+    }
+
+    // 设置订单号
+    const orderIdText = orderItem.querySelector('.order-id-text');
+    orderIdText.textContent = order.ticketId;
+
+    // 设置价格信息
+    const totalPrice = orderItem.querySelector('.total-price');
+    const priceBreakdown = orderItem.querySelector('.price-breakdown');
+    const unitPrice = order.unitPrice || 45;
+    const total = order.totalCost || (unitPrice * seatCount);
+    
+    totalPrice.textContent = `¥${total}`;
+    priceBreakdown.textContent = `¥${unitPrice} × ${seatCount}张`;
+
+    // 绑定点击事件
+    orderContainer.addEventListener('click', () => {
+        showMyOrderDetail(order);
+    });
+
+    return orderItem;
+}
+
+/**
+ * 为预约订单添加倒计时
+ * @param {HTMLElement} orderContainer - 订单容器元素
+ * @param {Object} order - 订单对象
+ */
+function addCountdownToOrder(orderContainer, order) {
+    if (order.status !== 'reserved' || !order.expiresAt) return;
+    
+    const orderId = order.ticketId;
+    const expiresAt = new Date(order.expiresAt);
+    
+    // 创建倒计时元素，使用与时间信息区相同的结构
+    const countdownElement = document.createElement('div');
+    countdownElement.className = 'additional-time';
+    countdownElement.style.display = 'block';
+    countdownElement.innerHTML = `
+        <span class="time-label countdown-label">支付剩余时间:</span>
+        <span class="time-value countdown-time" id="countdown-${orderId}">计算中...</span>
+    `;
+    
+    // 将倒计时插入到时间信息区域
+    const timeSection = orderContainer.querySelector('.time-section');
+    if (timeSection) {
+        timeSection.appendChild(countdownElement);
+    }
+    
+    // 清除可能存在的旧定时器
+    if (countdownIntervals.has(orderId)) {
+        clearInterval(countdownIntervals.get(orderId));
+    }
+    
+    // 更新倒计时函数
+    const updateCountdown = () => {
+        const now = new Date();
+        const timeLeft = expiresAt.getTime() - now.getTime();
+        const countdownDisplay = document.getElementById(`countdown-${orderId}`);
+        
+        if (!countdownDisplay) {
+            // 如果元素不存在，清除定时器
+            clearInterval(countdownIntervals.get(orderId));
+            countdownIntervals.delete(orderId);
+            return;
+        }
+        
+        if (timeLeft <= 0) {
+            // 时间到期
+            countdownDisplay.textContent = '已过期';
+            countdownDisplay.className = 'time-value countdown-time expired';
+            
+            // 清除定时器
+            clearInterval(countdownIntervals.get(orderId));
+            countdownIntervals.delete(orderId);
+            
+            // 触发订单状态更新
+            setTimeout(() => {
+                checkAllOrdersStatus();
+                renderMyOrdersList();
+            }, 1000);
+        } else {
+            // 计算剩余时间
+            const minutes = Math.floor(timeLeft / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            countdownDisplay.textContent = formattedTime;
+            
+            // 根据剩余时间设置样式
+            if (timeLeft <= 5 * 60 * 1000) { // 最后5分钟
+                countdownDisplay.className = 'time-value countdown-time urgent';
+            } else if (timeLeft <= 10 * 60 * 1000) { // 最后10分钟
+                countdownDisplay.className = 'time-value countdown-time warning';
+            } else {
+                countdownDisplay.className = 'time-value countdown-time normal';
+            }
+        }
+    };
+    
+    // 立即更新一次
+    updateCountdown();
+    
+    // 设置定时器，每秒更新
+    const intervalId = setInterval(updateCountdown, 1000);
+    countdownIntervals.set(orderId, intervalId);
+}
+
+/**
+ * 清理所有倒计时定时器
+ */
+function clearAllCountdowns() {
+    countdownIntervals.forEach((intervalId) => {
+        clearInterval(intervalId);
+    });
+    countdownIntervals.clear();
+}
+
+/**
  * 渲染订单列表
  */
 function renderMyOrdersList() {
+    // 清理之前的倒计时
+    clearAllCountdowns();
+    
     loadMyOrdersFromLocalStorage();
     
     // 检查并更新所有订单状态
@@ -342,112 +555,6 @@ function renderMyOrdersList() {
             ordersList.appendChild(orderItem);
         });
     }
-}
-
-/**
- * 创建订单项元素
- */
-function createMyOrderItem(order, isLatest = false) {
-    // 更新订单状态
-    order = checkAndUpdateOrderStatus(order);
-    
-    const template = document.getElementById('order-item-template');
-    const orderItem = template.content.cloneNode(true);
-    
-    // 获取电影信息
-    let movieTitle = '未知电影';
-    let movieImage = 'img/poster_cat.jpg';
-    let movieTime = '时间待定';
-    
-    if (order.movieInfo) {
-        movieTitle = order.movieInfo.title || movieTitle;
-        movieImage = order.movieInfo.image || movieImage;
-        movieTime = order.movieInfo.time || movieTime;
-    } else {
-        // 从电影ID获取信息
-        const selectedMovieId = localStorage.getItem('selectedMovie');
-        if (selectedMovieId) {
-            const movieInfo = JSON.parse(localStorage.getItem(`movieInfo.${selectedMovieId}`));
-            if (movieInfo) {
-                movieTitle = movieInfo.title;
-                movieImage = movieInfo.image;
-            }
-        }
-    }
-
-    // 设置订单ID
-    const orderContainer = orderItem.querySelector('.order-item');
-    orderContainer.dataset.orderId = order.ticketId;
-
-    // 设置电影海报
-    const moviePoster = orderItem.querySelector('.movie-poster');
-    moviePoster.src = movieImage;
-    moviePoster.alt = movieTitle;
-
-    // 设置状态标签
-    const statusBadge = orderItem.querySelector('.order-status-badge .status-text');
-    statusBadge.textContent = statusText[order.status] || order.status;
-    statusBadge.parentElement.className = `order-status-badge ${order.status}`;
-
-    // 设置电影标题
-    const titleText = orderItem.querySelector('.title-text');
-    titleText.textContent = movieTitle;
-
-    // 设置最新标签
-    const latestBadge = orderItem.querySelector('.latest-badge');
-    if (isLatest) {
-        latestBadge.style.display = 'inline';
-    }
-
-    // 设置放映时间
-    const showtimeText = orderItem.querySelector('.showtime-text');
-    showtimeText.textContent = movieTime;
-
-    // 设置座位信息
-    const seatsText = orderItem.querySelector('.seats-text');
-    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const seatList = Array.isArray(order.seats) ? 
-        order.seats.map(seatId => seatIdToText(seatId)).join(', ') : '无座位信息';
-    seatsText.textContent = `${seatCount}张票 (${seatList})`;
-
-    // 设置下单时间
-    const createdTime = orderItem.querySelector('.created-time');
-    createdTime.textContent = formatDate(order.createdAt);
-
-    // 设置额外时间信息（支付时间或过期时间）
-    const additionalTime = orderItem.querySelector('.additional-time');
-    const additionalTimeLabel = orderItem.querySelector('.additional-time-label');
-    const additionalTimeValue = orderItem.querySelector('.additional-time-value');
-    
-    if (order.status === 'reserved' && order.expiresAt) {
-        additionalTime.style.display = 'block';
-        additionalTimeLabel.textContent = '支付截止:';
-        additionalTimeValue.textContent = formatDate(order.expiresAt);
-    } else if ((order.status === 'sold' || order.status === 'paid') && order.paidAt) {
-        additionalTime.style.display = 'block';
-        additionalTimeLabel.textContent = '支付时间:';
-        additionalTimeValue.textContent = formatDate(order.paidAt);
-    }
-
-    // 设置订单号
-    const orderIdText = orderItem.querySelector('.order-id-text');
-    orderIdText.textContent = order.ticketId;
-
-    // 设置价格信息
-    const totalPrice = orderItem.querySelector('.total-price');
-    const priceBreakdown = orderItem.querySelector('.price-breakdown');
-    const unitPrice = order.unitPrice || 45;
-    const total = order.totalCost || (unitPrice * seatCount);
-    
-    totalPrice.textContent = `¥${total}`;
-    priceBreakdown.textContent = `¥${unitPrice} × ${seatCount}张`;
-
-    // 绑定点击事件
-    orderContainer.addEventListener('click', () => {
-        showMyOrderDetail(order);
-    });
-
-    return orderItem;
 }
 
 /**
