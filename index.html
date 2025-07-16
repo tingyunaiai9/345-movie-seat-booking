@@ -7,6 +7,7 @@
     <title>电影院在线选座系统</title>
     <!--<link rel="stylesheet" href="css/style.css">-->
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/blessing.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/config.css">
     <link rel="stylesheet" href="css/components.css">
@@ -194,18 +195,6 @@
                                     </div>
                                 </div>
 
-                                <div class="seat-preference">
-                                    <h3>选座偏好</h3>
-                                    <select id="seat-preference">
-                                        <option value="auto">自动推荐</option>
-                                        <option value="front">前排</option>
-                                        <option value="middle">中间</option>
-                                        <option value="back">后排</option>
-                                    </select>
-                                    <div class="auto-seat-actions">
-                                        <button class="btn btn-auto" id="auto-select-individual">自动选座</button>
-                                    </div>
-                                </div>
 
                                 <!-- 个人票控制中的手动控制部分 -->
                                 <div class="manual-controls">
@@ -221,6 +210,9 @@
                                     <div class="instruction-item">
                                         <span class="instruction-icon">🎯</span>
                                         <span class="instruction-text">建议选择相邻座位以获得更好体验</span>
+                                    </div>
+                                    <div class="auto-seat-actions">
+                                        <button class="btn btn-auto" id="auto-select-individual">自动选座</button>
                                     </div>
                                 </div>
                             </div>
@@ -248,19 +240,6 @@
                                     </div>
                                 </div>
 
-                                <div class="group-preference">
-                                    <h3>选座偏好</h3>
-                                    <select id="group-preference">
-                                        <option value="auto">自动推荐</option>
-                                        <option value="front">前排</option>
-                                        <option value="middle">中间</option>
-                                        <option value="back">后排</option>
-                                    </select>
-                                    <div class="auto-seat-actions">
-                                        <button class="btn btn-auto" id="auto-select-group">团体自动选座</button>
-                                    </div>
-                                </div>
-
                                 <!-- 团体票控制中的手动控制部分 -->
                                 <div class="manual-controls">
                                     <h3>选座说明</h3>
@@ -275,6 +254,9 @@
                                     <div class="instruction-item">
                                         <span class="instruction-icon">🎪</span>
                                         <span class="instruction-text">中间区域视野最佳</span>
+                                    </div>
+                                    <div class="auto-seat-actions">
+                                        <button class="btn btn-auto" id="auto-select-group">团体自动选座</button>
                                     </div>
                                 </div>
                             </div>
@@ -726,12 +708,77 @@
             </section>
 
             <!-- 最终祝福视图 -->
-            <section id="final-view" class="view" style="min-height: 500px;">
+            <!-- <section id="final-view" class="view" style="min-height: 500px;">
                 <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 60vh;">
                     <span
                         style="font-size: 3.2rem; color: #2d8cf0; font-weight: bold; text-align: center;">祝您观影愉快~</span>
                 </div>
-            </section>
+            </section> -->
+            <!-- 最终祝福视图 -->
+            <section id="final-view" class="view">
+                <div class="final-blessing-container">
+                    <!-- 背景动画元素 -->
+                    <div class="background-particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+
+                    <!-- 主要内容区域 -->
+                    <div class="blessing-content">
+                        <!-- 成功图标 -->
+                        <div class="success-icon-container">
+                            <div class="success-icon">
+                                <div class="check-mark">
+                                    <div class="check-left"></div>
+                                    <div class="check-right"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 主标题 -->
+                        <h1 class="blessing-title">
+                            <span class="title-line-1">购票成功！</span>
+                            <span class="title-line-2">祝您观影愉快</span>
+                        </h1>
+
+                        <!-- 装饰元素 -->
+                        <div class="decorative-elements">
+                            <span class="decoration">🎬</span>
+                            <span class="decoration">✨</span>
+                            <span class="decoration">🍿</span>
+                            <span class="decoration">🎭</span>
+                            <span class="decoration">⭐</span>
+                        </div>
+
+                        <!-- 祝福文字 -->
+                        <div class="blessing-message">
+                            <p class="message-line">愿这场电影为您带来美好回忆</p>
+                            <p class="message-line">期待您的下次光临！</p>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="final-actions">
+                            <button class="btn btn-primary btn-glow" id="view-my-orders-final">查看我的订单</button>
+                            <button class="btn btn-secondary btn-glow" id="back-to-home">返回首页</button>
+                        </div>
+                    </div>
+
+                    <!-- 底部装饰 -->
+                    <div class="bottom-decoration">
+                        <div class="wave-animation">
+                            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                                <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
+                                <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
+                                <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>  
         </div>
     </main>
 
@@ -775,6 +822,7 @@
     <script src="js/ui-validation.js"></script>
     <script src="js/ui-payment.js"></script>
     <script src="js/ui-orders.js"></script>
+    <script src="js/ui-blessing.js"></script>
 
 </body>
 
