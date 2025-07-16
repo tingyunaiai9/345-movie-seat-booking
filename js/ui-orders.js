@@ -22,6 +22,7 @@ const ORDER_FILTER_TYPES = {
     ALL: 'all',
     RESERVED: 'reserved',
     SOLD: 'sold',
+    INVALID: 'invalid',
     EXPIRED: 'expired',
     CANCELLED: 'cancelled',
     REFUNDED: 'refunded'
@@ -282,7 +283,7 @@ function checkAndUpdateOrderStatus(order) {
 /**
  * 创建订单项元素
  */
-function createMyOrderItem(order, isLatest = false) {
+function createMyOrderItem(order) {
     // 更新订单状态
     order = checkAndUpdateOrderStatus(order);
     
@@ -327,12 +328,6 @@ function createMyOrderItem(order, isLatest = false) {
     // 设置电影标题
     const titleText = orderItem.querySelector('.title-text');
     titleText.textContent = movieTitle;
-
-    // 设置最新标签
-    const latestBadge = orderItem.querySelector('.latest-badge');
-    if (isLatest) {
-        latestBadge.style.display = 'inline';
-    }
 
     // 设置放映时间
     const showtimeText = orderItem.querySelector('.showtime-text');
@@ -483,6 +478,7 @@ function clearAllCountdowns() {
     countdownIntervals.clear();
 }
 
+
 /**
  * 渲染订单列表
  */
@@ -511,6 +507,9 @@ function renderMyOrdersList() {
             switch (MyOrdersState.currentFilter) {
                 case ORDER_FILTER_TYPES.RESERVED: return order.status === 'reserved';
                 case ORDER_FILTER_TYPES.SOLD: return order.status === 'sold';
+                case ORDER_FILTER_TYPES.INVALID: 
+                    // 已失效：包括已取消、已过期、已退款
+                    return order.status === 'cancelled' || order.status === 'expired' || order.status === 'refunded';
                 case ORDER_FILTER_TYPES.EXPIRED: return order.status === 'expired';
                 case ORDER_FILTER_TYPES.CANCELLED: return order.status === 'cancelled';
                 case ORDER_FILTER_TYPES.REFUNDED: return order.status === 'refunded';
@@ -569,14 +568,13 @@ function renderMyOrdersList() {
     } else {
         // 渲染订单项
         filteredOrders.forEach((order, index) => {
-            // 只有在活跃状态订单中的第一个才标记为最新
-            const isLatest = index === 0 && (order.status === 'reserved' || order.status === 'sold');
-            const orderItem = createMyOrderItem(order, isLatest);
+            const orderItem = createMyOrderItem(order);
             ordersList.appendChild(orderItem);
         });
     }
 }
 
+// ...existing code...
 /**
  * 座位ID转换为"排座"格式
  */
