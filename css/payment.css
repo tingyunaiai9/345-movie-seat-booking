@@ -271,6 +271,19 @@
     display: none;
 }
 
+.payment-help-icon {
+    margin-left: 5px;
+    color: #999;
+    font-size: 12px;
+    cursor: help;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 /* 响应式设计 */
 @media (max-width: 768px) {
     .payment-options {

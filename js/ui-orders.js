@@ -73,27 +73,6 @@ function getMovieInfo(movieId) {
     };
 }
 
-/**
- * 计算预约过期时间
- * @param {Date|string} createdAt - 创建时间
- * @returns {Date} - 过期时间
- */
-function calculateExpiryTime(createdAt) {
-    const createdTime = new Date(createdAt);
-    return new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
-}
-
-/**
- * 计算剩余时间（分钟）
- * @param {Date} expiryTime - 过期时间
- * @returns {number} - 剩余分钟数
- */
-function calculateRemainingMinutes(expiryTime) {
-    const now = new Date();
-    const timeLeft = expiryTime - now;
-    return Math.floor(timeLeft / (60 * 1000));
-}
-
 // ========================= 订单状态检查和更新 =========================
 
 /**
@@ -112,7 +91,9 @@ function checkAndUpdateOrderStatus(order) {
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            expiryTime = calculateExpiryTime(order.createdAt);
+            // 直接计算预约过期时间
+            const createdTime = new Date(order.createdAt);
+            expiryTime = new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
             order.expiresAt = expiryTime.toISOString();
         }
         
@@ -513,12 +494,17 @@ function createMyOrderItem(order, isLatest = false) {
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            expiryTime = calculateExpiryTime(order.createdAt);
+            // 直接计算预约过期时间
+            const createdTime = new Date(order.createdAt);
+            expiryTime = new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
             order.expiresAt = expiryTime.toISOString();
         }
         
         if (expiryTime) {
-            const remainingMinutes = calculateRemainingMinutes(expiryTime);
+            // 直接计算剩余时间（分钟）
+            const now = new Date();
+            const timeLeft = expiryTime - now;
+            const remainingMinutes = Math.floor(timeLeft / (60 * 1000));
 
             if (remainingMinutes > 0) {
                 timeInfo = `${formatDate(expiryTime)} <span class="time-warning">(还剩 ${remainingMinutes} 分钟)</span>`;
@@ -673,7 +659,9 @@ function showMyOrderDetail(order) {
         if (order.expiresAt) {
             expiryTime = new Date(order.expiresAt);
         } else if (order.createdAt) {
-            expiryTime = calculateExpiryTime(order.createdAt);
+            // 直接计算预约过期时间
+            const createdTime = new Date(order.createdAt);
+            expiryTime = new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
             order.expiresAt = expiryTime.toISOString();
         }
         
