@@ -532,8 +532,30 @@ function renderMyOrdersList() {
         });
     }
 
-    // 按时间排序 - 最新的在上，最旧的在下
+    // 自定义排序：活跃状态在上，失效状态在下，各自按时间排序
     filteredOrders.sort((a, b) => {
+        // 定义订单状态的优先级
+        const getStatusPriority = (status) => {
+            switch (status) {
+                case 'reserved': return 1; // 预约状态最优先
+                case 'sold':
+                case 'paid': return 2; // 已支付状态次之
+                case 'cancelled': return 3; // 失效状态放在后面
+                case 'expired': return 4;
+                case 'refunded': return 5;
+                default: return 6; // 未知状态最后
+            }
+        };
+
+        const priorityA = getStatusPriority(a.status);
+        const priorityB = getStatusPriority(b.status);
+
+        // 首先按状态优先级排序
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
+        // 相同优先级内按时间排序（最新的在前）
         const timeA = new Date(a.createdAt || 0).getTime();
         const timeB = new Date(b.createdAt || 0).getTime();
         return timeB - timeA; // 降序排列，新的在前，旧的在后
@@ -550,7 +572,8 @@ function renderMyOrdersList() {
     } else {
         // 渲染订单项
         filteredOrders.forEach((order, index) => {
-            const isLatest = index === 0; // 第一个订单是最新的
+            // 只有在活跃状态订单中的第一个才标记为最新
+            const isLatest = index === 0 && (order.status === 'reserved' || order.status === 'sold' || order.status === 'paid');
             const orderItem = createMyOrderItem(order, isLatest);
             ordersList.appendChild(orderItem);
         });
