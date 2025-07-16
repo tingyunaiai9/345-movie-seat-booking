@@ -387,7 +387,7 @@
     color: #398d37;
 }
 
-/* 时间信息区 */
+/* 时间信息区 - 修复空格问题 */
 .time-section {
     margin-bottom: 8px;
 }
@@ -397,6 +397,7 @@
     align-items: center;
     margin: 4px 0;
     font-size: 13px;
+    gap: 0; /* 移除间距，防止额外空格 */
 }
 
 .time-label {
@@ -485,31 +486,66 @@
 }
 
 /* ========================= 失效状态订单样式 ========================= */
-.order-item.cancelled,
-.order-item.refunded,
-.order-item.expired {
+/* 针对订单项容器级别的失效状态 */
+.order-item[data-order-id] {
+    /* 基础样式，将通过JS动态添加失效类 */
+}
+
+/* 通过CSS属性选择器和伪类来识别失效状态的订单 */
+.order-item:has(.order-status-badge.cancelled),
+.order-item:has(.order-status-badge.refunded), 
+.order-item:has(.order-status-badge.expired) {
     opacity: 0.7;
     background: rgba(248, 249, 250, 0.95);
 }
 
-.order-item.cancelled .movie-poster,
-.order-item.refunded .movie-poster,
-.order-item.expired .movie-poster {
+.order-item:has(.order-status-badge.cancelled) .movie-poster,
+.order-item:has(.order-status-badge.refunded) .movie-poster,
+.order-item:has(.order-status-badge.expired) .movie-poster {
     filter: grayscale(50%);
 }
 
-.order-item.cancelled .movie-title,
-.order-item.refunded .movie-title,
-.order-item.expired .movie-title {
+.order-item:has(.order-status-badge.cancelled) .movie-title,
+.order-item:has(.order-status-badge.refunded) .movie-title,
+.order-item:has(.order-status-badge.expired) .movie-title {
     background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.order-item.cancelled .total-price,
-.order-item.refunded .total-price,
-.order-item.expired .total-price {
+.order-item:has(.order-status-badge.cancelled) .total-price,
+.order-item:has(.order-status-badge.refunded) .total-price,
+.order-item:has(.order-status-badge.expired) .total-price {
+    color: #6c757d;
+}
+
+/* 兼容性方案：对于不支持:has()的浏览器，使用JS添加的类名 */
+.order-item.order-cancelled,
+.order-item.order-refunded,
+.order-item.order-expired {
+    opacity: 0.7;
+    background: rgba(248, 249, 250, 0.95);
+}
+
+.order-item.order-cancelled .movie-poster,
+.order-item.order-refunded .movie-poster,
+.order-item.order-expired .movie-poster {
+    filter: grayscale(50%);
+}
+
+.order-item.order-cancelled .movie-title,
+.order-item.order-refunded .movie-title,
+.order-item.order-expired .movie-title {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.order-item.order-cancelled .total-price,
+.order-item.order-refunded .total-price,
+.order-item.order-expired .total-price {
     color: #6c757d;
 }
 
@@ -670,6 +706,24 @@
     background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.15) 100%);
     color: #dc3545;
     border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* 座位标签样式 */
+.seat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.seat-tag {
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(104, 165, 48, 0.3);
 }
 
 /* ========================= 订单详情模态框 - 失效状态样式 ========================= */
