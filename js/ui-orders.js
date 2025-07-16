@@ -15,22 +15,8 @@ const statusText = {
     'refunded': '已退款'
 };
 
-// 时间相关常量
-const TIME_CONSTANTS = {
-    RESERVATION_EXPIRE_MINUTES: 30,  // 预约过期时间（分钟）
-    MILLISECONDS_PER_MINUTE: 60 * 1000,  // 每分钟的毫秒数
-    DATE_FORMAT: {
-        YEAR_MONTH_DAY: 'YYYY-MM-DD',
-        HOUR_MINUTE: 'HH:mm',
-        FULL: 'YYYY-MM-DD HH:mm'
-    },
-    TIME_LABELS: {
-        ORDER_TIME: '下单时间:',
-        EXPIRE_TIME: '过期时间:',
-        PAY_TIME: '支付时间:',
-        STATUS: '状态:'
-    }
-};
+// 预约过期时间常量（分钟）
+const RESERVATION_EXPIRE_MINUTES = 30;
 
 // 电影信息映射
 const MOVIE_MAPPING = {
@@ -54,23 +40,6 @@ const MOVIE_MAPPING = {
     }
 };
 
-// 默认配置
-const DEFAULT_CONFIG = {
-    MOVIE: {
-        TITLE: '未知电影',
-        TIME: '时间待定',
-        IMAGE: 'img/poster_cat.jpg'
-    },
-    TICKET: {
-        UNIT_PRICE: 45,
-        CURRENCY: '¥'
-    },
-    CUSTOMER: {
-        DEFAULT_NAME: '未填写',
-        DEFAULT_AGE: '未填写'
-    }
-};
-
 // 订单筛选类型
 const ORDER_FILTER_TYPES = {
     ALL: 'all',
@@ -81,7 +50,7 @@ const ORDER_FILTER_TYPES = {
     REFUNDED: 'refunded'
 };
 
-// ========================= 订单管理状态 =========================
+// 订单管理状态
 const MyOrdersState = {
     orders: [],
     currentFilter: ORDER_FILTER_TYPES.ALL,
@@ -98,9 +67,9 @@ const MyOrdersState = {
 function getMovieInfo(movieId) {
     return MOVIE_MAPPING[movieId] || {
         id: movieId,
-        title: DEFAULT_CONFIG.MOVIE.TITLE,
-        image: DEFAULT_CONFIG.MOVIE.IMAGE,
-        defaultTime: DEFAULT_CONFIG.MOVIE.TIME
+        title: '未知电影',
+        image: 'img/poster_cat.jpg',
+        defaultTime: '时间待定'
     };
 }
 
@@ -111,7 +80,7 @@ function getMovieInfo(movieId) {
  */
 function calculateExpiryTime(createdAt) {
     const createdTime = new Date(createdAt);
-    return new Date(createdTime.getTime() + TIME_CONSTANTS.RESERVATION_EXPIRE_MINUTES * TIME_CONSTANTS.MILLISECONDS_PER_MINUTE);
+    return new Date(createdTime.getTime() + RESERVATION_EXPIRE_MINUTES * 60 * 1000);
 }
 
 /**
@@ -122,7 +91,7 @@ function calculateExpiryTime(createdAt) {
 function calculateRemainingMinutes(expiryTime) {
     const now = new Date();
     const timeLeft = expiryTime - now;
-    return Math.floor(timeLeft / TIME_CONSTANTS.MILLISECONDS_PER_MINUTE);
+    return Math.floor(timeLeft / (60 * 1000));
 }
 
 // ========================= 订单状态检查和更新 =========================
@@ -554,25 +523,25 @@ function createMyOrderItem(order, isLatest = false) {
             if (remainingMinutes > 0) {
                 timeInfo = `${formatDate(expiryTime)} <span class="time-warning">(还剩 ${remainingMinutes} 分钟)</span>`;
                 statusBadgeClass = 'urgent';
-                timeLabel = TIME_CONSTANTS.TIME_LABELS.EXPIRE_TIME;
+                timeLabel = '过期时间:';
             } else {
                 timeInfo = `${formatDate(expiryTime)}`;
                 statusBadgeClass = 'expired';
-                timeLabel = TIME_CONSTANTS.TIME_LABELS.EXPIRE_TIME;
+                timeLabel = '过期时间:';
             }
         }
     } else if (order.status === 'expired') {
         timeInfo = `已过期`;
         statusBadgeClass = 'expired';
-        timeLabel = TIME_CONSTANTS.TIME_LABELS.STATUS;
+        timeLabel = '状态:';
     } else if (order.paidAt) {
         timeInfo = `${formatDate(order.paidAt)}`;
         statusBadgeClass = 'paid';
-        timeLabel = TIME_CONSTANTS.TIME_LABELS.PAY_TIME;
+        timeLabel = '支付时间:';
     }
 
     // 价格计算
-    const unitPrice = order.unitPrice || DEFAULT_CONFIG.TICKET.UNIT_PRICE;
+    const unitPrice = order.unitPrice || 45;
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
     const totalPrice = order.totalPrice || (seatCount * unitPrice);
 
@@ -617,8 +586,8 @@ function createMyOrderItem(order, isLatest = false) {
     orderItem.querySelector('.order-id-text').textContent = order.ticketId;
     
     // 价格信息
-    orderItem.querySelector('.total-price').textContent = `${DEFAULT_CONFIG.TICKET.CURRENCY}${totalPrice}`;
-    orderItem.querySelector('.price-breakdown').textContent = `${seatCount} 张票 × ${DEFAULT_CONFIG.TICKET.CURRENCY}${unitPrice}`;
+    orderItem.querySelector('.total-price').textContent = `¥${totalPrice}`;
+    orderItem.querySelector('.price-breakdown').textContent = `${seatCount} 张票 × ¥${unitPrice}`;
 
     // 添加点击事件
     orderItem.addEventListener('click', (e) => {
@@ -728,15 +697,15 @@ function showMyOrderDetail(order) {
     seatTagsContainer.innerHTML = seatsHtml;
 
     // 更新客户信息
-    document.getElementById('detail-customer-name').textContent = customer.name || DEFAULT_CONFIG.CUSTOMER.DEFAULT_NAME;
-    document.getElementById('detail-customer-age').textContent = customer.age || DEFAULT_CONFIG.CUSTOMER.DEFAULT_AGE;
+    document.getElementById('detail-customer-name').textContent = customer.name || '未填写';
+    document.getElementById('detail-customer-age').textContent = customer.age || '未填写';
 
     // 更新费用明细
     const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const unitPrice = order.unitPrice || DEFAULT_CONFIG.TICKET.UNIT_PRICE;
+    const unitPrice = order.unitPrice || 45;
     const totalPrice = seatCount * unitPrice;
-    document.getElementById('detail-ticket-price').textContent = `${DEFAULT_CONFIG.TICKET.CURRENCY}${unitPrice} × ${seatCount}`;
-    document.getElementById('detail-total-price').textContent = `${DEFAULT_CONFIG.TICKET.CURRENCY}${totalPrice}`;
+    document.getElementById('detail-ticket-price').textContent = `¥${unitPrice} × ${seatCount}`;
+    document.getElementById('detail-total-price').textContent = `¥${totalPrice}`;
 
     // 显示/隐藏操作按钮
     const cancelBtn = document.getElementById('cancel-order');
@@ -878,9 +847,8 @@ if (typeof window !== 'undefined') {
         
         // 常量访问
         getConstants: () => ({
-            TIME_CONSTANTS,
+            RESERVATION_EXPIRE_MINUTES,
             MOVIE_MAPPING,
-            DEFAULT_CONFIG,
             ORDER_FILTER_TYPES,
             statusText
         })
