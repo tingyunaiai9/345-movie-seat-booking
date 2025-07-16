@@ -61,7 +61,7 @@
 /* 顶部控制网格布局 */
 .top-controls-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 25px;
     align-items: start;
 }
@@ -78,7 +78,6 @@
 
 .customer-info h3,
 .group-info h3,
-.seat-preference h3,
 .manual-controls h3 {
     margin: 0 0 15px 0;
     color: #2c3e50;

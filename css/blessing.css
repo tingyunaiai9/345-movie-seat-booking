@@ -1,0 +1,415 @@
+/* 最终祝福页面样式 */
+.final-blessing-container {
+    min-height: 100vh;
+    background: rgba(0, 0, 0, 0.2); /* 完全透明背景 */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 2rem;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* 背景粒子动画 */
+.background-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.particle:nth-child(1) {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+    animation-duration: 6s;
+}
+
+.particle:nth-child(2) {
+    top: 60%;
+    left: 80%;
+    animation-delay: -2s;
+    animation-duration: 8s;
+}
+
+.particle:nth-child(3) {
+    top: 80%;
+    left: 10%;
+    animation-delay: -4s;
+    animation-duration: 7s;
+}
+
+.particle:nth-child(4) {
+    top: 30%;
+    left: 70%;
+    animation-delay: -1s;
+    animation-duration: 9s;
+}
+
+.particle:nth-child(5) {
+    top: 70%;
+    left: 30%;
+    animation-delay: -3s;
+    animation-duration: 6s;
+}
+
+.particle:nth-child(6) {
+    top: 10%;
+    left: 60%;
+    animation-delay: -5s;
+    animation-duration: 8s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+/* 主要内容区域 */
+.blessing-content {
+    text-align: center;
+    z-index: 2;
+    position: relative;
+    max-width: 600px;
+    animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 成功图标 */
+.success-icon-container {
+    margin-bottom: 2rem;
+}
+
+.success-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bounceIn 0.8s ease-out 0.3s both;
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+}
+
+.check-mark {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+
+.check-left,
+.check-right {
+    position: absolute;
+    background: white;
+    border-radius: 2px;
+}
+
+.check-left {
+    width: 4px;
+    height: 20px;
+    left: 14px;
+    top: 20px;
+    transform: rotate(45deg);
+    animation: checkLeft 0.5s ease-out 0.8s both;
+}
+
+.check-right {
+    width: 4px;
+    height: 30px;
+    left: 22px;
+    top: 10px;
+    transform: rotate(-45deg);
+    animation: checkRight 0.5s ease-out 1s both;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes checkLeft {
+    0% {
+        height: 0;
+    }
+    100% {
+        height: 20px;
+    }
+}
+
+@keyframes checkRight {
+    0% {
+        height: 0;
+    }
+    100% {
+        height: 30px;
+    }
+}
+
+/* 主标题 */
+.blessing-title {
+    margin-bottom: 2rem;
+}
+
+.title-line-1,
+.title-line-2 {
+    display: block;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.title-line-1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    animation: fadeInLeft 0.8s ease-out 0.5s both;
+}
+
+.title-line-2 {
+    font-size: 3.2rem;
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeInRight 0.8s ease-out 0.7s both;
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 装饰元素 */
+.decorative-elements {
+    margin: 2rem 0;
+    animation: fadeIn 0.8s ease-out 0.9s both;
+}
+
+.decoration {
+    font-size: 2rem;
+    margin: 0 1rem;
+    display: inline-block;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.decoration:nth-child(1) { animation-delay: 0s; }
+.decoration:nth-child(2) { animation-delay: 0.2s; }
+.decoration:nth-child(3) { animation-delay: 0.4s; }
+.decoration:nth-child(4) { animation-delay: 0.6s; }
+.decoration:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 祝福文字 */
+.blessing-message {
+    margin-bottom: 3rem;
+    animation: fadeIn 0.8s ease-out 1.1s both;
+}
+
+.message-line {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 操作按钮 */
+.final-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: slideInUp 0.8s ease-out 1.3s both;
+}
+
+.btn-glow {
+    position: relative;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-transform: none;
+    font-weight: 600;
+}
+
+.btn-glow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-glow.btn-primary {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    border: none;
+    color: white;
+}
+
+.btn-glow.btn-primary:hover {
+    background: linear-gradient(135deg, #ee5a52, #dc4a41);
+}
+
+.btn-glow.btn-secondary {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    border: none;
+    color: white;
+}
+
+.btn-glow.btn-secondary:hover {
+    background: linear-gradient(135deg, #0984e3, #0770c4);
+}
+
+/* 底部装饰波浪 */
+.bottom-decoration {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.wave-animation svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 120px;
+}
+
+.wave-animation .shape-fill {
+    fill: rgba(255, 255, 255, 0.1);
+    animation: waveMove 8s ease-in-out infinite;
+}
+
+@keyframes waveMove {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(-20px);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .final-blessing-container {
+        padding: 1rem;
+    }
+    
+    .title-line-1 {
+        font-size: 2rem;
+    }
+    
+    .title-line-2 {
+        font-size: 2.5rem;
+    }
+    
+    .decoration {
+        font-size: 1.5rem;
+        margin: 0 0.5rem;
+    }
+    
+    .message-line {
+        font-size: 1.1rem;
+    }
+    
+    .final-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-glow {
+        padding: 10px 25px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .success-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .title-line-1 {
+        font-size: 1.8rem;
+    }
+    
+    .title-line-2 {
+        font-size: 2.2rem;
+    }
+}

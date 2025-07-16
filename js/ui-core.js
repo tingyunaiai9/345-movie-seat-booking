@@ -324,6 +324,7 @@ function bindAutoSeatButtons() {
     }
 }
 
+
 /**
  * 启用自动选座按钮
  */
@@ -347,6 +348,7 @@ function enableAutoSeatButtons() {
         console.log('✅ 团体票自动选座按钮已启用');
     }
 }
+
 
 /**
  * 处理窗口大小变化
