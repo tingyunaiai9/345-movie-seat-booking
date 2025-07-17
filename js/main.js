@@ -74,7 +74,7 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
     currentCinemaConfig.SEATS_PER_ROW = seatsPerRow;
     currentCinemaConfig.TOTAL_SEATS = rows * seatsPerRow;
     currentCinemaConfig.movieId = movieId;
-    
+
     // 处理电影时间设置
     if (movieTime) {
         if (typeof movieTime === 'string') {
@@ -96,7 +96,7 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
             currentCinemaConfig.movieStartTime = null;
         }
     }
-    
+
     if (currentCinemaConfig.movieStartTime) {
         console.log(`电影开始时间已设定: ${currentCinemaConfig.movieStartTime.toLocaleString()}`);
     }
@@ -348,7 +348,7 @@ function findScatteredSeatsForIndividual(members, validRows, colFilter = null) {
         for (const row of validRows) {
             if (!canSitInRow(ageGroup, row)) continue;
             // 螺旋式搜索colFilter范围内的座位
-            const colsToSearch = Array.isArray(colFilter) && colFilter.length > 0 ? colFilter : Array.from({length: currentCinemaConfig.SEATS_PER_ROW}, (_, i) => i + 1);
+            const colsToSearch = Array.isArray(colFilter) && colFilter.length > 0 ? colFilter : Array.from({ length: currentCinemaConfig.SEATS_PER_ROW }, (_, i) => i + 1);
             for (let j = 0; j < colsToSearch.length; j++) {
                 const seatOffset = Math.ceil(j / 2) * (j % 2 === 0 ? 1 : -1);
                 const colIdx = colsToSearch.indexOf(midSeat) + seatOffset;
@@ -533,7 +533,7 @@ function reserveTickets(seats, customerInfo) {
     const expiresAt = new Date(Date.now() + currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
     console.log('电影开始时间:', currentCinemaConfig.movieStartTime);
     console.log('预订过期时间:', expiresAt);
-    
+
     // 获取电影信息
     let movieInfo = null;
     if (currentCinemaConfig.movieId && window.UIMovieSelector && window.UIMovieSelector.getMovieInfo) {
@@ -579,6 +579,7 @@ function purchaseTickets(seats, customerInfo) {
     let movieInfo = null;
     if (currentCinemaConfig.movieId && window.UIMovieSelector && window.UIMovieSelector.getMovieInfo) {
         movieInfo = window.UIMovieSelector.getMovieInfo(currentCinemaConfig.movieId);
+        console.log('当前电影信息:', movieInfo);
     }
 
     const ticketId = `s-${Date.now()}`;
@@ -692,7 +693,7 @@ function getSeat(row, col) {
  * 获取当前影院所有座位的深拷贝
  * @returns {Array} 座位二维数组的深拷贝
  */
-function getCinemaSeats(){
+function getCinemaSeats() {
     return cinemaSeats.map(row => row.map(seat => ({ ...seat }))); // 返回座位的深拷贝，避免外部修改
 }
 
