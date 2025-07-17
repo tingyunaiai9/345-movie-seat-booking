@@ -283,7 +283,7 @@ function handleReservation() {
 
             // 切换到 final-view，优先用UIViewController.switchToView
             if (window.UIViewController && typeof window.UIViewController.switchToView === 'function') {
-                window.UIViewController.switchToView('final');
+                window.UIViewController.switchToView('final', {operation: 'reservation'});
             } else {
                 // 兜底：直接用DOM切换
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
