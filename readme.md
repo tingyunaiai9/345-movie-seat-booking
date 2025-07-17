@@ -31,8 +31,94 @@
 * 其他优点
   * 动态效果
   * 视觉美感
-  * 内涵彩蛋
+  * 内涵彩蛋，敬请期待~
+
+## 二、使用说明
+
+### **2.1 运行环境**
+
+* 推荐浏览器：Google Chrome 浏览器的最新稳定版
+* 打开方式：直接在浏览器中打开 `index.html` 即可
+
+### 2.2 界面布局介绍
+
+（五粮液TODO：介绍各个界面的布局和功能，可以和2.3合并，多放一些图片，可以在截图上增加一些框和箭头用于说明，好看一点的框和箭头）
+
+### **2.3 操作指南**
+
+（五粮液TODO）
+
+## 三、实现思路及技术应用
+
+### 3.1 系统流程设计
+
+（停云TODO：）
+
+### 3.2 数据结构设计
+
+（停云TODO：seat、ticket）
+
+### 3.3 核心算法设计
+
+（停云TODO：自动选座、选座验证、订单操作）
+
+### 3.4 数据存储机制
+
+（六块TODO）
+
+### 3.5 Canvas绘制
+
+（六块TODO）
+
+### 3.6 页面逻辑
+
+（五粮液TODO）
+
+### 3.7 交互设计
+
+（sigamalTODO）
+
+## 四、遇到问题及解决办法
+
+问题一：（简称）（停云TODO：写3个）
+
+* 问题描述：
+* 原因分析：
+* 解决方法：
+
+问题四：（简称）（六块TODO：写3个）
+
+* 问题描述：
+* 原因分析：
+* 解决方法：
+
+问题七：（简称）（五粮液TODO：写3个）
+
+* 问题描述：
+* 原因分析：
+* 解决方法：
+
+问题十：（简称）（sigmalTODO：写3个）
+
+* 问题描述：
+* 原因分析：
+* 解决方法：
+
+## 五、总结与感悟
+
+* 停云：（停云TODO：写100~200字）
+* 六块：（六块TODO：写100~200字）
+* 五粮液：（五粮液TODO：写100~200字）
+* sigmal：（sigmalTODO：写100~200字）
+
+## 六、分工
+
+* [停云](https://github.com/tingyunaiai9)：（停云TODO）
+* [六块](https://github.com/fujiimoku)：（六块TODO）
+* [五粮液](https://github.com/wanly23)：（五粮液TODO）
+* [sigmal](https://github.com/sigmalyj)：（sigmalTODO）
 
 ## 参考资料
 
+* [1] MDN Web Docs. Canvas API. [https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 * 大模型：Gemini，Claude，ChatCPT
