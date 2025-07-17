@@ -137,6 +137,7 @@
 .filter-tabs {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap; /* 允许换行，适应更多按钮 */
 }
 
 .filter-tab {
@@ -149,6 +150,7 @@
     transition: all 0.3s ease;
     font-size: 14px;
     font-weight: 500;
+    white-space: nowrap; /* 防止文字换行 */
 }
 
 .filter-tab.active {
@@ -161,6 +163,23 @@
 .filter-tab:hover:not(.active) {
     border-color: #98ccbb;
     background: rgba(255, 255, 255, 0.9);
+}
+
+/* 为已失效筛选按钮添加特殊样式 */
+.filter-tab[data-filter="invalid"] {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.filter-tab[data-filter="invalid"].active {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.15) 100%);
+    color: #dc3545;
+}
+
+.filter-tab[data-filter="invalid"]:hover:not(.active) {
+    border-color: #f5c6cb;
+    background: rgba(248, 215, 218, 0.5);
 }
 
 .search-box {
@@ -807,97 +826,42 @@
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
-/* ========================= 预约倒计时样式 ========================= */
-.countdown-label {
-    color: #6c757d;
-    font-weight: 500;
-    font-size: 13px;
-    min-width: 60px;
-}
-
-.countdown-time {
-    font-family: 'Courier New', monospace;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    min-width: 50px;
-    text-align: center;
-    padding: 2px 6px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-}
-
-.countdown-time.normal {
-    color: #398d37;
-    background: rgba(57, 141, 55, 0.1);
-}
-
-.countdown-time.warning {
-    color: #ffc107;
-    background: rgba(255, 193, 7, 0.2);
-}
-
-.countdown-time.urgent {
-    color: #dc3545;
-    background: rgba(220, 53, 69, 0.2);
-    font-weight: 900;
-}
-
-.countdown-time.expired {
-    color: #6c757d;
-    background: rgba(108, 117, 125, 0.1);
-    text-decoration: line-through;
-}
-
-/* 倒计时动画效果 */
-@keyframes warning-pulse {
-    0%, 100% {
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 4px 16px rgba(255, 193, 7, 0.4);
-        transform: scale(1.02);
-    }
-}
-
-@keyframes urgent-pulse {
-    0%, 100% {
-        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
-        transform: scale(1.03);
-    }
-}
-
-/* 移动端适配 */
+/* 响应式调整筛选器 */
 @media (max-width: 768px) {
-    .countdown-label {
-        font-size: 11px;
+    .orders-filter {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
     }
     
-    .countdown-time {
+    .filter-tabs {
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .filter-tab {
+        padding: 6px 12px;
         font-size: 13px;
-        min-width: 45px;
+    }
+    
+    .search-box {
+        justify-content: center;
+    }
+    
+    .search-box input {
+        width: 100%;
+        max-width: 300px;
     }
 }
 
 @media (max-width: 480px) {
-    .countdown-time {
-        font-size: 12px;
-        min-width: 40px;
+    .filter-tabs {
+        flex-direction: column;
+        gap: 8px;
     }
-}
-
-/* 确保倒计时不影响订单卡片的整体布局 */
-.time-section {
-    margin-bottom: 8px;
-}
-
-/* 在订单详情模态框中的倒计时样式 */
-.order-detail-modal .countdown-time {
-    font-size: 16px;
-    min-width: 60px;
+    
+    .filter-tab {
+        text-align: center;
+        padding: 8px 16px;
+    }
 }

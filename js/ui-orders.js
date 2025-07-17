@@ -35,9 +35,6 @@ const MyOrdersState = {
     searchKeyword: ''
 };
 
-// 在全局变量部分添加倒计时管理器
-let countdownIntervals = new Map(); // 存储每个订单的倒计时定时器
-
 // ========================= 订单页面管理 =========================
 
 /**
@@ -207,9 +204,6 @@ function showMyOrdersPage() {
  */
 function hideMyOrdersPage() {
     console.log('隐藏我的订单页面');
-    
-    // 清理所有倒计时
-    clearAllCountdowns();
 
     const myOrdersView = document.getElementById('my-orders-view');
     if (myOrdersView) {
@@ -353,9 +347,6 @@ function createMyOrderItem(order) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付截止:';
         additionalTimeValue.textContent = formatDate(order.expiresAt);
-        
-        // 为预约订单添加倒计时
-        addCountdownToOrder(orderContainer, order);
     } else if (order.status === 'sold' && order.paidAt) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付时间:';
@@ -384,133 +375,9 @@ function createMyOrderItem(order) {
 }
 
 /**
- * 为预约订单添加倒计时
- * @param {HTMLElement} orderContainer - 订单容器元素
- * @param {Object} order - 订单对象
- */
-function addCountdownToOrder(orderContainer, order) {
-    if (order.status !== 'reserved' || !order.expiresAt) return;
-    
-    const orderId = order.ticketId;
-    const expiresAt = new Date(order.expiresAt);
-    
-    // 立即计算初始倒计时值
-    const now = new Date();
-    const timeLeft = expiresAt.getTime() - now.getTime();
-    
-    let initialText = '已过期';
-    let initialClass = 'time-value countdown-time expired';
-    
-    if (timeLeft > 0) {
-        // 计算剩余时间
-        const minutes = Math.floor(timeLeft / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        initialText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        // 根据剩余时间设置初始样式
-        if (timeLeft <= 5 * 60 * 1000) { // 最后5分钟
-            initialClass = 'time-value countdown-time urgent';
-        } else if (timeLeft <= 10 * 60 * 1000) { // 最后10分钟
-            initialClass = 'time-value countdown-time warning';
-        } else {
-            initialClass = 'time-value countdown-time normal';
-        }
-    }
-    
-    // 创建倒计时元素，使用与时间信息区相同的结构，并设置初始值
-    const countdownElement = document.createElement('div');
-    countdownElement.className = 'additional-time';
-    countdownElement.style.display = 'block';
-    countdownElement.innerHTML = `
-        <span class="time-label countdown-label">支付剩余时间:</span>
-        <span class="${initialClass}" id="countdown-${orderId}">${initialText}</span>
-    `;
-    
-    // 将倒计时插入到时间信息区域
-    const timeSection = orderContainer.querySelector('.time-section');
-    if (timeSection) {
-        timeSection.appendChild(countdownElement);
-    }
-    
-    // 如果已经过期，不需要设置定时器
-    if (timeLeft <= 0) {
-        return;
-    }
-    
-    // 清除可能存在的旧定时器
-    if (countdownIntervals.has(orderId)) {
-        clearInterval(countdownIntervals.get(orderId));
-    }
-    
-    // 更新倒计时函数
-    const updateCountdown = () => {
-        const now = new Date();
-        const timeLeft = expiresAt.getTime() - now.getTime();
-        const countdownDisplay = document.getElementById(`countdown-${orderId}`);
-        
-        if (!countdownDisplay) {
-            // 如果元素不存在，清除定时器
-            clearInterval(countdownIntervals.get(orderId));
-            countdownIntervals.delete(orderId);
-            return;
-        }
-        
-        if (timeLeft <= 0) {
-            // 时间到期
-            countdownDisplay.textContent = '已过期';
-            countdownDisplay.className = 'time-value countdown-time expired';
-            
-            // 清除定时器
-            clearInterval(countdownIntervals.get(orderId));
-            countdownIntervals.delete(orderId);
-            
-            // 触发订单状态更新
-            setTimeout(() => {
-                checkAllOrdersStatus();
-                renderMyOrdersList();
-            }, 1000);
-        } else {
-            // 计算剩余时间
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            
-            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            countdownDisplay.textContent = formattedTime;
-            
-            // 根据剩余时间设置样式
-            if (timeLeft <= 5 * 60 * 1000) { // 最后5分钟
-                countdownDisplay.className = 'time-value countdown-time urgent';
-            } else if (timeLeft <= 10 * 60 * 1000) { // 最后10分钟
-                countdownDisplay.className = 'time-value countdown-time warning';
-            } else {
-                countdownDisplay.className = 'time-value countdown-time normal';
-            }
-        }
-    };
-    
-    // 设置定时器，每秒更新（不需要立即调用 updateCountdown，因为已经设置了初始值）
-    const intervalId = setInterval(updateCountdown, 1000);
-    countdownIntervals.set(orderId, intervalId);
-}
-
-/**
- * 清理所有倒计时定时器
- */
-function clearAllCountdowns() {
-    countdownIntervals.forEach((intervalId) => {
-        clearInterval(intervalId);
-    });
-    countdownIntervals.clear();
-}
-
-
-/**
  * 渲染订单列表
  */
 function renderMyOrdersList() {
-    // 清理之前的倒计时
-    clearAllCountdowns();
-    
     loadMyOrdersFromLocalStorage();
     
     // 检查并更新所有订单状态
