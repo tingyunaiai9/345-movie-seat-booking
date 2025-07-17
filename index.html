@@ -617,103 +617,9 @@
                         </div>
                     </template>
 
-                    <!-- 订单详情模态框 -->
-                    <div class="order-detail-modal" id="order-detail-modal" style="display: none;">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3>订单详情</h3>
-                                <button class="modal-close" id="close-order-detail">×</button>
-                            </div>
-                            <div class="modal-body" id="order-detail-content">
-                                <!-- 在订单详情模态框中，订单信息区域应该按以下顺序排列 -->
-                                <div class="order-detail-section">
-                                    <h4>📋 订单信息</h4>
-                                    <div class="detail-grid">
-                                        <!-- 1. 电影名称 -->
-                                        <span class="detail-label">电影名称:</span>
-                                        <span class="detail-value" id="detail-movie-title">未知电影</span>
-                                        
-                                        <!-- 2. 订单号 -->
-                                        <span class="detail-label">订单号:</span>
-                                        <span class="detail-value" id="detail-order-id">-</span>
-                                        
-                                        <!-- 3. 放映时间 -->
-                                        <span class="detail-label">放映时间:</span>
-                                        <span class="detail-value" id="detail-movie-time">时间待定</span>
-                                        
-                                        <!-- 4. 状态 -->
-                                        <span class="detail-label">订单状态:</span>
-                                        <span class="detail-value order-status" id="detail-order-status">-</span>
-                                        
-                                        <!-- 5. 创建时间 -->
-                                        <span class="detail-label">下单时间:</span>
-                                        <span class="detail-value" id="detail-created-time">-</span>
-                                        
-                                        <!-- 6. 支付时间（动态显示） -->
-                                        <span class="detail-label" id="detail-paid-time-label" style="display: none;">支付时间:</span>
-                                        <span class="detail-value" id="detail-paid-time" style="display: none;">-</span>
-                                        
-                                        <!-- 6. 支付截止时间（动态显示） -->
-                                        <span class="detail-label" id="detail-expires-label" style="display: none;">支付截止:</span>
-                                        <span class="detail-value" id="detail-expires-time" style="display: none;">-</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- 座位信息区域保持不变 -->
-                                <div class="order-detail-section">
-                                    <h4>🎫 座位信息</h4>
-                                    <div class="detail-grid">
-                                        <span class="detail-label">选择座位:</span>
-                                        <div class="detail-value">
-                                            <div class="seat-tags" id="detail-seat-tags">
-                                                <!-- 座位标签将在这里动态生成 -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- 客户信息区域保持不变 -->
-                                <div class="order-detail-section">
-                                    <h4>👤 客户信息</h4>
-                                    <div class="detail-grid">
-                                        <span class="detail-label">姓名:</span>
-                                        <span class="detail-value" id="detail-customer-name">-</span>
-                                        
-                                        <span class="detail-label">年龄:</span>
-                                        <span class="detail-value" id="detail-customer-age">-</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- 费用明细区域保持不变 -->
-                                <div class="order-detail-section">
-                                    <h4>💰 费用明细</h4>
-                                    <div class="detail-grid">
-                                        <span class="detail-label">票价:</span>
-                                        <span class="detail-value" id="detail-ticket-price">¥45 × 1</span>
-                                        
-                                        <span class="detail-label">总计:</span>
-                                        <span class="detail-value" id="detail-total-price">¥45</span>
-                                    </div>
-                                </div>                            
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-secondary" id="cancel-order" style="display: none;">取消订单</button>
-                                <button class="btn btn-primary" id="pay-reserved-order"
-                                    style="display: none;">立即支付</button>
-                                <button class="btn btn-refund" id="refund-order" style="display: none;">申请退款</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
-            <!-- 最终祝福视图 -->
-            <!-- <section id="final-view" class="view" style="min-height: 500px;">
-                <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 60vh;">
-                    <span
-                        style="font-size: 3.2rem; color: #2d8cf0; font-weight: bold; text-align: center;">祝您观影愉快~</span>
-                </div>
-            </section> -->
             <!-- 最终祝福视图 -->
             <section id="final-view" class="view">
                 <div class="final-blessing-container">
@@ -803,6 +709,93 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="modal-cancel">取消</button>
                 <button class="btn btn-primary" id="modal-confirm">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔑 新位置：订单详情模态框 - 现在是全局模态框 -->
+    <div class="order-detail-modal" id="order-detail-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>订单详情</h3>
+                <button class="modal-close" id="close-order-detail">×</button>
+            </div>
+            <div class="modal-body" id="order-detail-content">
+                <!-- 在订单详情模态框中，订单信息区域应该按以下顺序排列 -->
+                <div class="order-detail-section">
+                    <h4>📋 订单信息</h4>
+                    <div class="detail-grid">
+                        <!-- 1. 电影名称 -->
+                        <span class="detail-label">电影名称:</span>
+                        <span class="detail-value" id="detail-movie-title">未知电影</span>
+                        
+                        <!-- 2. 订单号 -->
+                        <span class="detail-label">订单号:</span>
+                        <span class="detail-value" id="detail-order-id">-</span>
+                        
+                        <!-- 3. 放映时间 -->
+                        <span class="detail-label">放映时间:</span>
+                        <span class="detail-value" id="detail-movie-time">时间待定</span>
+                        
+                        <!-- 4. 状态 -->
+                        <span class="detail-label">订单状态:</span>
+                        <span class="detail-value order-status" id="detail-order-status">-</span>
+                        
+                        <!-- 5. 创建时间 -->
+                        <span class="detail-label">下单时间:</span>
+                        <span class="detail-value" id="detail-created-time">-</span>
+                        
+                        <!-- 6. 支付时间（动态显示） -->
+                        <span class="detail-label" id="detail-paid-time-label" style="display: none;">支付时间:</span>
+                        <span class="detail-value" id="detail-paid-time" style="display: none;">-</span>
+                        
+                        <!-- 6. 支付截止时间（动态显示） -->
+                        <span class="detail-label" id="detail-expires-label" style="display: none;">支付截止:</span>
+                        <span class="detail-value" id="detail-expires-time" style="display: none;">-</span>
+                    </div>
+                </div>
+                
+                <!-- 座位信息区域保持不变 -->
+                <div class="order-detail-section">
+                    <h4>🎫 座位信息</h4>
+                    <div class="detail-grid">
+                        <span class="detail-label">选择座位:</span>
+                        <div class="detail-value">
+                            <div class="seat-tags" id="detail-seat-tags">
+                                <!-- 座位标签将在这里动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 客户信息区域保持不变 -->
+                <div class="order-detail-section">
+                    <h4>👤 客户信息</h4>
+                    <div class="detail-grid">
+                        <span class="detail-label">姓名:</span>
+                        <span class="detail-value" id="detail-customer-name">-</span>
+                        
+                        <span class="detail-label">年龄:</span>
+                        <span class="detail-value" id="detail-customer-age">-</span>
+                    </div>
+                </div>
+                
+                <!-- 费用明细区域保持不变 -->
+                <div class="order-detail-section">
+                    <h4>💰 费用明细</h4>
+                    <div class="detail-grid">
+                        <span class="detail-label">票价:</span>
+                        <span class="detail-value" id="detail-ticket-price">¥45 × 1</span>
+                        
+                        <span class="detail-label">总计:</span>
+                        <span class="detail-value" id="detail-total-price">¥45</span>
+                    </div>
+                </div>                            
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-order" style="display: none;">取消订单</button>
+                <button class="btn btn-primary" id="pay-reserved-order" style="display: none;">立即支付</button>
+                <button class="btn btn-refund" id="refund-order" style="display: none;">申请退款</button>
             </div>
         </div>
     </div>

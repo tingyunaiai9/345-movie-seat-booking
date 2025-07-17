@@ -771,16 +771,20 @@ function showMyOrderDetail(order) {
 function hideMyOrderDetail() {
     const modal = document.getElementById('order-detail-modal');
     if (modal) {
-        modal.style.display = 'none';
-        // 🔑 添加淡出动画
+        // 添加淡出动画
         modal.style.opacity = '0';
-        modal.style.transform = 'scale(0.95)';
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.transform = 'scale(0.95)';
+        }
         
         setTimeout(() => {
             modal.style.display = 'none';
             // 重置样式
             modal.style.opacity = '';
-            modal.style.transform = '';
+            if (modalContent) {
+                modalContent.style.transform = '';
+            }
         }, 200);
         // 恢复页面滚动
         document.body.style.overflow = '';
