@@ -529,10 +529,21 @@ function reserveTickets(seats, customerInfo) {
     if (fullSeatObjects.length === 0) return { success: false, message: '未选择任何座位' };
     if (!fullSeatObjects.every(s => isSeatAvailableOrSelected(s.row, s.col))) return { success: false, message: '您选择的座位中包含不可用座位，请重新选择' };
 
-    // 修改预订过期时间计算：设置为当前时间的30分钟后
-    const expiresAt = new Date(Date.now() + currentCinemaConfig.RESERVATION_EXPIRY_MINUTES * 60 * 1000);
+    // 修改预订过期时间计算：设置为电影开始前30分钟
+    const movieStartTime = new Date(currentCinemaConfig.movieStartTime);
+    const thirtyMinutesBeforeMovie = new Date(movieStartTime.getTime() - 30 * 60 * 1000);
+    const currentTime = new Date();
+
+    // 检查当前时间是否已经超过了截止时间
+    if (currentTime >= thirtyMinutesBeforeMovie) {
+        return { success: false, message: '预订已截止：距离电影开始时间不足30分钟，无法预订。' };
+    }
+
+    const expiresAt = thirtyMinutesBeforeMovie;
     console.log('电影开始时间:', currentCinemaConfig.movieStartTime);
     console.log('预订过期时间:', expiresAt);
+
+    console.log('预订过期时间（电影开始前30分钟）:', expiresAt);
 
     // 获取电影信息
     let movieInfo = null;
