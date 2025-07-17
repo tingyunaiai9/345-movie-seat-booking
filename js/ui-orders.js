@@ -268,14 +268,28 @@ function checkAndUpdateOrderStatus(order) {
         const now = new Date();
         const expiresAt = new Date(order.expiresAt);
         if (now > expiresAt) {
+            const oldStatus = order.status;
             order.status = 'expired';
+            
+            console.log(`订单状态变更: ${order.ticketId} 从 ${oldStatus} 变更为 ${order.status}`);
+            
             // 状态改变后，重新排序所有订单
             MyOrdersState.orders = sortOrders(MyOrdersState.orders);
+            
+            // 打印当前所有订单的状态
+            console.log('当前所有订单状态:');
+            console.table(MyOrdersState.orders.map(ord => ({
+                订单号: ord.ticketId,
+                状态: ord.status,
+                状态文本: statusText[ord.status] || ord.status,
+                创建时间: ord.createdAt,
+                过期时间: ord.expiresAt || '无',
+                电影: ord.movieInfo?.title || '未知'
+            })));
         }
     }
     return order;
 }
-
 
 /**
  * 订单排序函数
@@ -288,12 +302,12 @@ function sortOrders(orders) {
         // 定义订单状态的优先级
         const getStatusPriority = (status) => {
             switch (status) {
-                case 'reserved': return 1; // 预约状态最优先
-                case 'sold': return 2; // 已支付状态次之
-                case 'cancelled': return 3; // 失效状态放在后面
-                case 'expired': return 4;
-                case 'refunded': return 5;
-                default: return 6; // 未知状态最后
+                case 'reserved': return 1; // 预约和支付状态最优先
+                case 'sold': return 1; 
+                case 'cancelled': return 2; // 失效状态放在后面
+                case 'expired': return 2;
+                case 'refunded': return 2;
+                default: return 3; // 未知状态最后
             }
         };
 
