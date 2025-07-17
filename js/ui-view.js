@@ -737,15 +737,18 @@ function validateCustomConfig() {
     const customRowsInput = document.getElementById('custom-rows');
     const customSeatsInput = document.getElementById('custom-seats');
 
-    const rows = parseInt(customRowsInput?.value) || 0;
-    const cols = parseInt(customSeatsInput?.value) || 0;
+    const rows = parseInt(customRowsInput?.value) || 10;
+    const cols = parseInt(customSeatsInput?.value) || 20;
+
+    console.log(`验证自定义配置: rows=${rows}, cols=${cols}`);
 
     // 验证自定义配置是否有效
     const isValid = rows >= 5 && rows <= 20 && cols >= 10 && cols <= 30;
 
     if (isValid) {
         viewState.cinemaConfigSelected = true;
-        applyConfigToModules(rows, cols, '自定义');
+        viewState.selectedCinemaSize = { rows, cols, name: '自定义' };
+        console.log(`自定义配置验证通过: ${JSON.stringify(viewState.selectedCinemaSize)}`);
     } else {
         viewState.cinemaConfigSelected = false;
     }
@@ -864,35 +867,35 @@ function handlePaymentConfirmation() {
 function bindFinalPageEvents() {
     console.log('绑定最终页面按钮事件...');
 
-        // 查看我的订单按钮
+    // 查看我的订单按钮
     const viewOrdersBtn = document.getElementById('view-my-orders-final');
     if (viewOrdersBtn) {
         // 移除可能存在的旧事件监听器
         const newViewOrdersBtn = viewOrdersBtn.cloneNode(true);
         viewOrdersBtn.parentNode.replaceChild(newViewOrdersBtn, viewOrdersBtn);
-        
-        newViewOrdersBtn.addEventListener('click', function() {
+
+        newViewOrdersBtn.addEventListener('click', function () {
             console.log('点击查看我的订单按钮');
             handleViewMyOrders();
         });
-        
+
         console.log('✅ 查看订单按钮事件已绑定');
     } else {
         console.warn('未找到查看订单按钮 #view-my-orders-final');
     }
-    
+
     // 返回首页按钮
     const backHomeBtn = document.getElementById('back-to-home');
     if (backHomeBtn) {
         // 移除可能存在的旧事件监听器
         const newBackHomeBtn = backHomeBtn.cloneNode(true);
         backHomeBtn.parentNode.replaceChild(newBackHomeBtn, backHomeBtn);
-        
-        newBackHomeBtn.addEventListener('click', function() {
+
+        newBackHomeBtn.addEventListener('click', function () {
             console.log('点击返回首页按钮');
             handleBackToHome();
         });
-        
+
         console.log('✅ 返回首页按钮事件已绑定');
     } else {
         console.warn('未找到返回首页按钮 #back-to-home');
@@ -904,7 +907,7 @@ function bindFinalPageEvents() {
  */
 function handleViewMyOrders() {
     console.log('处理查看我的订单');
-    
+
     try {
         // 方法1：使用UIOrders模块
         if (window.UIOrders && window.UIOrders.showMyOrdersPage) {
@@ -912,21 +915,21 @@ function handleViewMyOrders() {
             window.UIOrders.showMyOrdersPage();
             return;
         }
-        
+
         // 方法2：手动切换到订单视图
         console.log('手动切换到订单视图');
-        
+
         // 隐藏所有视图
         document.querySelectorAll('.view').forEach(view => {
             view.classList.remove('active');
         });
-        
+
         // 显示订单视图
         const ordersView = document.getElementById('my-orders-view');
         if (ordersView) {
             ordersView.classList.add('active');
             console.log('✅ 订单视图已显示');
-            
+
             // 如果有订单渲染函数，调用它
             if (window.UIOrders && window.UIOrders.renderMyOrdersList) {
                 window.UIOrders.renderMyOrdersList();
@@ -935,7 +938,7 @@ function handleViewMyOrders() {
             console.error('未找到订单视图 #my-orders-view');
             showMessage('订单页面不可用', 'error');
         }
-        
+
     } catch (error) {
         console.error('切换到订单页面时发生错误:', error);
         showMessage('切换到订单页面失败', 'error');
@@ -947,17 +950,17 @@ function handleViewMyOrders() {
  */
 function handleBackToHome() {
     console.log('处理返回首页');
-    
+
     try {
         // 重置所有状态
         resetAllStates();
-        
+
         // 切换到配置页面
         switchToView('config');
-        
+
         console.log('✅ 已返回首页');
         showMessage('已返回首页，可以开始新的订单', 'info');
-        
+
     } catch (error) {
         console.error('返回首页时发生错误:', error);
         showMessage('返回首页失败', 'error');
@@ -969,38 +972,38 @@ function handleBackToHome() {
  */
 function resetAllStates() {
     console.log('重置所有状态');
-    
+
     try {
         // 1. 清除选中的座位
         if (window.StateManager && window.StateManager.clearAllSelections) {
             window.StateManager.clearAllSelections();
             console.log('✅ StateManager状态已清除');
         }
-        
+
         // 2. 清除个人票成员列表
         if (typeof clearIndividualMembersList === 'function') {
             clearIndividualMembersList();
             console.log('✅ 个人票成员列表已清除');
         }
-        
+
         // 3. 清除团体票成员列表（如果有的话）
         if (typeof clearGroupMembersList === 'function') {
             clearGroupMembersList();
             console.log('✅ 团体票成员列表已清除');
         }
-        
+
         // 4. 重置视图状态
         resetToStart();
-        
+
         // 5. 清除localStorage中的临时数据（保留订单数据）
         const keysToRemove = ['selectedMovie', 'selectedMovieInfo', 'tempCustomerInfo'];
         keysToRemove.forEach(key => {
             localStorage.removeItem(key);
         });
         console.log('✅ 临时数据已清除');
-        
+
         console.log('🔄 所有状态重置完成');
-        
+
     } catch (error) {
         console.error('重置状态时发生错误:', error);
     }
