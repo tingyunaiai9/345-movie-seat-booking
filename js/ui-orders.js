@@ -655,7 +655,8 @@ function showMyOrderDetail(order) {
     // 显示模态框并确保在视口中央
     modal.style.display = 'flex';
 
-    // 确保模态框聚焦（便于键盘操作）
+
+    // 设置焦点到模态框（便于键盘操作）
     modal.focus();
 }
 
@@ -665,8 +666,21 @@ function showMyOrderDetail(order) {
 function hideMyOrderDetail() {
     const modal = document.getElementById('order-detail-modal');
     if (modal) {
-        modal.style.display = 'none';
-
+        // 添加淡出动画
+        modal.style.opacity = '0';
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.transform = 'scale(0.95)';
+        }
+        
+        setTimeout(() => {
+            modal.style.display = 'none';
+            // 重置样式
+            modal.style.opacity = '';
+            if (modalContent) {
+                modalContent.style.transform = '';
+            }
+        }, 200);
         // 恢复页面滚动
         document.body.style.overflow = '';
     }

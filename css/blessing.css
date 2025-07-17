@@ -110,7 +110,39 @@
     margin-bottom: 2rem;
 }
 
-.success-icon {
+.success-icon-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bounceIn 0.8s ease-out 0.3s both;
+    
+    /* 🔑 保持原来的阴影和背景效果 */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.logo-image {
+    width: 80px;  /* 🔑 调整logo图片大小，稍小于容器 */
+    height: 80px;
+    object-fit: contain;  /* 🔑 保持图片比例 */
+    border-radius: 50%;
+    
+    /* 🔑 添加图片过滤效果，让logo更突出 */
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    
+    /* 🔑 如果logo是白色背景，可以去掉这行注释 */
+    /* background: white; */
+}
+
+/* .success-icon {
     width: 100px;
     height: 100px;
     border-radius: 50%;
@@ -121,9 +153,9 @@
     justify-content: center;
     animation: bounceIn 0.8s ease-out 0.3s both;
     box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
-}
+} */
 
-.check-mark {
+/* .check-mark {
     width: 40px;
     height: 40px;
     position: relative;
@@ -134,9 +166,9 @@
     position: absolute;
     background: white;
     border-radius: 2px;
-}
+} */
 
-.check-left {
+/* .check-left {
     width: 4px;
     height: 20px;
     left: 14px;
@@ -152,7 +184,7 @@
     top: 10px;
     transform: rotate(-45deg);
     animation: checkRight 0.5s ease-out 1s both;
-}
+} */
 
 @keyframes bounceIn {
     0% {
