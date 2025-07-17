@@ -165,23 +165,6 @@
     background: rgba(255, 255, 255, 0.9);
 }
 
-/* 为已失效筛选按钮添加特殊样式 */
-.filter-tab[data-filter="invalid"] {
-    border-color: #dc3545;
-    color: #dc3545;
-}
-
-.filter-tab[data-filter="invalid"].active {
-    border-color: #dc3545;
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.15) 100%);
-    color: #dc3545;
-}
-
-.filter-tab[data-filter="invalid"]:hover:not(.active) {
-    border-color: #f5c6cb;
-    background: rgba(248, 215, 218, 0.5);
-}
-
 .search-box {
     display: flex;
     gap: 10px;
