@@ -253,6 +253,8 @@ function checkAllOrdersStatus() {
             console.log('已释放过期预订座位:', releasedSeats);
             // 重新加载订单数据
             loadMyOrdersFromLocalStorage();
+            // 对订单进行排序
+            MyOrdersState.orders = sortOrders(MyOrdersState.orders);
         }
     }
 }
@@ -267,9 +269,47 @@ function checkAndUpdateOrderStatus(order) {
         const expiresAt = new Date(order.expiresAt);
         if (now > expiresAt) {
             order.status = 'expired';
+            // 状态改变后，重新排序所有订单
+            MyOrdersState.orders = sortOrders(MyOrdersState.orders);
         }
     }
     return order;
+}
+
+
+/**
+ * 订单排序函数
+ * 自定义排序：活跃状态在上，失效状态在下，各自按时间排序
+ * @param {Array} orders - 订单数组
+ * @returns {Array} 排序后的订单数组
+ */
+function sortOrders(orders) {
+    return orders.sort((a, b) => {
+        // 定义订单状态的优先级
+        const getStatusPriority = (status) => {
+            switch (status) {
+                case 'reserved': return 1; // 预约状态最优先
+                case 'sold': return 2; // 已支付状态次之
+                case 'cancelled': return 3; // 失效状态放在后面
+                case 'expired': return 4;
+                case 'refunded': return 5;
+                default: return 6; // 未知状态最后
+            }
+        };
+
+        const priorityA = getStatusPriority(a.status);
+        const priorityB = getStatusPriority(b.status);
+
+        // 首先按状态优先级排序
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
+        // 相同优先级内按时间排序（最新的在前）
+        const timeA = new Date(a.createdAt || 0).getTime();
+        const timeB = new Date(b.createdAt || 0).getTime();
+        return timeB - timeA; // 降序排列，新的在前，旧的在后
+    });
 }
 
 // ========================= 订单列表渲染 =========================
@@ -427,33 +467,8 @@ function renderMyOrdersList() {
         });
     }
 
-    // 自定义排序：活跃状态在上，失效状态在下，各自按时间排序
-    filteredOrders.sort((a, b) => {
-        // 定义订单状态的优先级
-        const getStatusPriority = (status) => {
-            switch (status) {
-                case 'reserved': return 1; // 预约状态最优先
-                case 'sold': return 2; // 已支付状态次之
-                case 'cancelled': return 3; // 失效状态放在后面
-                case 'expired': return 4;
-                case 'refunded': return 5;
-                default: return 6; // 未知状态最后
-            }
-        };
-
-        const priorityA = getStatusPriority(a.status);
-        const priorityB = getStatusPriority(b.status);
-
-        // 首先按状态优先级排序
-        if (priorityA !== priorityB) {
-            return priorityA - priorityB;
-        }
-
-        // 相同优先级内按时间排序（最新的在前）
-        const timeA = new Date(a.createdAt || 0).getTime();
-        const timeB = new Date(b.createdAt || 0).getTime();
-        return timeB - timeA; // 降序排列，新的在前，旧的在后
-    });
+    // 对筛选后的订单进行排序
+    filteredOrders = sortOrders(filteredOrders);
 
     // 清空列表
     ordersList.innerHTML = '';
