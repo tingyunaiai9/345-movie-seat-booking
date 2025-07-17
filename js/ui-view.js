@@ -240,6 +240,11 @@ function switchToView(viewName, options = {}) {
     // 显示目标视图
     targetView.classList.add('active');
 
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth' // 平滑滚动效果
+    });
     // 根据视图切换背景
     handleBackgroundForView(viewName);
 
