@@ -353,8 +353,8 @@ function getSeatInfoText(order) {
         return '自定义厅';
     };
 
-    const rows = order.rows || 8;
-    const cols = order.cols || 12;
+    const rows = order.movieInfo.rows || 8;
+    const cols = order.movieInfo.cols || 12;
     const hallType = getHallType(rows, cols);
     
     // 处理座位信息
@@ -445,7 +445,7 @@ function createMyOrderItem(order) {
     const showtimeText = orderItem.querySelector('.showtime-text');
     showtimeText.textContent = movieTime;
 
-    // 设置座位信息 - 使用新的合并函数
+    // 设置座位信息
     const seatsText = orderItem.querySelector('.seats-text');
     const seatInfo = getSeatInfoText(order);
     seatsText.textContent = `${seatInfo.seatCount}张票 (${seatInfo.seatInfo})`;
