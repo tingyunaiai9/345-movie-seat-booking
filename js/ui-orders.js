@@ -327,6 +327,70 @@ function sortOrders(orders) {
 }
 
 // ========================= 订单列表渲染 =========================
+/**
+ * 获取座位信息文本
+ * 包含座位ID转换、影厅类型判断和座位信息格式化
+ */
+function getSeatInfoText(order) {
+    // 座位ID转换为"排座"格式的内部函数
+    const seatIdToText = (seatId) => {
+        const parts = seatId.split('-');
+        if (parts.length === 3) {
+            return `${parts[1]}排${parts[2]}座`;
+        }
+        return seatId;
+    };
+
+    // 获取影厅类型的内部函数
+    const getHallType = (rows, cols) => {
+        if (rows === 8 && cols === 12) {
+            return '小厅';
+        } else if (rows === 10 && cols === 20) {
+            return '中厅';
+        } else if (rows === 12 && cols === 25) {
+            return '大厅';
+        }
+        return '自定义厅';
+    };
+
+    const rows = order.rows || 8;
+    const cols = order.cols || 12;
+    const hallType = getHallType(rows, cols);
+    
+    // 处理座位信息
+    if (!Array.isArray(order.seats) || order.seats.length === 0) {
+        return {
+            hallType,
+            seatCount: 0,
+            seatInfo: '无座位信息',
+            detailedSeats: []
+        };
+    }
+    
+    const seatCount = order.seats.length;
+    const detailedSeats = order.seats.map(id => {
+        const seatText = seatIdToText(id);
+        return `${hallType}${seatText}`;
+    });
+    
+    // 如果只有一个座位，显示具体座位
+    if (seatCount === 1) {
+        return {
+            hallType,
+            seatCount,
+            seatInfo: detailedSeats[0],
+            detailedSeats
+        };
+    }
+    
+    // 多个座位时，显示影厅类型和座位数量
+    return {
+        hallType,
+        seatCount,
+        seatInfo: `${hallType}${seatCount}个座位`,
+        detailedSeats
+    };
+}
 
 /**
  * 创建订单项元素
@@ -381,12 +445,10 @@ function createMyOrderItem(order) {
     const showtimeText = orderItem.querySelector('.showtime-text');
     showtimeText.textContent = movieTime;
 
-    // 设置座位信息
+    // 设置座位信息 - 使用新的合并函数
     const seatsText = orderItem.querySelector('.seats-text');
-    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
-    const seatList = Array.isArray(order.seats) ? 
-        order.seats.map(seatId => seatIdToText(seatId)).join(', ') : '无座位信息';
-    seatsText.textContent = `${seatCount}张票 (${seatList})`;
+    const seatInfo = getSeatInfoText(order);
+    seatsText.textContent = `${seatInfo.seatCount}张票 (${seatInfo.seatInfo})`;
 
     // 设置下单时间
     const createdTime = orderItem.querySelector('.created-time');
@@ -421,10 +483,10 @@ function createMyOrderItem(order) {
     const totalPrice = orderItem.querySelector('.total-price');
     const priceBreakdown = orderItem.querySelector('.price-breakdown');
     const unitPrice = order.unitPrice || 45;
-    const total = order.totalCost || (unitPrice * seatCount);
+    const total = order.totalCost || (unitPrice * seatInfo.seatCount);
     
     totalPrice.textContent = `¥${total}`;
-    priceBreakdown.textContent = `¥${unitPrice} × ${seatCount}张`;
+    priceBreakdown.textContent = `¥${unitPrice} × ${seatInfo.seatCount}张`;
 
     // 绑定点击事件
     orderContainer.addEventListener('click', () => {
@@ -499,18 +561,6 @@ function renderMyOrdersList() {
             ordersList.appendChild(orderItem);
         });
     }
-}
-
-/**
- * 座位ID转换为"排座"格式
- */
-function seatIdToText(seatId) {
-    // seatId 格式为 'seat-8-12'
-    const parts = seatId.split('-');
-    if (parts.length === 3) {
-        return `${parts[1]}排${parts[2]}座`;
-    }
-    return seatId;
 }
 
 /**
@@ -613,18 +663,26 @@ function showMyOrderDetail(order) {
             : order.paidAt;
     }
 
-    // 更新座位信息
+    // 更新座位信息 - 使用新的合并函数
     const seatTagsContainer = document.getElementById('detail-seat-tags');
-    const seatsHtml = Array.isArray(order.seats) ?
-        order.seats.map(id => `<span class="seat-tag">${seatIdToText(id)}</span>`).join('') : '';
-    seatTagsContainer.innerHTML = seatsHtml;
+    const seatInfo = getSeatInfoText(order);
+    
+    if (seatInfo.detailedSeats.length > 0) {
+        // 显示详细的座位标签
+        const seatsHtml = seatInfo.detailedSeats.map(seatText => {
+            return `<span class="seat-tag">${seatText}</span>`;
+        }).join('');
+        seatTagsContainer.innerHTML = seatsHtml;
+    } else {
+        seatTagsContainer.innerHTML = '<span class="seat-tag">无座位信息</span>';
+    }
 
     // 更新客户信息
     document.getElementById('detail-customer-name').textContent = customer.name || '未填写';
     document.getElementById('detail-customer-age').textContent = customer.age || '未填写';
 
     // 更新费用明细
-    const seatCount = Array.isArray(order.seats) ? order.seats.length : 0;
+    const seatCount = seatInfo.seatCount;
     const unitPrice = order.unitPrice || 45;
     const totalPrice = order.totalCost || (seatCount * unitPrice);
     document.getElementById('detail-ticket-price').textContent = `¥${unitPrice} × ${seatCount}`;
@@ -654,7 +712,6 @@ function showMyOrderDetail(order) {
 
     // 显示模态框并确保在视口中央
     modal.style.display = 'flex';
-
 
     // 设置焦点到模态框（便于键盘操作）
     modal.focus();
