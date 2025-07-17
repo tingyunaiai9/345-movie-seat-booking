@@ -907,7 +907,12 @@ function bindFinalPageEvents() {
  */
 function handleViewMyOrders() {
     console.log('处理查看我的订单');
-    
+    // 🔑 关键修复：隐藏导航栏
+    if (window.UIViewController && window.UIViewController.hideNavigationSteps) {
+        window.UIViewController.hideNavigationSteps();
+        console.log('✅ 导航栏已隐藏');
+    }
+
     // 🔑 直接调用 ui-orders.js 中的函数
     if (window.UIOrders && window.UIOrders.showMyOrdersPage) {
         window.UIOrders.showMyOrdersPage();
