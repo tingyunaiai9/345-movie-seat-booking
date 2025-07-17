@@ -200,23 +200,119 @@ function getSeatId(row, col) {
 }
 
 /**
- * 将当前影厅的座位状态保存到 localStorage
+ * 获取指定电影和影厅配置的座位状态
+ * @param {string} movieId - 电影ID
+ * @param {number} rows - 排数
+ * @param {number} seatsPerRow - 每排座位数
+ * @returns {Array|null} 座位状态数组或null
  */
+function loadCinemaStateFromStorage(movieId, rows, seatsPerRow) {
+    const storageKey = `cinemaState-${movieId}-${rows}x${seatsPerRow}`;
+    const savedSeats = localStorage.getItem(storageKey);
+
+    if (savedSeats) {
+        try {
+            return JSON.parse(savedSeats);
+        } catch (e) {
+            console.error('解析座位状态失败:', e);
+            return null;
+        }
+    }
+    return null;
+}
+
+/**
+ * 保存指定电影和影厅配置的座位状态
+ * @param {string} movieId - 电影ID
+ * @param {number} rows - 排数
+ * @param {number} seatsPerRow - 每排座位数
+ * @param {Array} seatData - 座位状态数组
+ */
+function saveCinemaStateToStorage(movieId, rows, seatsPerRow, seatData) {
+    const storageKey = `cinemaState-${movieId}-${rows}x${seatsPerRow}`;
+    try {
+        localStorage.setItem(storageKey, JSON.stringify(seatData));
+        console.log(`座位状态已保存到 localStorage，键为: ${storageKey}`);
+    } catch (e) {
+        console.error('保存座位状态失败:', e);
+    }
+}
+
+/**
+ * 修改指定票据对应影厅的座位状态
+ * @param {Object} ticket - 票据对象
+ * @param {string} newStatus - 新的座位状态
+ */
+function updateSeatsForTicket(ticket, newStatus) {
+    if (!ticket || !ticket.movieInfo) {
+        console.error('票据信息不完整，无法更新座位状态');
+        return;
+    }
+
+    const movieId = ticket.movieInfo.id;
+    const rows = ticket.movieInfo.rows;
+    const cols = ticket.movieInfo.cols;
+
+    if (!movieId || !rows || !cols) {
+        console.error('票据中的电影信息不完整，无法更新座位状态', ticket.movieInfo);
+        return;
+    }
+
+    const seatIds = ticket.seats;
+    if (!seatIds || seatIds.length === 0) return;
+
+    // 解析座位ID获取行列信息
+    const seatPositions = seatIds.map(id => {
+        const [_, row, col] = id.split('-');
+        return { row: parseInt(row), col: parseInt(col) };
+    });
+
+    // 加载对应影厅的座位状态
+    let targetSeats = loadCinemaStateFromStorage(movieId, rows, cols);
+
+    if (!targetSeats) {
+        console.warn(`未找到电影 ${movieId} (${rows}x${cols}) 的座位状态，无法更新`);
+        return;
+    }
+
+    // 更新座位状态
+    seatPositions.forEach(pos => {
+        if (pos.row >= 1 && pos.row <= rows && pos.col >= 1 && pos.col <= cols) {
+            targetSeats[pos.row - 1][pos.col - 1].status = newStatus;
+        }
+    });
+
+    // 保存更新后的座位状态
+    saveCinemaStateToStorage(movieId, rows, cols, targetSeats);
+
+    // 如果当前加载的是同一个影厅，也要更新当前的座位状态
+    if (currentCinemaConfig.movieId === movieId &&
+        currentCinemaConfig.TOTAL_ROWS === rows &&
+        currentCinemaConfig.SEATS_PER_ROW === cols) {
+        seatPositions.forEach(pos => {
+            if (cinemaSeats[pos.row - 1] && cinemaSeats[pos.row - 1][pos.col - 1]) {
+                cinemaSeats[pos.row - 1][pos.col - 1].status = newStatus;
+            }
+        });
+    }
+}
+
 function saveCurrentCinemaState() {
-    console.log(`当前影院共${currentCinemaConfig.TOTAL_ROWS}排，每排${currentCinemaConfig.SEATS_PER_ROW}座，电影ID: ${localStorage.getItem('selectedMovie')}`);
-    //确保当前配置和电影ID都存在
-    currentCinemaConfig.movieId = localStorage.getItem('selectedMovie');
+    console.log(`当前影院共${currentCinemaConfig.TOTAL_ROWS}排，每排${currentCinemaConfig.SEATS_PER_ROW}座，电影ID: ${currentCinemaConfig.movieId}`);
+
     if (!currentCinemaConfig.TOTAL_ROWS || !currentCinemaConfig.SEATS_PER_ROW || !currentCinemaConfig.movieId) {
         console.warn('当前影厅配置不完整，无法保存状态。');
         return;
     }
 
-    const { TOTAL_ROWS, SEATS_PER_ROW, movieId } = currentCinemaConfig;
-    const storageKey = `cinemaState-${movieId}-${TOTAL_ROWS}x${SEATS_PER_ROW}`;
-
-    localStorage.setItem(storageKey, JSON.stringify(cinemaSeats));
-    console.log(`当前影厅状态已保存到 localStorage，键为: ${storageKey}`);
+    saveCinemaStateToStorage(
+        currentCinemaConfig.movieId,
+        currentCinemaConfig.TOTAL_ROWS,
+        currentCinemaConfig.SEATS_PER_ROW,
+        cinemaSeats
+    );
 }
+
 
 // ========================= 个人选座算法 =========================
 
@@ -498,16 +594,11 @@ function checkAndReleaseExpiredReservations() {
     ticketRecords.forEach(ticket => {
         if (ticket.status === ORDER_STATUS.RESERVED && ticket.expiresAt && now > ticket.expiresAt) {
             ticket.status = ORDER_STATUS.EXPIRED;
-            ticket.seats.forEach(seatId => {
-                const [_, row, col] = seatId.split('-');
-                if (validateSeatParams(row, col)) {
-                    cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
-                    releasedSeatIds.push(seatId);
-                }
-            });
+            updateSeatsForTicket(ticket, SEAT_STATUS.AVAILABLE);
+
+            releasedSeatIds.push(...ticket.seats);
         }
     });
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return releasedSeatIds;
 }
 
@@ -619,13 +710,9 @@ function payForReservation(reservationId) {
     ticket.paidAt = new Date();
     delete ticket.expiresAt;
 
-    ticket.seats.forEach(seatId => {
-        const [_, row, col] = seatId.split('-');
-        if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.SOLD;
-    });
+    updateSeatsForTicket(ticket, SEAT_STATUS.SOLD);
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
     return { success: true, ticketId: ticket.ticketId, message: '支付成功！' };
 }
 
@@ -640,13 +727,10 @@ function cancelReservation(reservationId) {
     if (ticket.status !== ORDER_STATUS.RESERVED) return { success: false, message: `操作失败：该票据已[${ticket.status}]，无法取消预订。` };
 
     ticket.status = ORDER_STATUS.CANCELLED;
-    ticket.seats.forEach(seatId => {
-        const [_, row, col] = seatId.split('-');
-        if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
-    });
+    updateSeatsForTicket(ticket, SEAT_STATUS.AVAILABLE);
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+
     return { success: true, message: '预订已成功取消！' };
 }
 
@@ -662,13 +746,10 @@ function refundTicket(ticketId) {
     if (currentCinemaConfig.movieStartTime && new Date() > currentCinemaConfig.movieStartTime) return { success: false, message: '电影已开始，无法退票。' };
 
     ticket.status = ORDER_STATUS.REFUNDED;
-    ticket.seats.forEach(seatId => {
-        const [_, row, col] = seatId.split('-');
-        if (validateSeatParams(row, col)) cinemaSeats[row - 1][col - 1].status = SEAT_STATUS.AVAILABLE;
-    });
+    updateSeatsForTicket(ticket, SEAT_STATUS.AVAILABLE);
     // 票务操作后同步localStorage
     try { localStorage.setItem('movieTicketOrders', JSON.stringify(ticketRecords)); } catch (e) { console.error('订单同步到localStorage失败:', e); }
-    saveCurrentCinemaState(); // 保存当前状态到 localStorage
+
     return { success: true, message: '退票成功！' };
 }
 
