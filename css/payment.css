@@ -10,6 +10,13 @@
     margin: 0 auto;
     backdrop-filter: blur(10px);
     border: 1px solid #c2d4d6;
+
+    /* 🔑 确保包含所有浮动和定位元素 */
+    overflow: hidden;
+    position: relative;
+    
+    /* 🔑 确保足够的高度 */
+    min-height: 600px;
 }
 
 .payment-panel h2 {
@@ -491,9 +498,19 @@
 .payment-actions {
     display: flex;
     gap: 20px;
+    align-items: center;
     justify-content: center;
-    padding-top: 25px;
-    border-top: 2px solid #c2d4d6;
+    /* 🔑 关键修复：确保在面板内部 */
+    margin: 20px 0 0 0;
+    padding: 25px 20px 0 20px;
+    border-top: 2px solid #e9ecef;
+
+    /* 确保按钮在面板内部 */
+    width: 100%;
+    box-sizing: border-box;
+
+    position: relative;
+    z-index: 1;
 }
 
 .payment-actions .btn {
@@ -507,6 +524,11 @@
     overflow: hidden;
     border: none;
     cursor: pointer;
+
+    /* 🔑 确保按钮不会超出容器 */
+    max-width: 200px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .payment-actions .btn::before {
@@ -597,7 +619,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #2d8cf0 0%, #1976d2 100%);
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
     color: white;
 }
 

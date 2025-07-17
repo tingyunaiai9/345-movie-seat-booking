@@ -35,9 +35,6 @@ const MyOrdersState = {
     searchKeyword: ''
 };
 
-// 在全局变量部分添加倒计时管理器
-let countdownIntervals = new Map(); // 存储每个订单的倒计时定时器
-
 // ========================= 订单页面管理 =========================
 
 /**
@@ -207,9 +204,6 @@ function showMyOrdersPage() {
  */
 function hideMyOrdersPage() {
     console.log('隐藏我的订单页面');
-    
-    // 清理所有倒计时
-    clearAllCountdowns();
 
     const myOrdersView = document.getElementById('my-orders-view');
     if (myOrdersView) {
@@ -259,6 +253,8 @@ function checkAllOrdersStatus() {
             console.log('已释放过期预订座位:', releasedSeats);
             // 重新加载订单数据
             loadMyOrdersFromLocalStorage();
+            // 对订单进行排序
+            MyOrdersState.orders = sortOrders(MyOrdersState.orders);
         }
     }
 }
@@ -272,10 +268,62 @@ function checkAndUpdateOrderStatus(order) {
         const now = new Date();
         const expiresAt = new Date(order.expiresAt);
         if (now > expiresAt) {
+            const oldStatus = order.status;
             order.status = 'expired';
+            
+            console.log(`订单状态变更: ${order.ticketId} 从 ${oldStatus} 变更为 ${order.status}`);
+            
+            // 状态改变后，重新排序所有订单
+            MyOrdersState.orders = sortOrders(MyOrdersState.orders);
+            
+            // 打印当前所有订单的状态
+            console.log('当前所有订单状态:');
+            console.table(MyOrdersState.orders.map(ord => ({
+                订单号: ord.ticketId,
+                状态: ord.status,
+                状态文本: statusText[ord.status] || ord.status,
+                创建时间: ord.createdAt,
+                过期时间: ord.expiresAt || '无',
+                电影: ord.movieInfo?.title || '未知'
+            })));
         }
     }
     return order;
+}
+
+/**
+ * 订单排序函数
+ * 自定义排序：活跃状态在上，失效状态在下，各自按时间排序
+ * @param {Array} orders - 订单数组
+ * @returns {Array} 排序后的订单数组
+ */
+function sortOrders(orders) {
+    return orders.sort((a, b) => {
+        // 定义订单状态的优先级
+        const getStatusPriority = (status) => {
+            switch (status) {
+                case 'reserved': return 1; // 预约和支付状态最优先
+                case 'sold': return 1; 
+                case 'cancelled': return 2; // 失效状态放在后面
+                case 'expired': return 2;
+                case 'refunded': return 2;
+                default: return 3; // 未知状态最后
+            }
+        };
+
+        const priorityA = getStatusPriority(a.status);
+        const priorityB = getStatusPriority(b.status);
+
+        // 首先按状态优先级排序
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
+        // 相同优先级内按时间排序（最新的在前）
+        const timeA = new Date(a.createdAt || 0).getTime();
+        const timeB = new Date(b.createdAt || 0).getTime();
+        return timeB - timeA; // 降序排列，新的在前，旧的在后
+    });
 }
 
 // ========================= 订单列表渲染 =========================
@@ -342,7 +390,9 @@ function createMyOrderItem(order) {
 
     // 设置下单时间
     const createdTime = orderItem.querySelector('.created-time');
-    createdTime.textContent = formatDate(order.createdAt);
+    createdTime.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+        ? window.UIMovieSelector.formatMovieShowTime(new Date(order.createdAt))
+        : order.createdAt;
 
     // 设置额外时间信息（支付时间或过期时间）
     const additionalTime = orderItem.querySelector('.additional-time');
@@ -352,14 +402,15 @@ function createMyOrderItem(order) {
     if (order.status === 'reserved' && order.expiresAt) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付截止:';
-        additionalTimeValue.textContent = formatDate(order.expiresAt);
-        
-        // 为预约订单添加倒计时
-        addCountdownToOrder(orderContainer, order);
+        additionalTimeValue.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+            ? window.UIMovieSelector.formatMovieShowTime(new Date(order.expiresAt))
+            : order.expiresAt;
     } else if (order.status === 'sold' && order.paidAt) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付时间:';
-        additionalTimeValue.textContent = formatDate(order.paidAt);
+        additionalTimeValue.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+            ? window.UIMovieSelector.formatMovieShowTime(new Date(order.paidAt))
+            : order.paidAt;
     }
 
     // 设置订单号
@@ -384,133 +435,9 @@ function createMyOrderItem(order) {
 }
 
 /**
- * 为预约订单添加倒计时
- * @param {HTMLElement} orderContainer - 订单容器元素
- * @param {Object} order - 订单对象
- */
-function addCountdownToOrder(orderContainer, order) {
-    if (order.status !== 'reserved' || !order.expiresAt) return;
-    
-    const orderId = order.ticketId;
-    const expiresAt = new Date(order.expiresAt);
-    
-    // 立即计算初始倒计时值
-    const now = new Date();
-    const timeLeft = expiresAt.getTime() - now.getTime();
-    
-    let initialText = '已过期';
-    let initialClass = 'time-value countdown-time expired';
-    
-    if (timeLeft > 0) {
-        // 计算剩余时间
-        const minutes = Math.floor(timeLeft / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        initialText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        // 根据剩余时间设置初始样式
-        if (timeLeft <= 5 * 60 * 1000) { // 最后5分钟
-            initialClass = 'time-value countdown-time urgent';
-        } else if (timeLeft <= 10 * 60 * 1000) { // 最后10分钟
-            initialClass = 'time-value countdown-time warning';
-        } else {
-            initialClass = 'time-value countdown-time normal';
-        }
-    }
-    
-    // 创建倒计时元素，使用与时间信息区相同的结构，并设置初始值
-    const countdownElement = document.createElement('div');
-    countdownElement.className = 'additional-time';
-    countdownElement.style.display = 'block';
-    countdownElement.innerHTML = `
-        <span class="time-label countdown-label">支付剩余时间:</span>
-        <span class="${initialClass}" id="countdown-${orderId}">${initialText}</span>
-    `;
-    
-    // 将倒计时插入到时间信息区域
-    const timeSection = orderContainer.querySelector('.time-section');
-    if (timeSection) {
-        timeSection.appendChild(countdownElement);
-    }
-    
-    // 如果已经过期，不需要设置定时器
-    if (timeLeft <= 0) {
-        return;
-    }
-    
-    // 清除可能存在的旧定时器
-    if (countdownIntervals.has(orderId)) {
-        clearInterval(countdownIntervals.get(orderId));
-    }
-    
-    // 更新倒计时函数
-    const updateCountdown = () => {
-        const now = new Date();
-        const timeLeft = expiresAt.getTime() - now.getTime();
-        const countdownDisplay = document.getElementById(`countdown-${orderId}`);
-        
-        if (!countdownDisplay) {
-            // 如果元素不存在，清除定时器
-            clearInterval(countdownIntervals.get(orderId));
-            countdownIntervals.delete(orderId);
-            return;
-        }
-        
-        if (timeLeft <= 0) {
-            // 时间到期
-            countdownDisplay.textContent = '已过期';
-            countdownDisplay.className = 'time-value countdown-time expired';
-            
-            // 清除定时器
-            clearInterval(countdownIntervals.get(orderId));
-            countdownIntervals.delete(orderId);
-            
-            // 触发订单状态更新
-            setTimeout(() => {
-                checkAllOrdersStatus();
-                renderMyOrdersList();
-            }, 1000);
-        } else {
-            // 计算剩余时间
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            
-            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            countdownDisplay.textContent = formattedTime;
-            
-            // 根据剩余时间设置样式
-            if (timeLeft <= 5 * 60 * 1000) { // 最后5分钟
-                countdownDisplay.className = 'time-value countdown-time urgent';
-            } else if (timeLeft <= 10 * 60 * 1000) { // 最后10分钟
-                countdownDisplay.className = 'time-value countdown-time warning';
-            } else {
-                countdownDisplay.className = 'time-value countdown-time normal';
-            }
-        }
-    };
-    
-    // 设置定时器，每秒更新（不需要立即调用 updateCountdown，因为已经设置了初始值）
-    const intervalId = setInterval(updateCountdown, 1000);
-    countdownIntervals.set(orderId, intervalId);
-}
-
-/**
- * 清理所有倒计时定时器
- */
-function clearAllCountdowns() {
-    countdownIntervals.forEach((intervalId) => {
-        clearInterval(intervalId);
-    });
-    countdownIntervals.clear();
-}
-
-
-/**
  * 渲染订单列表
  */
 function renderMyOrdersList() {
-    // 清理之前的倒计时
-    clearAllCountdowns();
-    
     loadMyOrdersFromLocalStorage();
     
     // 检查并更新所有订单状态
@@ -554,33 +481,8 @@ function renderMyOrdersList() {
         });
     }
 
-    // 自定义排序：活跃状态在上，失效状态在下，各自按时间排序
-    filteredOrders.sort((a, b) => {
-        // 定义订单状态的优先级
-        const getStatusPriority = (status) => {
-            switch (status) {
-                case 'reserved': return 1; // 预约状态最优先
-                case 'sold': return 2; // 已支付状态次之
-                case 'cancelled': return 3; // 失效状态放在后面
-                case 'expired': return 4;
-                case 'refunded': return 5;
-                default: return 6; // 未知状态最后
-            }
-        };
-
-        const priorityA = getStatusPriority(a.status);
-        const priorityB = getStatusPriority(b.status);
-
-        // 首先按状态优先级排序
-        if (priorityA !== priorityB) {
-            return priorityA - priorityB;
-        }
-
-        // 相同优先级内按时间排序（最新的在前）
-        const timeA = new Date(a.createdAt || 0).getTime();
-        const timeB = new Date(b.createdAt || 0).getTime();
-        return timeB - timeA; // 降序排列，新的在前，旧的在后
-    });
+    // 对筛选后的订单进行排序
+    filteredOrders = sortOrders(filteredOrders);
 
     // 清空列表
     ordersList.innerHTML = '';
@@ -609,19 +511,6 @@ function seatIdToText(seatId) {
         return `${parts[1]}排${parts[2]}座`;
     }
     return seatId;
-}
-
-/**
- * 时间格式化
- */
-function formatDate(date) {
-    if (!date) return '';
-    if (typeof date === 'string') {
-        // 兼容字符串存储的时间
-        date = new Date(date);
-    }
-    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 /**
@@ -680,7 +569,9 @@ function showMyOrderDetail(order) {
     statusElement.className = `detail-value order-status ${order.status}`;
 
     // 5. 创建时间（第五个显示）
-    document.getElementById('detail-created-time').textContent = formatDate(order.createdAt);
+    document.getElementById('detail-created-time').textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+        ? window.UIMovieSelector.formatMovieShowTime(new Date(order.createdAt))
+        : order.createdAt;
 
     // 6. 支付时间/支付截止时间（第六个显示，根据状态动态显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
@@ -709,13 +600,17 @@ function showMyOrderDetail(order) {
         if (expiryTime) {
             expiresLabel.style.display = 'inline';
             expiresTime.style.display = 'inline';
-            expiresTime.textContent = formatDate(expiryTime);
+            expiresTime.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+                ? window.UIMovieSelector.formatMovieShowTime(expiryTime)
+                : expiryTime;
         }
     } else if (order.paidAt && order.status === 'sold') {
         // 已支付状态：显示支付时间
         paidTimeLabel.style.display = 'inline';
         paidTime.style.display = 'inline';
-        paidTime.textContent = formatDate(order.paidAt);
+        paidTime.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+            ? window.UIMovieSelector.formatMovieShowTime(new Date(order.paidAt))
+            : order.paidAt;
     }
 
     // 更新座位信息
@@ -760,7 +655,8 @@ function showMyOrderDetail(order) {
     // 显示模态框并确保在视口中央
     modal.style.display = 'flex';
 
-    // 确保模态框聚焦（便于键盘操作）
+
+    // 设置焦点到模态框（便于键盘操作）
     modal.focus();
 }
 
@@ -770,8 +666,21 @@ function showMyOrderDetail(order) {
 function hideMyOrderDetail() {
     const modal = document.getElementById('order-detail-modal');
     if (modal) {
-        modal.style.display = 'none';
-
+        // 添加淡出动画
+        modal.style.opacity = '0';
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.transform = 'scale(0.95)';
+        }
+        
+        setTimeout(() => {
+            modal.style.display = 'none';
+            // 重置样式
+            modal.style.opacity = '';
+            if (modalContent) {
+                modalContent.style.transform = '';
+            }
+        }, 200);
         // 恢复页面滚动
         document.body.style.overflow = '';
     }

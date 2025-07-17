@@ -181,21 +181,36 @@ function updatePaymentCustomerInfo() {
         }
     } else {
         // 团体票逻辑
-        const customerName = document.getElementById('customer-name')?.value || '未填写';
-        const customerAge = document.getElementById('customer-age')?.value || '未填写';
-
-        infoHtml = `
-            <div class="customer-info-item">
-                <span class="label">姓名:</span>
-                <span class="value">${customerName}</span>
-            </div>
-            <div class="customer-info-item">
-                <span class="label">年龄:</span>
-                <span class="value">${customerAge}</span>
-            </div>
-        `;
+        const groupMembers = window.UIMemberManagement ?
+            window.UIMemberManagement.getGroupMembersList() : [];
+        if (groupMembers && groupMembers.length > 0) {
+            infoHtml = `
+                <div class="customer-info-item">
+                    <span class="label">票务类型:</span>
+                    <span class="value">团体票</span>
+                </div>
+                <div class="customer-info-item">
+                    <span class="label">人数:</span>
+                    <span class="value">${groupMembers.length}人</span>
+                </div>
+            `;
+            groupMembers.forEach((member, index) => {
+                infoHtml += `
+                    <div class="customer-info-item">
+                        <span class="label">${index + 1}. ${member.name}:</span>
+                        <span class="value">${member.age}岁</span>
+                    </div>
+                `;
+            });
+        } else {
+            infoHtml = `
+                <div class="customer-info-item">
+                    <span class="label">客户信息:</span>
+                    <span class="value">请添加团体成员信息</span>
+                </div>
+            `;
+        }
     }
-
     customerInfoEl.innerHTML = infoHtml;
 }
 
