@@ -184,6 +184,21 @@ function updateMovieShowTimes() {
  * @returns {Object|null} - 电影信息对象，如果找不到则返回null
  */
 function getMovieInfo(movieId) {
+    // 优先从 localStorage 中获取选中的电影信息
+    const selectedMovieInfo = localStorage.getItem('selectedMovieInfo');
+    if (selectedMovieInfo) {
+        try {
+            const movieData = JSON.parse(selectedMovieInfo);
+            // 如果请求的是当前选中的电影，返回 localStorage 中的数据
+            if (movieData.id === movieId) {
+                return movieData;
+            }
+        } catch (e) {
+            console.error('解析 selectedMovieInfo 失败:', e);
+        }
+    }
+
+    // 如果 localStorage 中没有或者请求的不是当前选中的电影，回退到常量数据
     return movieInfo[movieId] || null;
 }
 
