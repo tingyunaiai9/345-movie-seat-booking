@@ -493,7 +493,8 @@
     gap: 20px;
     justify-content: center;
     padding-top: 25px;
-    border-top: 2px solid #c2d4d6;
+    /* border-top: 2px solid #c2d4d6; */
+    border-top: none;
 }
 
 .payment-actions .btn {

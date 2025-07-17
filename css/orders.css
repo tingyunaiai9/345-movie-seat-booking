@@ -551,6 +551,8 @@
     padding: 0;
     box-sizing: border-box;
     margin: 0;
+
+    overflow: auto;
 }
 
 .order-detail-modal .modal-content {
@@ -566,6 +568,9 @@
     flex-direction: column;
     animation: modalSlideIn 0.3s ease-out;
     margin: 0;
+
+    align-self: center;
+    justify-self: center;
 }
 
 @keyframes modalSlideIn {

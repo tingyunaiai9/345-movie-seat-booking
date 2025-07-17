@@ -902,40 +902,13 @@ function bindFinalPageEvents() {
 function handleViewMyOrders() {
     console.log('处理查看我的订单');
     
-    try {
-        // 方法1：使用UIOrders模块
-        if (window.UIOrders && window.UIOrders.showMyOrdersPage) {
-            console.log('使用UIOrders模块显示订单页面');
-            window.UIOrders.showMyOrdersPage();
-            return;
-        }
-        
-        // 方法2：手动切换到订单视图
-        console.log('手动切换到订单视图');
-        
-        // 隐藏所有视图
-        document.querySelectorAll('.view').forEach(view => {
-            view.classList.remove('active');
-        });
-        
-        // 显示订单视图
-        const ordersView = document.getElementById('my-orders-view');
-        if (ordersView) {
-            ordersView.classList.add('active');
-            console.log('✅ 订单视图已显示');
-            
-            // 如果有订单渲染函数，调用它
-            if (window.UIOrders && window.UIOrders.renderMyOrdersList) {
-                window.UIOrders.renderMyOrdersList();
-            }
-        } else {
-            console.error('未找到订单视图 #my-orders-view');
-            showMessage('订单页面不可用', 'error');
-        }
-        
-    } catch (error) {
-        console.error('切换到订单页面时发生错误:', error);
-        showMessage('切换到订单页面失败', 'error');
+    // 🔑 直接调用 ui-orders.js 中的函数
+    if (window.UIOrders && window.UIOrders.showMyOrdersPage) {
+        window.UIOrders.showMyOrdersPage();
+        console.log('✅ 订单页面已显示');
+    } else {
+        console.error('❌ UIOrders 模块不可用');
+        showMessage('订单功能不可用，请刷新页面重试', 'error');
     }
 }
 
