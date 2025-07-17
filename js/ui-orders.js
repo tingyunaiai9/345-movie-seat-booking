@@ -336,7 +336,9 @@ function createMyOrderItem(order) {
 
     // 设置下单时间
     const createdTime = orderItem.querySelector('.created-time');
-    createdTime.textContent = formatDate(order.createdAt);
+    createdTime.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+        ? window.UIMovieSelector.formatMovieShowTime(new Date(order.createdAt))
+        : order.createdAt;
 
     // 设置额外时间信息（支付时间或过期时间）
     const additionalTime = orderItem.querySelector('.additional-time');
@@ -346,11 +348,15 @@ function createMyOrderItem(order) {
     if (order.status === 'reserved' && order.expiresAt) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付截止:';
-        additionalTimeValue.textContent = formatDate(order.expiresAt);
+        additionalTimeValue.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+            ? window.UIMovieSelector.formatMovieShowTime(new Date(order.expiresAt))
+            : order.expiresAt;
     } else if (order.status === 'sold' && order.paidAt) {
         additionalTime.style.display = 'block';
         additionalTimeLabel.textContent = '支付时间:';
-        additionalTimeValue.textContent = formatDate(order.paidAt);
+        additionalTimeValue.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+            ? window.UIMovieSelector.formatMovieShowTime(new Date(order.paidAt))
+            : order.paidAt;
     }
 
     // 设置订单号
@@ -479,19 +485,6 @@ function seatIdToText(seatId) {
 }
 
 /**
- * 时间格式化
- */
-function formatDate(date) {
-    if (!date) return '';
-    if (typeof date === 'string') {
-        // 兼容字符串存储的时间
-        date = new Date(date);
-    }
-    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-}
-
-/**
  * 显示订单详情
  */
 function showMyOrderDetail(order) {
@@ -547,7 +540,9 @@ function showMyOrderDetail(order) {
     statusElement.className = `detail-value order-status ${order.status}`;
 
     // 5. 创建时间（第五个显示）
-    document.getElementById('detail-created-time').textContent = formatDate(order.createdAt);
+    document.getElementById('detail-created-time').textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+        ? window.UIMovieSelector.formatMovieShowTime(new Date(order.createdAt))
+        : order.createdAt;
 
     // 6. 支付时间/支付截止时间（第六个显示，根据状态动态显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
@@ -576,13 +571,17 @@ function showMyOrderDetail(order) {
         if (expiryTime) {
             expiresLabel.style.display = 'inline';
             expiresTime.style.display = 'inline';
-            expiresTime.textContent = formatDate(expiryTime);
+            expiresTime.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+                ? window.UIMovieSelector.formatMovieShowTime(expiryTime)
+                : expiryTime;
         }
     } else if (order.paidAt && order.status === 'sold') {
         // 已支付状态：显示支付时间
         paidTimeLabel.style.display = 'inline';
         paidTime.style.display = 'inline';
-        paidTime.textContent = formatDate(order.paidAt);
+        paidTime.textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
+            ? window.UIMovieSelector.formatMovieShowTime(new Date(order.paidAt))
+            : order.paidAt;
     }
 
     // 更新座位信息
