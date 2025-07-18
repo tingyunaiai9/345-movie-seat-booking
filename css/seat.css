@@ -446,22 +446,22 @@
 
 /* 为不同座位状态设置颜色 */
 .legend-color.available {
-    background: #279036;
+    background: #A0FB8E;
     /* 可用座位 */
 }
 
 .legend-color.selected {
-    background: #f2c627;
+    background: #FFD166;
     /* 已选座位 */
 }
 
 .legend-color.sold {
-    background: #bf130d;
+    background: #D35D6E;
     /* 已售座位 */
 }
 
 .legend-color.reserved {
-    background: #d56018;
+    background: #FF9F5A;
     /* 已预订座位 */
 }
 

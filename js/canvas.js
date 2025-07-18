@@ -369,88 +369,6 @@ function drawCinema() {
 }
 
 /**
- * 计算座位位置
- * @param {Object} seat - 座位对象
- * @returns {Object} 包含x和y坐标的对象
- */
-function calculateSeatPosition(seat) {
-    const { SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR } = CANVAS_CONFIG;
-    const { currentLayout, totalRows, totalCols, canvasWidth } = GLOBAL_STATE;
-
-    let x, y;
-
-    if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
-        // 平行布局计算
-        const seatWidth = SEAT_RADIUS * 2;
-        const totalWidth = totalCols * (seatWidth + COL_SPACING) - COL_SPACING;
-        const xOffset = (canvasWidth - totalWidth) / 2;
-        const yOffset = 100; // 顶部留白
-
-        x = xOffset + (seat.col - 1) * (seatWidth + COL_SPACING) + SEAT_RADIUS;
-        y = yOffset + (seat.row - 1) * ROW_SPACING + SEAT_RADIUS;
-    } else {
-        // 弧形布局计算
-        // 调整角度计算以确保座位以中央虚线为中心对称分布
-        // 总列数为奇数时：中央虚线在中间列上
-        // 总列数为偶数时：中央虚线在中间两列之间
-        let columnOffset;
-        if (totalCols % 2 === 1) {
-            // 奇数列：以中间列为中心，第(totalCols+1)/2列的角度为0
-            const centerCol = (totalCols + 1) / 2;
-            columnOffset = seat.col - centerCol;
-        } else {
-            // 偶数列：以中间两列之间为中心
-            const centerPoint = (totalCols + 1) / 2;
-            columnOffset = seat.col - centerPoint;
-        }
-
-        const angle = columnOffset * ANGLE_FACTOR;
-        const currentArcRadius = ARC_RADIUS + (seat.row - 1) * ROW_SPACING;
-        x = canvasWidth / 2 + currentArcRadius * Math.sin(angle);
-        y = CIRCLE_CENTER + currentArcRadius * Math.cos(angle);
-    }
-
-    return { x, y };
-}
-
-/**
- * 计算中心区域信息
- * @returns {Object} 中心区域信息
- */
-function calculateCenterZone() {
-    const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
-    const { totalRows, totalCols } = GLOBAL_STATE;
-
-    // 从 main.js 获取座位总数
-    const config = window.CinemaData ? window.CinemaData.getCurrentConfig() : null;
-    const totalSeats = config ? config.TOTAL_SEATS : totalRows * totalCols;
-
-    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
-    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
-    const numCenterCols = Math.ceil(totalCols * layoutRatio);
-    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
-
-    const middleRow = Math.ceil(totalRows / 2);
-
-    // 使用与座位位置计算相同的中心对齐逻辑
-    let middleCol;
-    if (totalCols % 2 === 1) {
-        // 奇数列：中心点是中间列
-        middleCol = (totalCols + 1) / 2;
-    } else {
-        // 偶数列：中心点是中间两列之间（使用非整数值）
-        middleCol = (totalCols + 1) / 2;
-    }
-
-    return {
-        rowStart: middleRow - Math.floor(numCenterRows / 2),
-        rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
-        colStart: Math.round(middleCol - numCenterCols / 2),
-        colEnd: Math.round(middleCol + numCenterCols / 2) - 1
-    };
-}
-
-/**
  * 绘制中心区域标识（支持平行布局和弧形布局）
  */
 function drawCenterZone() {
@@ -600,6 +518,91 @@ function preloadSeatImages() {
     });
 }
 
+// ========================= 工具计算函数 =========================
+
+/**
+ * 计算座位位置
+ * @param {Object} seat - 座位对象
+ * @returns {Object} 包含x和y坐标的对象
+ */
+function calculateSeatPosition(seat) {
+    const { SEAT_RADIUS, ROW_SPACING, COL_SPACING, ARC_RADIUS, CIRCLE_CENTER, ANGLE_FACTOR } = CANVAS_CONFIG;
+    const { currentLayout, totalRows, totalCols, canvasWidth } = GLOBAL_STATE;
+
+    let x, y;
+
+    if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
+        // 平行布局计算
+        const seatWidth = SEAT_RADIUS * 2;
+        const totalWidth = totalCols * (seatWidth + COL_SPACING) - COL_SPACING;
+        const xOffset = (canvasWidth - totalWidth) / 2;
+        const yOffset = 100; // 顶部留白
+
+        x = xOffset + (seat.col - 1) * (seatWidth + COL_SPACING) + SEAT_RADIUS;
+        y = yOffset + (seat.row - 1) * ROW_SPACING + SEAT_RADIUS;
+    } else {
+        // 弧形布局计算
+        // 调整角度计算以确保座位以中央虚线为中心对称分布
+        // 总列数为奇数时：中央虚线在中间列上
+        // 总列数为偶数时：中央虚线在中间两列之间
+        let columnOffset;
+        if (totalCols % 2 === 1) {
+            // 奇数列：以中间列为中心，第(totalCols+1)/2列的角度为0
+            const centerCol = (totalCols + 1) / 2;
+            columnOffset = seat.col - centerCol;
+        } else {
+            // 偶数列：以中间两列之间为中心
+            const centerPoint = (totalCols + 1) / 2;
+            columnOffset = seat.col - centerPoint;
+        }
+
+        const angle = columnOffset * ANGLE_FACTOR;
+        const currentArcRadius = ARC_RADIUS + (seat.row - 1) * ROW_SPACING;
+        x = canvasWidth / 2 + currentArcRadius * Math.sin(angle);
+        y = CIRCLE_CENTER + currentArcRadius * Math.cos(angle);
+    }
+
+    return { x, y };
+}
+
+/**
+ * 计算中心区域信息
+ * @returns {Object} 中心区域信息
+ */
+function calculateCenterZone() {
+    const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
+    const { totalRows, totalCols } = GLOBAL_STATE;
+
+    // 从 main.js 获取座位总数
+    const config = window.CinemaData ? window.CinemaData.getCurrentConfig() : null;
+    const totalSeats = config ? config.TOTAL_SEATS : totalRows * totalCols;
+
+    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
+    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
+    const numCenterCols = Math.ceil(totalCols * layoutRatio);
+    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
+
+    const middleRow = Math.ceil(totalRows / 2);
+
+    // 使用与座位位置计算相同的中心对齐逻辑
+    let middleCol;
+    if (totalCols % 2 === 1) {
+        // 奇数列：中心点是中间列
+        middleCol = (totalCols + 1) / 2;
+    } else {
+        // 偶数列：中心点是中间两列之间（使用非整数值）
+        middleCol = (totalCols + 1) / 2;
+    }
+
+    return {
+        rowStart: middleRow - Math.floor(numCenterRows / 2),
+        rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
+        colStart: Math.round(middleCol - numCenterCols / 2),
+        colEnd: Math.round(middleCol + numCenterCols / 2) - 1
+    };
+}
+
+
 /**
  * 根据座位布局动态计算画布尺寸
  * @returns {Object} 包含width和height的对象
@@ -637,7 +640,7 @@ function calculateCanvasSize() {
     }
 }
 
-// ========================= 虚拟数据和初始化 =========================
+// ========================= 初始化数据和刷新 =========================
 
 /**
  * 初始化并绘制Cinema - 集成了数据获取、状态初始化和绘制功能
@@ -705,9 +708,7 @@ function refreshCinemaDisplay(layoutType) {
     drawCinema();
 }
 
-// ========================= 布局切换函数 =========================
-
-/**
+ /**
  * 切换布局模式
  */
 function toggleLayout() {
