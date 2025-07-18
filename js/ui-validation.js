@@ -271,7 +271,6 @@ function handleReservation() {
 
         // 根据返回结果处理
         if (result && result.success) {
-            console.log('✅ 预订成功');
             alert('预订成功！请在电影开始前30分钟之前支付');
             // 订单已由 main.js 创建，UI 层无需再创建订单
 
@@ -293,7 +292,6 @@ function handleReservation() {
         } else {
             // 预订失败 - 显示错误信息
             const errorMessage = result && result.message ? result.message : '预订失败，请重试';
-            console.error('❌ 预订失败:', errorMessage);
             alert('预订失败：' + errorMessage);
         }
 

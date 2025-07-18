@@ -455,7 +455,6 @@ function handleFinalPayment() {
     } else {
         const errorMessage = result && result.message ? result.message : '支付失败，请重试';
         alert('支付失败：' + errorMessage);
-        console.error('❌ 支付失败:', errorMessage);
     }
 }
 

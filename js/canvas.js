@@ -462,7 +462,6 @@ function preloadSeatImages() {
             images[status] = img;
         });
         GLOBAL_STATE.seatImages = images;
-        console.log('所有座位图片预加载完毕');
         return images;
     });
 }
@@ -514,10 +513,6 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
     // ===== 初始化全局状态 =====
     // 获取Canvas元素
     GLOBAL_STATE.canvas = document.getElementById('cinema-canvas');
-    if (!GLOBAL_STATE.canvas || !GLOBAL_STATE.canvas.getContext) {
-        console.error('浏览器不支持Canvas或未找到canvas元素');
-        return;
-    }
 
     GLOBAL_STATE.ctx = GLOBAL_STATE.canvas.getContext('2d');
 
@@ -540,20 +535,7 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
         return;
     }
 
-    // ===== 再次检查座位数据是否可用 =====
-    if (!window.CinemaData || !window.CinemaData.getCinemaSeats) {
-        console.error('CinemaData模块未加载或getCinemaSeats函数不可用');
-        return;
-    }
-
-    const seatsData = window.CinemaData.getCinemaSeats().flat(); // 将二维数组转为一维数组
-
-    if (!seatsData || seatsData.length === 0) {
-        console.error('初始化后仍无法获取座位数据');
-        return;
-    }
-
-    console.log(`成功获取${seatsData.length}个座位数据`);
+    const seatsData = window.CinemaData.getCinemaSeats().flat(); 
 
     // 设置状态
     GLOBAL_STATE.isInitialized = true;
@@ -600,8 +582,6 @@ function toggleLayout() {
         ? CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL
         : CANVAS_CONFIG.LAYOUT_TYPES.ARC;
 
-    console.log(`布局已切换为: ${GLOBAL_STATE.currentLayout}`);
-
     // 重新绘制
     if (GLOBAL_STATE.isInitialized) {
         drawCinema();
@@ -631,8 +611,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
 
     } else {
-        if (!canvas) console.error('未找到ID为 cinema-canvas 的 canvas 元素');
-        if (!toggleBtn) console.error('未找到ID为 toggle-layout-btn 的按钮元素');
+        console.error('Canvas或切换按钮未找到，请检查HTML结构');
     }
 });
 
@@ -654,4 +633,4 @@ window.CanvasRenderer = {
     toggleLayout, // 导出布局切换函数
 };
 
-console.log('电影院Canvas渲染模块(canvas.js)已加载 - 使用实际数据和全局状态管理');
+console.log('电影院Canvas渲染模块已加载');

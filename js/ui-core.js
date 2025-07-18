@@ -26,8 +26,6 @@ let uiState = {
  * 初始化UI系统
  */
 function initializeUI() {
-    console.log('UI模块开始初始化...');
-
     // 检测是否已有视图控制器
     if (window.viewController) {
         console.log('检测到 viewController，跳过视图管理初始化');
@@ -69,7 +67,6 @@ function initializeNonViewFunctions() {
     }, 200); // 延迟确保Canvas已经创建
 
     uiState.systemInitialized = true;
-    console.log('UI模块初始化完成');
 }
 
 // ========================= 票务类型管理 =========================
@@ -284,7 +281,6 @@ function bindAutoSeatButtons() {
     const autoSelectIndividualBtn = document.getElementById('auto-select-individual');
     if (autoSelectIndividualBtn) {
         autoSelectIndividualBtn.addEventListener('click', function () {
-            console.log('🎯 个人票自动选座');
 
             // 获取个人票成员信息
             const members = window.UIMemberManagement ? window.UIMemberManagement.getIndividualMembersList() : [];
@@ -306,7 +302,6 @@ function bindAutoSeatButtons() {
     const autoSelectGroupBtn = document.getElementById('auto-select-group');
     if (autoSelectGroupBtn) {
         autoSelectGroupBtn.addEventListener('click', function () {
-            console.log('🎯 团体票自动选座');
 
             // 获取团体成员信息
             const groupInfo = window.UIMemberManagement ? window.UIMemberManagement.getGroupMembersList() : [];
@@ -337,7 +332,6 @@ function enableAutoSeatButtons() {
         autoSelectIndividualBtn.style.backgroundColor = '#68a530';
         autoSelectIndividualBtn.style.color = 'white';
         autoSelectIndividualBtn.style.cursor = 'pointer';
-        console.log('✅ 个人票自动选座按钮已启用');
     }
 
     if (autoSelectGroupBtn) {
@@ -345,7 +339,6 @@ function enableAutoSeatButtons() {
         autoSelectGroupBtn.style.backgroundColor = '#68a530';
         autoSelectGroupBtn.style.color = 'white';
         autoSelectGroupBtn.style.cursor = 'pointer';
-        console.log('✅ 团体票自动选座按钮已启用');
     }
 }
 
