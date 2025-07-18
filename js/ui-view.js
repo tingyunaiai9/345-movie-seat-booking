@@ -43,9 +43,6 @@ let viewState = {
  * 初始化视图控制器
  */
 function initializeViewController() {
-    console.log('视图控制器开始初始化...');
-
-
     // 初始化事件监听器
     initializeEventListeners();
 
@@ -56,9 +53,6 @@ function initializeViewController() {
 
     // 初始化按钮状态
     initializeButtonStates();
-
-
-    console.log('视图控制器初始化完成');
 }
 
 /**
@@ -81,7 +75,6 @@ function initializeEventListeners() {
             if (viewState.selectedCinemaSize && viewState.selectedMovie) {
                 localStorage.setItem('selectedMovie', viewState.selectedMovie);
                 // 【核心改动】在这里执行唯一一次权威的座位初始化
-                console.log('🚀 执行最终初始化，传入影厅和电影信息...');
                 window.CinemaData.initializeCinemaSeats(
                     viewState.selectedCinemaSize.rows,
                     viewState.selectedCinemaSize.cols,
@@ -362,7 +355,6 @@ function handleSpecialViewLogic(viewName, options = {}) {
                 messageLines[1].textContent = '请在规定时间内完成支付，期待您的光临！';
             }
             
-            console.log('✅ 最终页面内容已更新为预订成功');
             
         } else if (options.operation === 'purchase') {
             // 购票成功的内容（默认）
@@ -379,7 +371,6 @@ function handleSpecialViewLogic(viewName, options = {}) {
                 messageLines[1].textContent = '期待您的下次光临！';
             }
             
-            console.log('✅ 最终页面内容已更新为购票成功');
         }
         
         console.log('切换到最终结算页面');
@@ -646,7 +637,6 @@ function initializeSeatView(resetSelection = true) {
         return;
     }
 
-    console.log(`✅ 座位数据已根据影厅(${config.TOTAL_ROWS}x${config.SEATS_PER_ROW})和电影(${selectedMovie})完成加载/创建。`);
 
     // 2. 初始化或刷新Canvas绘图 (canvas.js)
     console.log('正在初始化 Canvas...');
@@ -654,11 +644,9 @@ function initializeSeatView(resetSelection = true) {
         if (resetSelection) {
             // 完全重新初始化（不是从支付页面返回时）
             window.CanvasRenderer.initializeAndDrawCinema();
-            console.log('✅ Canvas 初始化并绘制完成。');
         } else {
             // 从支付页面返回时，只刷新显示，不重置选座状态
             window.CanvasRenderer.refreshCinemaDisplay();
-            console.log('✅ Canvas 刷新显示完成（保留选座状态）。');
         }
     } catch (e) {
         console.error('Canvas 绘制失败:', e);
@@ -672,11 +660,9 @@ function initializeSeatView(resetSelection = true) {
         if (resetSelection) {
             // 完全重置 StateManager（不是从支付页面返回时）
             window.StateManager.resetStateManager();
-            console.log('✅ StateManager 重置完成。');
         } else {
             // 从支付页面返回时，不重置选座状态，只刷新通知
             window.StateManager.notifySelectionChange();
-            console.log('✅ StateManager 选座状态已保留。');
         }
     } catch (e) {
         console.error('StateManager 初始化失败:', e);
@@ -686,7 +672,6 @@ function initializeSeatView(resetSelection = true) {
     // 4. 更新UI上的统计信息（可选，但推荐）
     updateCinemaStatusDisplay();
 
-    console.log('🚀 选座视图所有组件已准备就绪！');
 }
 
 // ========================= 影厅配置管理 =========================
@@ -928,8 +913,6 @@ function bindFinalPageEvents() {
             console.log('点击查看我的订单按钮');
             handleViewMyOrders();
         });
-
-        console.log('✅ 查看订单按钮事件已绑定');
     } else {
         console.warn('未找到查看订单按钮 #view-my-orders-final');
     }
@@ -945,8 +928,6 @@ function bindFinalPageEvents() {
             console.log('点击返回首页按钮');
             handleBackToHome();
         });
-
-        console.log('✅ 返回首页按钮事件已绑定');
     } else {
         console.warn('未找到返回首页按钮 #back-to-home');
     }
@@ -960,15 +941,12 @@ function handleViewMyOrders() {
     // 🔑 关键修复：隐藏导航栏
     if (window.UIViewController && window.UIViewController.hideNavigationSteps) {
         window.UIViewController.hideNavigationSteps();
-        console.log('✅ 导航栏已隐藏');
     }
 
     // 🔑 直接调用 ui-orders.js 中的函数
     if (window.UIOrders && window.UIOrders.showMyOrdersPage) {
         window.UIOrders.showMyOrdersPage();
-        console.log('✅ 订单页面已显示');
     } else {
-        console.error('❌ UIOrders 模块不可用');
         showMessage('订单功能不可用，请刷新页面重试', 'error');
     }
 }
@@ -986,7 +964,6 @@ function handleBackToHome() {
         // 切换到配置页面
         switchToView('config');
 
-        console.log('✅ 已返回首页');
         showMessage('已返回首页，可以开始新的订单', 'info');
 
     } catch (error) {
@@ -1005,19 +982,16 @@ function resetAllStates() {
         // 1. 清除选中的座位
         if (window.StateManager && window.StateManager.clearAllSelections) {
             window.StateManager.clearAllSelections();
-            console.log('✅ StateManager状态已清除');
         }
 
         // 2. 清除个人票成员列表
         if (typeof clearIndividualMembersList === 'function') {
             clearIndividualMembersList();
-            console.log('✅ 个人票成员列表已清除');
         }
 
         // 3. 清除团体票成员列表（如果有的话）
         if (typeof clearGroupMembersList === 'function') {
             clearGroupMembersList();
-            console.log('✅ 团体票成员列表已清除');
         }
 
         // 4. 重置视图状态
@@ -1028,9 +1002,6 @@ function resetAllStates() {
         keysToRemove.forEach(key => {
             localStorage.removeItem(key);
         });
-        console.log('✅ 临时数据已清除');
-
-        console.log('🔄 所有状态重置完成');
 
     } catch (error) {
         console.error('重置状态时发生错误:', error);
@@ -1064,21 +1035,17 @@ function handleBackgroundForView(viewName) {
  * @param {string} name - 配置名称
  */
 function applyConfigToModules(rows, cols, name, movieId = null) {
-    console.log(`🔧 应用影厅配置: ${name} (${rows}行 × ${cols}列)，电影ID:${movieId}`);
-
     // 1. 如果已经在选座界面，更新 Canvas 显示
     if (window.initializeAndDrawCinema && typeof window.initializeAndDrawCinema === 'function') {
         // 延迟执行，确保数据已经更新
         setTimeout(() => {
             window.initializeAndDrawCinema();
-            console.log(`✅ Canvas 显示已更新`);
         }, 50);
     }
 
     // 2. 如果状态管理器已初始化，刷新数据
     if (window.StateManager && typeof window.StateManager.loadInitialSeatsData === 'function') {
         window.StateManager.loadInitialSeatsData();
-        console.log(`✅ StateManager 数据已刷新`);
     }
 
     // 3. 更新UI显示的统计信息
@@ -1299,4 +1266,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 100);
 });
 
-console.log('视图控制器模块已加载');
+console.log('UI视图控制器模块已加载');

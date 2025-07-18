@@ -49,8 +49,6 @@ let movieSelectorState = {
  * - 设置电影时间显示
  */
 function initializeMovieSelector() {
-    console.log('初始化电影选择器...');
-
     // 设置电影时间显示
     setMovieShowTimes();
 
@@ -109,7 +107,6 @@ function setMovieShowTimes() {
                     timeElement.textContent = timeString;
                     // 更新常量中的时间信息
                     movieInfo[movieId].time = timeString;
-                    console.log(`设置电影 ${movieId} 的放映时间: ${timeString}`);
                 } else {
                     timeElement.textContent = '时间待定';
                     movieInfo[movieId].time = '时间待定';
@@ -315,5 +312,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // 延迟初始化，确保主模块已加载
     setTimeout(() => {
         initializeMovieSelector();
+        console.log('电影选择器初始化完成');
     }, 100);
 });

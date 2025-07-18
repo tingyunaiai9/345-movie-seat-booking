@@ -88,7 +88,6 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
             const defaultTime = window.UIMovieSelector.getMovieShowTime(movieId);
             if (defaultTime) {
                 currentCinemaConfig.movieStartTime = defaultTime;
-                console.log(`为电影 ${movieId} 设定默认放映时间: ${defaultTime.toLocaleString()}`);
             } else {
                 currentCinemaConfig.movieStartTime = null;
             }
@@ -96,11 +95,6 @@ function initializeCinemaSeats(rows, seatsPerRow, movieTime = null, movieId = nu
             currentCinemaConfig.movieStartTime = null;
         }
     }
-
-    if (currentCinemaConfig.movieStartTime) {
-        console.log(`电影开始时间已设定: ${currentCinemaConfig.movieStartTime.toLocaleString()}`);
-    }
-    console.log(`初始化影院座位数据: ${rows}排, 每排${seatsPerRow}座，电影ID: ${movieId}`);
 
     // 从 localStorage 加载或初始化座位数据
     const storageKey = `cinemaState-${movieId}-${rows}x${seatsPerRow}`;
@@ -914,7 +908,7 @@ window.CinemaData = {
     getOrderById
 };
 
-console.log('电影院票务系统核心模块(main.js)已加载');
+console.log('电影院票务系统核心模块已加载');
 
 // 初始化时加载localStorage订单
 loadOrdersFromLocalStorage();
