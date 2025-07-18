@@ -118,13 +118,13 @@ function setupHighDPICanvas(canvas, ctx, width, height) {
 }
 
 /**
- * 绘制单个座位 - 优化版本
+ * 绘制单个座位 - 优化版本（移除文字绘制）
  * @param {number} x - 座位的中心点 x 坐标
  * @param {number} y - 座位的中心点 y 坐标
  * @param {Object} seat - 座位对象（包含状态、行号、列号等信息）
  */
 function drawSeat(x, y, seat) {
-    const { SEAT_RADIUS, SEAT_FONT, TEXT_COLOR } = CANVAS_CONFIG;
+    const { SEAT_RADIUS } = CANVAS_CONFIG;
     const { ctx, seatImages } = GLOBAL_STATE;
 
     // 确定显示状态：如果座位被选中，显示selected状态，否则显示原状态
@@ -178,14 +178,78 @@ function drawSeat(x, y, seat) {
         ctx.arc(x, y, currentRadius, 0, Math.PI * 2);
         ctx.fill();
     }
+}
 
-    // 绘制座位号和排号，字体大小也根据缩放因子调整
+/**
+ * 绘制行列标识文字
+ */
+function drawRowColumnLabels() {
+    const { TEXT_COLOR, SEAT_FONT } = CANVAS_CONFIG;
+    const { ctx, totalRows, totalCols, currentLayout } = GLOBAL_STATE;
+
+    ctx.save();
     ctx.fillStyle = TEXT_COLOR;
-    const fontSize = parseInt(SEAT_FONT) * scaleFactor;
-    ctx.font = `${fontSize}px Arial`;
+    ctx.font = SEAT_FONT;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${seat.row}-${seat.col}`, x, y);
+
+    // 收集每行和每列的座位位置信息
+    const rowPositions = new Map(); // 行号 -> {minX, maxX, y}
+    const colPositions = new Map(); // 列号 -> {x, minY, maxY}
+
+    // 获取座位数据
+    const seatsArray = window.CinemaData.getCinemaSeats().flat();
+
+    // 分析每个座位的位置，收集行列信息
+    seatsArray.forEach(seat => {
+        const coords = calculateSeatPosition(seat);
+        
+        // 收集行信息
+        if (!rowPositions.has(seat.row)) {
+            rowPositions.set(seat.row, {
+                minX: coords.x,
+                maxX: coords.x,
+                y: coords.y
+            });
+        } else {
+            const rowInfo = rowPositions.get(seat.row);
+            rowInfo.minX = Math.min(rowInfo.minX, coords.x);
+            rowInfo.maxX = Math.max(rowInfo.maxX, coords.x);
+        }
+
+        // 收集列信息
+        if (!colPositions.has(seat.col)) {
+            colPositions.set(seat.col, {
+                x: coords.x,
+                minY: coords.y,
+                maxY: coords.y
+            });
+        } else {
+            const colInfo = colPositions.get(seat.col);
+            colInfo.minY = Math.min(colInfo.minY, coords.y);
+            colInfo.maxY = Math.max(colInfo.maxY, coords.y);
+        }
+    });
+
+    // 绘制行标识（在每行左侧）
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    rowPositions.forEach((rowInfo, rowNum) => {
+        const labelX = rowInfo.minX - 40; // 在最左边座位左侧40像素处
+        const labelY = rowInfo.y;
+        ctx.fillText(`第${rowNum}行`, labelX, labelY);
+    });
+
+    // 绘制列标识（在每列下方）
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    colPositions.forEach((colInfo, colNum) => {
+        const labelX = colInfo.x;
+        const labelY = colInfo.maxY + 40; // 在最下边座位下方40像素处
+        ctx.fillText(`第${colNum}列`, labelX, labelY);
+    });
+
+    ctx.restore();
 }
 
 /**
@@ -272,6 +336,9 @@ function drawCinema() {
 
         drawSeat(coords.x, coords.y, seat);
     });
+
+    // ===== 绘制行列标识 =====
+    drawRowColumnLabels();
 
     // ===== 绘制中心区域标识 ======
     // 无论是否有centerSeatsCoords，都尝试绘制中心区域（基于centerZoneInfo）

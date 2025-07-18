@@ -83,20 +83,19 @@ function initializeStateManager(canvasId) {
 // ========================= 鼠标事件处理函数 =========================
 
 /**
- * 获取鼠标相对Canvas的位置
+ * 获取鼠标相对Canvas的位置（修复高DPI适配问题）
  * @param {MouseEvent} event - 鼠标事件
  * @returns {Object} 鼠标位置坐标 {x, y}
  */
 function getMousePosition(event) {
     globalState.canvasRect = globalState.canvasElement.getBoundingClientRect();
     const rect = globalState.canvasRect;
-    const canvas = globalState.canvasElement;
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
+    
+    // 修复：直接使用CSS显示尺寸计算坐标，不需要考虑设备像素比
+    // 因为Canvas内部的坐标系统已经在setupHighDPICanvas中处理了缩放
     return {
-        x: (event.clientX - rect.left) * scaleX,
-        y: (event.clientY - rect.top) * scaleY
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
     };
 }
 
