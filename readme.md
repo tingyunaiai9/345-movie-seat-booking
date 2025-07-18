@@ -66,22 +66,22 @@
 
 影院涉及关键数据分为以下几个部分，根据调用需求不同以不同方式存储：
 
-- 当前选择电影信息：每一个电影和一个影厅大小可以确定一个特定影厅
-  - 存储方式：以对应的Key存在`localStorage`中。
-  - Key：`selectedMovieInfo`
-  - 存储内容：行列信息`cols`、`rows`，电影信息`id`、`title`，电影贴图路径`image`，票价`price`，开始时间`time`
+- **当前选择电影信息**：每一个电影和一个影厅大小可以确定一个特定影厅
+  - **存储方式**：以对应的Key存在`localStorage`中。
+  - **Key**：`selectedMovieInfo`
+  - **存储内容**：行列信息`cols`、`rows`，电影信息`id`、`title`，电影贴图路径`image`，票价`price`，开始时间`time`
 
-- 影院座位状态数据：根据每一个电影和一个影厅大小可以确定的特定影厅，储存其座位状态。
-  - 存储方式：以对应的Key存在`localStorage`中。
-  - Key：`cinemaState-{电影名}-{rows}x{cols}`。
-  - 存储内容：二维数组`cinemaSeats`，每个元素包含对应作为的`row`，` col`， `id`，`status`信息。
+- **影院座位状态数据**：根据每一个电影和一个影厅大小可以确定的特定影厅，储存其座位状态。
+  - **存储方式**：以对应的Key存在`localStorage`中。
+  - **Key**：`cinemaState-{电影名}-{rows}x{cols}`。
+  - **存储内容**：二维数组`cinemaSeats`，每个元素包含对应作为的`row`，` col`， `id`，`status`信息。
 - 选座界面输入数据：选座界面接受的输入有客户输入的信息以及客户选择的具体座位。
-  - 存储方式：客户信息直接存储在 DOM 元素中，而选中座位则直接更改`main.js`中的座位状态并实时查询。
-  - 存储内容：票务类型，用户姓名及年龄。
-- 订单信息：订单信息包含座位信息、客户信息以及电影信息。
-  - 存储方式：以对应的Key存在`localStorage`中。
-  - Key：`movieTicketOrders`
-  - 存储内容：为一个订单列表，每个订单包含信息有：购票Id`ticketId`，订单状态`status`，座位`seats`，客户信息`customerInfo`，电影信息`movieInfo`，单价`unitPrice`，总价`totalCost`，创建时间`createdAt`，过期时间`expiresAt`（预订票），支付时间`paidAt`（直购票或支付后的预定票）。
+  - **存储方式**：客户信息直接存储在 DOM 元素中，而选中座位则直接更改`main.js`中的座位状态并实时查询。
+  - **存储内容**：票务类型，用户姓名及年龄。
+- **订单信息**：订单信息包含座位信息、客户信息以及电影信息。
+  - **存储方式**：以对应的Key存在`localStorage`中。
+  - **Key**：`movieTicketOrders`
+  - **存储内容**：为一个订单列表，每个订单包含信息有：购票Id`ticketId`，订单状态`status`，座位`seats`，客户信息`customerInfo`，电影信息`movieInfo`，单价`unitPrice`，总价`totalCost`，创建时间`createdAt`，过期时间`expiresAt`（预订票），支付时间`paidAt`（直购票或支付后的预定票）。
 
 
 #### 当前选择电影信息
@@ -92,9 +92,9 @@
 
 整个订单流程中，影院座位状态数据经历了三个阶段。
 
-- 初始化阶段：由前面两个界面选择结束后，可确定影院座位状态数据的Key，根据Key在`localStorage`中查找是否有了对应的座位状态信息，如果已经有就加载进当前的`cinemaSeats`，若没有，则初始化对应大小的影厅并存入`localStorage`等待后续调用。
-- 选座阶段：这一阶段仅会涉及到`available`和`selected`之间的切换，在订单确认之前无需存入`localStorage`，只需完成交互即可。
-- 订单阶段：订单完成后需要根据订单具体情况更改`cinemaSeats`的相应座位状态并存入`localStorage`，预定完成和支付完成两个动作只需要更改当前的信息即可，但是涉及到检查预定是否过期、退款、取消预定、支付预定、退款这几个操作则可能去更改当前`cinemaSeats`所存储座位状态以外的数据。因此需要根据订单存储的电影信息来查找对应Key并该Key下存储的影院座位状态数据。
+- **初始化阶段**：由前面两个界面选择结束后，可确定影院座位状态数据的Key，根据Key在`localStorage`中查找是否有了对应的座位状态信息，如果已经有就加载进当前的`cinemaSeats`，若没有，则初始化对应大小的影厅并存入`localStorage`等待后续调用。
+- **选座阶段**：这一阶段仅会涉及到`available`和`selected`之间的切换，在订单确认之前无需存入`localStorage`，只需完成交互即可。
+- **订单阶段**：订单完成后需要根据订单具体情况更改`cinemaSeats`的相应座位状态并存入`localStorage`，预定完成和支付完成两个动作只需要更改当前的信息即可，但是涉及到检查预定是否过期、退款、取消预定、支付预定、退款这几个操作则可能去更改当前`cinemaSeats`所存储座位状态以外的数据。因此需要根据订单存储的电影信息来查找对应Key并该Key下存储的影院座位状态数据。
 
 #### 选座界面输入数据
 
@@ -106,7 +106,45 @@
 
 ### 3.5 Canvas绘制
 
-（六块TODO）
+`canvas.js` 文件负责将影院座位数据以可视化方式呈现在页面上，核心机制如下：
+
+#### 数据来源
+
+- **座位数据**：从`main.js`获取，得到二维数组，每个元素为座位对象（包含 row、col、id、status 等）。
+- **当前影厅配置**：从`main.js`获取，包括总排数、总列数等。
+- **选中状态**：从`stateManager.js`获取获取当前被选中的座位列表，辅助高亮显示。
+
+#### 绘制流程
+
+`canvas.js`维护一个 GLOBAL_STATE 对象，记录当前画布、布局类型、行列数、中心区域信息等，确保绘制时状态一致。
+
+- **初始化与绘制**：首先完成 Canvas 初始化、座位数据加载、图片预加载，并调用 drawCinema() 完成实际绘制。
+
+- **核心绘制函数**：
+
+  `drawCinema()`负责整体绘制流程，包括：
+
+  - 清空画布
+  - 绘制中央过道虚线
+  - 计算并绘制中心区域
+  - 遍历所有座位，调用 `drawSeat(x, y, seat)`绘制每个座位
+  - 绘制中心区域标识（矩形或扇形，取决于布局）
+
+- **座位绘制**
+  `drawSeat(x, y, seat)`根据座位状态（available、selected、sold、reserved）选择不同图片或颜色，并在座位中心绘制排号和座号。若座位被选中或悬停，会有缩放高亮效果。
+  
+- **布局支持**
+  支持弧形（ARC）和矩形（PARALLEL）两种布局，通过 `GLOBAL_STATE.currentLayout` 切换，分别采用不同的坐标计算方式。
+
+#### 交互与刷新
+
+- **布局切换**
+  通过 `toggleLayout()` 切换布局类型，并自动重绘。
+- **数据变更刷新**
+  调用 `refreshCinemaDisplay()` 可在座位数据变化后重新绘制，确保画面与数据同步。
+
+- 页面加载时自动初始化并绘制影院布局。
+- 提供全局导出接口 `window.CanvasRenderer`，供其他模块调用绘制、刷新、布局切换等功能。
 
 ### 3.6 页面逻辑
 
@@ -151,12 +189,12 @@
 
 ## 六、分工
 
-* [停云](https://github.com/tingyunaiai9)：（停云TODO）
-* [六块](https://github.com/fujiimoku)：（六块TODO）
-* [五粮液](https://github.com/wanly23)：（五粮液TODO）
-* [sigmal](https://github.com/sigmalyj)：（sigmalTODO）
+* 停云](https://github.com/tingyunaiai9)：（停云TODO）
+* 六块](https://github.com/fujiimoku)：（六块TODO）
+* 五粮液](https://github.com/wanly23)：（五粮液TODO）
+* sigmal](https://github.com/sigmalyj)：（sigmalTODO）
 
 ## 参考资料
 
-* [1] MDN Web Docs. Canvas API. [https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+* 1] MDN Web Docs. Canvas API. https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 * 大模型：Gemini，Claude，ChatCPT
