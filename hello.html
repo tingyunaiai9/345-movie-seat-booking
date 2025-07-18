@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>345影院 - 欢迎</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/hello.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+    <!-- Hello视图 - 首页欢迎界面 -->
+    <section id="hello-view" class="view active">
+        <div class="hello-container">
+            <!-- 背景装饰元素 -->
+            <div class="hello-background">
+                <div class="floating-particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+            </div>
+
+            <!-- 主要内容区域 -->
+            <div class="hello-content">
+                <!-- Logo 区域 -->
+                <div class="hello-logo">
+                    <div class="logo-container">
+                        <img src="img/logo_pic.png" alt="345影院Logo" class="logo-image">
+                        <div class="logo-glow"></div>
+                    </div>
+                </div>
+
+                <!-- 标题区域 -->
+                <div class="hello-title">
+                    <h1 class="cinema-name">
+                        <span class="title-number">345</span>
+                        <span class="title-text">影院</span>
+                    </h1>
+                    <p class="cinema-subtitle">欢迎来到数字化观影新体验</p>
+                </div>
+
+                <!-- 装饰元素 -->
+                <div class="hello-decorations">
+                    <div class="decoration-item">🎬</div>
+                    <div class="decoration-item">🍿</div>
+                    <div class="decoration-item">🎭</div>
+                    <div class="decoration-item">⭐</div>
+                    <div class="decoration-item">🎪</div>
+                </div>
+
+                <!-- 欢迎信息 -->
+                <div class="hello-welcome">
+                    <p class="welcome-text">体验全新的在线选座系统</p>
+                    <p class="welcome-text">智能推荐 · 便捷支付 · 贴心服务</p>
+                </div>
+
+                <!-- 开始按钮 -->
+                <div class="hello-action">
+                    <button class="btn-start" id="start-booking">
+                        <span class="btn-text">开始预订</span>
+                        <span class="btn-icon">→</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                </div>
+
+                <!-- 特色功能展示 -->
+                <div class="hello-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <span class="feature-text">智能选座</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💳</div>
+                        <span class="feature-text">多种支付</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📱</div>
+                        <span class="feature-text">便捷体验</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部波浪动画 -->
+            <div class="hello-waves">
+                <div class="wave wave1"></div>
+                <div class="wave wave2"></div>
+                <div class="wave wave3"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 点击开始预订按钮跳转到主系统
+        document.getElementById('start-booking').addEventListener('click', function() {
+            // 添加点击动画效果
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+                // 跳转到主系统页面
+                window.location.href = 'index.html';
+            }, 150);
+        });
+
+        // 添加按钮悬停效果
+        document.getElementById('start-booking').addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+
+        document.getElementById('start-booking').addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+
+        // 添加页面加载动画
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.8s ease-in-out';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

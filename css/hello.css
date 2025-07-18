@@ -1,0 +1,554 @@
+/* ========================= Hello页面样式 ========================= */
+
+/* 添加背景图样式 */
+body {
+    background: url('../img/background-field.png') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 添加半透明遮罩层以确保内容可读性 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.1) 50%,
+        rgba(0, 0, 0, 0.3) 100%
+    );
+    z-index: -1;
+}
+
+/* 确保内容在背景之上 */
+#hello-view {
+    position: relative;
+    z-index: 1;
+}
+
+/* Hello界面容器 - 修改背景和增强视觉效果 */
+.hello-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 移除原来的渐变背景，改为透明效果 */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(2px);
+    border-radius: 20px;
+    margin: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: white;
+}
+
+/* 背景装饰 */
+.hello-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* 浮动粒子动画 - 优化颜色 */
+.floating-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.floating-particles .particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: floatParticle 8s infinite linear;
+}
+
+.floating-particles .particle:nth-child(1) {
+    width: 10px;
+    height: 10px;
+    left: 10%;
+    animation-delay: 0s;
+    animation-duration: 6s;
+}
+
+.floating-particles .particle:nth-child(2) {
+    width: 15px;
+    height: 15px;
+    left: 20%;
+    animation-delay: 1s;
+    animation-duration: 8s;
+}
+
+.floating-particles .particle:nth-child(3) {
+    width: 8px;
+    height: 8px;
+    left: 35%;
+    animation-delay: 2s;
+    animation-duration: 7s;
+}
+
+.floating-particles .particle:nth-child(4) {
+    width: 12px;
+    height: 12px;
+    left: 50%;
+    animation-delay: 3s;
+    animation-duration: 9s;
+}
+
+.floating-particles .particle:nth-child(5) {
+    width: 6px;
+    height: 6px;
+    left: 65%;
+    animation-delay: 4s;
+    animation-duration: 5s;
+}
+
+.floating-particles .particle:nth-child(6) {
+    width: 14px;
+    height: 14px;
+    left: 80%;
+    animation-delay: 5s;
+    animation-duration: 8s;
+}
+
+.floating-particles .particle:nth-child(7) {
+    width: 9px;
+    height: 9px;
+    left: 75%;
+    animation-delay: 6s;
+    animation-duration: 6s;
+}
+
+.floating-particles .particle:nth-child(8) {
+    width: 11px;
+    height: 11px;
+    left: 90%;
+    animation-delay: 7s;
+    animation-duration: 7s;
+}
+
+@keyframes floatParticle {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* 主要内容区域 */
+.hello-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 800px;
+    padding: 40px;
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Logo区域 - 修复过高问题 */
+.hello-logo {
+    margin-bottom: 30px; /* 减少底部边距 */
+    position: relative;
+}
+
+.logo-container {
+    position: relative;
+    display: inline-block;
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+.logo-image {
+    width: 80px; /* 减小logo尺寸 */
+    height: 80px; /* 减小logo尺寸 */
+    border-radius: 50%;
+    border: 3px solid rgba(95, 240, 143, 0.5); /* 减小边框 */
+    box-shadow: 0 0 20px rgba(95, 240, 143, 0.3); /* 减小阴影 */
+    transition: all 0.3s ease;
+}
+
+.logo-glow {
+    position: absolute;
+    top: -8px; /* 调整位置 */
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(95, 240, 143, 0.2) 0%, transparent 70%);
+    animation: logoGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px); /* 减小浮动距离 */
+    }
+}
+
+@keyframes logoGlow {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* 标题区域 - 增强文字对比度 */
+.hello-title {
+    margin-bottom: 25px; /* 减少边距 */
+}
+
+.cinema-name {
+    font-size: 3.5rem; /* 减小字体大小 */
+    font-weight: bold;
+    margin-bottom: 10px; /* 减少边距 */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 增强阴影 */
+    animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+.title-number {
+    color: #5ff08f;
+    font-size: 4rem; /* 减小字体大小 */
+    text-shadow: 0 0 20px rgba(95, 240, 143, 0.5);
+}
+
+.title-text {
+    color: white;
+    margin-left: 10px;
+}
+
+.cinema-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 增强阴影 */
+    animation: subtitleFade 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0% {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(95, 240, 143, 0.3);
+    }
+    100% {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(95, 240, 143, 0.6);
+    }
+}
+
+@keyframes subtitleFade {
+    0%, 100% {
+        opacity: 0.9;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 装饰元素 */
+.hello-decorations {
+    margin: 25px 0; /* 减少边距 */
+    display: flex;
+    justify-content: center;
+    gap: 25px; /* 减少间距 */
+}
+
+.decoration-item {
+    font-size: 1.8rem; /* 减小字体大小 */
+    animation: decorationFloat 4s ease-in-out infinite;
+    cursor: default;
+    transition: transform 0.3s ease;
+}
+
+.decoration-item:nth-child(1) { animation-delay: 0s; }
+.decoration-item:nth-child(2) { animation-delay: 0.5s; }
+.decoration-item:nth-child(3) { animation-delay: 1s; }
+.decoration-item:nth-child(4) { animation-delay: 1.5s; }
+.decoration-item:nth-child(5) { animation-delay: 2s; }
+
+.decoration-item:hover {
+    transform: scale(1.3) rotate(15deg);
+}
+
+@keyframes decorationFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-12px) rotate(8deg); /* 减小浮动距离 */
+    }
+}
+
+/* 欢迎信息 - 增强文字对比度 */
+.hello-welcome {
+    margin: 25px 0; /* 减少边距 */
+}
+
+.welcome-text {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 8px 0; /* 减少边距 */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 增强阴影 */
+    animation: welcomeFade 2s ease-in-out infinite alternate;
+}
+
+.welcome-text:nth-child(2) {
+    animation-delay: 1s;
+}
+
+@keyframes welcomeFade {
+    0% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 开始按钮 - 增强按钮效果 */
+.hello-action {
+    margin: 35px 0; /* 减少边距 */
+}
+
+.btn-start {
+    position: relative;
+    background: linear-gradient(45deg, #5ff08f, #4db8a0);
+    color: white;
+    border: none;
+    padding: 16px 35px; /* 稍微减小内边距 */
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* 增强阴影 */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: buttonPulse 3s ease-in-out infinite;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-start:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(95, 240, 143, 0.4);
+    background: linear-gradient(45deg, #4db8a0, #5ff08f);
+}
+
+.btn-start:active {
+    transform: translateY(-1px);
+}
+
+.btn-text {
+    position: relative;
+    z-index: 2;
+}
+
+.btn-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-start:hover .btn-icon {
+    transform: translateX(5px);
+}
+
+.btn-ripple {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    transform: scale(0);
+    transition: transform 0.6s ease;
+    z-index: 1;
+}
+
+.btn-start:hover .btn-ripple {
+    transform: scale(2);
+}
+
+@keyframes buttonPulse {
+    0%, 100% {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 8px 30px rgba(95, 240, 143, 0.5);
+    }
+}
+
+/* 特色功能展示 - 增强背景 */
+.hello-features {
+    margin-top: 40px; /* 减少边距 */
+    display: flex;
+    justify-content: center;
+    gap: 50px; /* 减少间距 */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    padding: 20px;
+    animation: featuresSlideUp 1s ease-out 0.5s both;
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* 减少间距 */
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    font-size: 1.8rem; /* 减小图标大小 */
+    background: rgba(95, 240, 143, 0.2);
+    width: 50px; /* 减小尺寸 */
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(95, 240, 143, 0.3);
+    animation: featureIconSpin 8s linear infinite;
+}
+
+.feature-text {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+@keyframes featureIconSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes featuresSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 底部波浪动画 */
+.hello-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    z-index: 1;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100px;
+    background: linear-gradient(90deg, rgba(95, 240, 143, 0.1), rgba(95, 240, 143, 0.3));
+    border-radius: 50px 50px 0 0;
+}
+
+.wave1 {
+    animation: waveMove 8s ease-in-out infinite;
+    opacity: 0.4;
+}
+
+.wave2 {
+    animation: waveMove 6s ease-in-out infinite;
+    opacity: 0.6;
+}
+
+.wave3 {
+    animation: waveMove 10s ease-in-out infinite;
+    opacity: 0.3;
+}
+
+@keyframes waveMove {
+    0%, 100% {
+        transform: translateX(-50%);
+    }
+    50% {
+        transform: translateX(-25%);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .hello-content {
+        padding: 20px;
+    }
+    
+    .cinema-name {
+        font-size: 2.5rem;
+    }
+    
+    .title-number {
+        font-size: 3rem;
+    }
+    
+    .hello-features {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .hello-decorations {
+        gap: 15px;
+    }
+    
+    .decoration-item {
+        font-size: 1.5rem;
+    }
+}
