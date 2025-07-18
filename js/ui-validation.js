@@ -272,7 +272,7 @@ function handleReservation() {
         // 根据返回结果处理
         if (result && result.success) {
             console.log('✅ 预订成功');
-            alert('预订成功！请在30分钟内支付');
+            alert('预订成功！请在电影开始前30分钟之前支付');
             // 订单已由 main.js 创建，UI 层无需再创建订单
 
             // 清空当前的用户数据
@@ -283,7 +283,7 @@ function handleReservation() {
 
             // 切换到 final-view，优先用UIViewController.switchToView
             if (window.UIViewController && typeof window.UIViewController.switchToView === 'function') {
-                window.UIViewController.switchToView('final');
+                window.UIViewController.switchToView('final', {operation: 'reservation'});
             } else {
                 // 兜底：直接用DOM切换
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));

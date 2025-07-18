@@ -213,7 +213,7 @@ function initializeEventListeners() {
 /**
  * 切换到指定视图（整合了ui-core.js的switchView功能）
  * @param {string} viewName - 目标视图名称
- * @param {Object} options - 切换选项
+ * @param {Object} operation - 附加操作选项
  */
 function switchToView(viewName, options = {}) {
     // 验证视图是否存在
@@ -240,6 +240,11 @@ function switchToView(viewName, options = {}) {
     // 显示目标视图
     targetView.classList.add('active');
 
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth' // 平滑滚动效果
+    });
     // 根据视图切换背景
     handleBackgroundForView(viewName);
 
@@ -270,9 +275,9 @@ function switchToView(viewName, options = {}) {
 /**
  * 处理特殊视图的逻辑
  * @param {string} viewName - 视图名称
- * @param {Object} options - 选项
+ * @param {Object} operation - 附加操作选项
  */
-function handleSpecialViewLogic(viewName, options) {
+function handleSpecialViewLogic(viewName, options = {}) {
     // 如果切换到座位选择页面
     if (viewName === 'seat') {
         setTimeout(() => {
@@ -334,6 +339,51 @@ function handleSpecialViewLogic(viewName, options) {
         }, 100);
     }
 
+
+    // 如果切换到最终结算页面
+    if (viewName === 'final') {
+        // 处理最终结算页面的逻辑
+        const titleLine1 = document.querySelector('#final-view .title-line-1');
+        const titleLine2 = document.querySelector('#final-view .title-line-2');
+        const messageLines = document.querySelectorAll('#final-view .message-line');
+        
+        if (options.operation === 'reservation') {
+            // 预订成功的内容
+            if (titleLine1) {
+                titleLine1.textContent = '预订成功！';
+            }
+            if (titleLine2) {
+                titleLine2.textContent = '请及时完成支付';
+            }
+            
+            // 更新祝福消息
+            if (messageLines.length >= 2) {
+                messageLines[0].textContent = '您的座位已为您保留至电影开始前30分钟';
+                messageLines[1].textContent = '请在规定时间内完成支付，期待您的光临！';
+            }
+            
+            console.log('✅ 最终页面内容已更新为预订成功');
+            
+        } else if (options.operation === 'purchase') {
+            // 购票成功的内容（默认）
+            if (titleLine1) {
+                titleLine1.textContent = '购票成功！';
+            }
+            if (titleLine2) {
+                titleLine2.textContent = '祝您观影愉快';
+            }
+            
+            // 更新祝福消息
+            if (messageLines.length >= 2) {
+                messageLines[0].textContent = '愿这场电影为您带来美好回忆';
+                messageLines[1].textContent = '期待您的下次光临！';
+            }
+            
+            console.log('✅ 最终页面内容已更新为购票成功');
+        }
+        
+        console.log('切换到最终结算页面');
+    }
     // 如果从 final 界面回到 config 界面
     if (viewName === 'config' && viewState.viewHistory.length >= 2 &&
         viewState.viewHistory[viewState.viewHistory.length - 2] === 'final') {
