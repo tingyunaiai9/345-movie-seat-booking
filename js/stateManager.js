@@ -83,7 +83,7 @@ function initializeStateManager(canvasId) {
 // ========================= 鼠标事件处理函数 =========================
 
 /**
- * 获取鼠标相对Canvas的位置（修复高DPI适配问题）
+ * 获取鼠标相对Canvas的位置
  * @param {MouseEvent} event - 鼠标事件
  * @returns {Object} 鼠标位置坐标 {x, y}
  */
@@ -91,11 +91,26 @@ function getMousePosition(event) {
     globalState.canvasRect = globalState.canvasElement.getBoundingClientRect();
     const rect = globalState.canvasRect;
     
-    // 修复：直接使用CSS显示尺寸计算坐标，不需要考虑设备像素比
-    // 因为Canvas内部的坐标系统已经在setupHighDPICanvas中处理了缩放
+    // 获取Canvas的CSS显示尺寸
+    const cssWidth = rect.width;
+    const cssHeight = rect.height;
+    
+    // 获取Canvas的实际绘制尺寸（逻辑尺寸）
+    const logicalWidth = GLOBAL_STATE.canvasWidth || globalState.canvasElement.width;
+    const logicalHeight = GLOBAL_STATE.canvasHeight || globalState.canvasElement.height;
+    
+    // 计算鼠标在CSS坐标系中的位置
+    const cssX = event.clientX - rect.left;
+    const cssY = event.clientY - rect.top;
+    
+    // 将CSS坐标转换为Canvas逻辑坐标
+    // 考虑Canvas的CSS显示尺寸与逻辑绘制尺寸的比例
+    const scaleX = logicalWidth / cssWidth;
+    const scaleY = logicalHeight / cssHeight;
+    
     return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
+        x: cssX * scaleX,
+        y: cssY * scaleY
     };
 }
 
@@ -179,7 +194,9 @@ function handleCanvasClick(event) {
         notifySelectionChange();
         console.log('通知选座状态变化');
     }
-}/**
+}
+
+/**
  * 处理Canvas鼠标移动事件
  * @param {MouseEvent} event - 鼠标移动事件
  */

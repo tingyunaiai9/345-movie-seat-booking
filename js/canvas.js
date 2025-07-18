@@ -149,35 +149,27 @@ function drawSeat(x, y, seat) {
 
     const img = seatImages[displayStatus];
 
-    if (img) {
-        // 保存当前状态
-        ctx.save();
-        
-        // 为图片绘制启用最佳质量设置
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        
-        // 使用整数坐标避免亚像素渲染
-        const drawX = Math.round(x - currentRadius);
-        const drawY = Math.round(y - currentRadius);
-        const drawSize = Math.round(currentRadius * 2);
-        
-        ctx.drawImage(
-            img,
-            drawX,
-            drawY,
-            drawSize,
-            drawSize
-        );
-        
-        ctx.restore();
-    } else {
-        // 如果某个状态的图片加载失败或不存在，则回退到绘制灰色圆形
-        ctx.fillStyle = 'gray';
-        ctx.beginPath();
-        ctx.arc(x, y, currentRadius, 0, Math.PI * 2);
-        ctx.fill();
-    }
+    // 保存当前状态
+    ctx.save();
+    
+    // 为图片绘制启用最佳质量设置
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    
+    // 使用整数坐标避免亚像素渲染
+    const drawX = Math.round(x - currentRadius);
+    const drawY = Math.round(y - currentRadius);
+    const drawSize = Math.round(currentRadius * 2);
+    
+    ctx.drawImage(
+        img,
+        drawX,
+        drawY,
+        drawSize,
+        drawSize
+    );
+    
+    ctx.restore();
 }
 
 /**
@@ -521,6 +513,43 @@ function preloadSeatImages() {
 // ========================= 工具计算函数 =========================
 
 /**
+ * 计算中心区域信息
+ * @returns {Object} 中心区域信息
+ */
+function calculateCenterZone() {
+    const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
+    const { totalRows, totalCols } = GLOBAL_STATE;
+
+    // 从 main.js 获取座位总数
+    const config = window.CinemaData ? window.CinemaData.getCurrentConfig() : null;
+    const totalSeats = config ? config.TOTAL_SEATS : totalRows * totalCols;
+
+    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
+    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
+    const numCenterCols = Math.ceil(totalCols * layoutRatio);
+    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
+
+    const middleRow = Math.ceil(totalRows / 2);
+
+    // 使用与座位位置计算相同的中心对齐逻辑
+    let middleCol;
+    if (totalCols % 2 === 1) {
+        // 奇数列：中心点是中间列
+        middleCol = (totalCols + 1) / 2;
+    } else {
+        // 偶数列：中心点是中间两列之间（使用非整数值）
+        middleCol = (totalCols + 1) / 2;
+    }
+
+    return {
+        rowStart: middleRow - Math.floor(numCenterRows / 2),
+        rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
+        colStart: Math.round(middleCol - numCenterCols / 2),
+        colEnd: Math.round(middleCol + numCenterCols / 2) - 1
+    };
+}
+
+/**
  * 计算座位位置
  * @param {Object} seat - 座位对象
  * @returns {Object} 包含x和y坐标的对象
@@ -564,44 +593,6 @@ function calculateSeatPosition(seat) {
 
     return { x, y };
 }
-
-/**
- * 计算中心区域信息
- * @returns {Object} 中心区域信息
- */
-function calculateCenterZone() {
-    const { CENTER_ZONE_RATIO } = CANVAS_CONFIG;
-    const { totalRows, totalCols } = GLOBAL_STATE;
-
-    // 从 main.js 获取座位总数
-    const config = window.CinemaData ? window.CinemaData.getCurrentConfig() : null;
-    const totalSeats = config ? config.TOTAL_SEATS : totalRows * totalCols;
-
-    const targetCenterCount = Math.floor(totalSeats * CENTER_ZONE_RATIO);
-    const layoutRatio = Math.sqrt(targetCenterCount / totalSeats);
-    const numCenterCols = Math.ceil(totalCols * layoutRatio);
-    const numCenterRows = Math.ceil(targetCenterCount / numCenterCols);
-
-    const middleRow = Math.ceil(totalRows / 2);
-
-    // 使用与座位位置计算相同的中心对齐逻辑
-    let middleCol;
-    if (totalCols % 2 === 1) {
-        // 奇数列：中心点是中间列
-        middleCol = (totalCols + 1) / 2;
-    } else {
-        // 偶数列：中心点是中间两列之间（使用非整数值）
-        middleCol = (totalCols + 1) / 2;
-    }
-
-    return {
-        rowStart: middleRow - Math.floor(numCenterRows / 2),
-        rowEnd: middleRow - Math.floor(numCenterRows / 2) + numCenterRows - 1,
-        colStart: Math.round(middleCol - numCenterCols / 2),
-        colEnd: Math.round(middleCol + numCenterCols / 2) - 1
-    };
-}
-
 
 /**
  * 根据座位布局动态计算画布尺寸
