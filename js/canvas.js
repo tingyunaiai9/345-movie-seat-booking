@@ -237,17 +237,36 @@ function drawRowColumnLabels() {
     rowPositions.forEach((rowInfo, rowNum) => {
         const labelX = rowInfo.minX - 40; // 在最左边座位左侧40像素处
         const labelY = rowInfo.y;
-        ctx.fillText(`第${rowNum}行`, labelX, labelY);
+        ctx.fillText(`第${rowNum}排`, labelX, labelY);
     });
 
-    // 绘制列标识（在每列下方）
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    colPositions.forEach((colInfo, colNum) => {
-        const labelX = colInfo.x;
-        const labelY = colInfo.maxY + 40; // 在最下边座位下方40像素处
-        ctx.fillText(`第${colNum}列`, labelX, labelY);
-    });
+    // 绘制列标识 - 根据布局类型采用不同策略
+    if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
+        // 平行布局：在每列下方绘制
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        colPositions.forEach((colInfo, colNum) => {
+            const labelX = colInfo.x;
+            const labelY = colInfo.maxY + 40; // 在最下边座位下方40像素处
+            ctx.fillText(`第${colNum}列`, labelX, labelY);
+        });
+    } else {
+        // 弧形布局：在每列的最后排（最后一行）座位下方绘制
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        
+        // 找到每列最后一行的座位位置
+        for (let col = 1; col <= totalCols; col++) {
+            // 找到该列最后一行的座位
+            const lastRowSeat = seatsArray.find(seat => seat.col === col && seat.row === totalRows);
+            if (lastRowSeat) {
+                const coords = calculateSeatPosition(lastRowSeat);
+                const labelX = coords.x;
+                const labelY = coords.y + 40; // 在最后一行座位下方40像素处
+                ctx.fillText(`第${col}列`, labelX, labelY);
+            }
+        }
+    }
 
     ctx.restore();
 }
