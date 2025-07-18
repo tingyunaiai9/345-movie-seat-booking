@@ -48,10 +48,10 @@ const CANVAS_CONFIG = {
 
     // 图片路径配置
     IMAGE_PATHS: {
-        available: 'img/seat_available.PNG',
-        selected: 'img/seat_selected.PNG',
-        sold: 'img/seat_sold.PNG',
-        reserved: 'img/seat_reserved.PNG'
+        available: 'img/seat_available.png',
+        selected: 'img/seat_selected.png',
+        sold: 'img/seat_sold.png',
+        reserved: 'img/seat_reserved.png'
     },
 
     // 布局类型
@@ -92,7 +92,33 @@ const GLOBAL_STATE = {
 // ========================= 核心绘制函数 =========================
 
 /**
- * 绘制单个座位
+ * 设置高分辨率Canvas，避免图片模糊
+ * @param {HTMLCanvasElement} canvas - Canvas元素
+ * @param {CanvasRenderingContext2D} ctx - Canvas上下文
+ * @param {number} width - 逻辑宽度
+ * @param {number} height - 逻辑高度
+ */
+function setupHighDPICanvas(canvas, ctx, width, height) {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    
+    // 设置Canvas的实际分辨率
+    canvas.width = width * devicePixelRatio;
+    canvas.height = height * devicePixelRatio;
+    
+    // 设置CSS显示尺寸
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    
+    // 缩放上下文以匹配设备像素比
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    
+    // 启用抗锯齿和图像平滑
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+}
+
+/**
+ * 绘制单个座位 - 优化版本
  * @param {number} x - 座位的中心点 x 坐标
  * @param {number} y - 座位的中心点 y 坐标
  * @param {Object} seat - 座位对象（包含状态、行号、列号等信息）
@@ -124,15 +150,27 @@ function drawSeat(x, y, seat) {
     const img = seatImages[displayStatus];
 
     if (img) {
-        // 使用 drawImage 绘制贴图，坐标需要调整为左上角
-        // 根据缩放因子调整绘制尺寸
+        // 保存当前状态
+        ctx.save();
+        
+        // 为图片绘制启用最佳质量设置
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        // 使用整数坐标避免亚像素渲染
+        const drawX = Math.round(x - currentRadius);
+        const drawY = Math.round(y - currentRadius);
+        const drawSize = Math.round(currentRadius * 2);
+        
         ctx.drawImage(
             img,
-            x - currentRadius,
-            y - currentRadius,
-            currentRadius * 2,
-            currentRadius * 2
+            drawX,
+            drawY,
+            drawSize,
+            drawSize
         );
+        
+        ctx.restore();
     } else {
         // 如果某个状态的图片加载失败或不存在，则回退到绘制灰色圆形
         ctx.fillStyle = 'gray';
@@ -151,8 +189,7 @@ function drawSeat(x, y, seat) {
 }
 
 /**
- * 核心函数：绘制整个影厅的座位布局
- * 包含屏幕绘制、过道绘制、座位绘制和中心区域标识
+ * 修改后的绘制影厅函数
  */
 function drawCinema() {
     const { canvas, ctx, currentLayout } = GLOBAL_STATE;
@@ -179,15 +216,17 @@ function drawCinema() {
     GLOBAL_STATE.totalRows = Math.max(...seatsArray.map(s => s.row));
     GLOBAL_STATE.totalCols = Math.max(...seatsArray.map(s => s.col));
 
-    // 设置画布尺寸
+    // 设置画布尺寸 - 使用高DPI适配
     const canvasDimensions = calculateCanvasSize();
-    canvas.width = canvasDimensions.width;
-    canvas.height = canvasDimensions.height;
+    
+    // 使用高DPI设置替代原来的尺寸设置
+    setupHighDPICanvas(canvas, ctx, canvasDimensions.width, canvasDimensions.height);
+    
     GLOBAL_STATE.canvasWidth = canvasDimensions.width;
     GLOBAL_STATE.canvasHeight = canvasDimensions.height;
 
     // 清空画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvasDimensions.width, canvasDimensions.height);
     const { canvasWidth, canvasHeight } = GLOBAL_STATE;
 
     // ===== 绘制中央过道虚线 =====
@@ -438,8 +477,7 @@ function drawCenterZone() {
 }
 
 /**
- * 预加载所有座位状态的图片
- * @returns {Promise<Object>} - 一个Promise，解析后返回一个包含已加载图片的对象
+ * 优化图片预加载函数
  */
 function preloadSeatImages() {
     const { IMAGE_PATHS } = CANVAS_CONFIG;
@@ -447,11 +485,21 @@ function preloadSeatImages() {
     const promises = Object.entries(IMAGE_PATHS).map(([status, src]) => {
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.onload = () => resolve({ status, img });
+            
+            // 设置图片平滑处理
+            img.style.imageRendering = 'auto';
+            
+            img.onload = () => {
+                // 确保图片完全加载
+                console.log(`图片加载成功: ${status} (${img.naturalWidth}x${img.naturalHeight})`);
+                resolve({ status, img });
+            };
+            
             img.onerror = () => {
                 console.error(`图片加载失败: ${src}`);
                 reject(`图片加载失败: ${src}`);
             };
+            
             img.src = src;
         });
     });
@@ -511,7 +559,6 @@ function calculateCanvasSize() {
  */
 function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
     // ===== 初始化全局状态 =====
-    // 获取Canvas元素
     GLOBAL_STATE.canvas = document.getElementById('cinema-canvas');
 
     GLOBAL_STATE.ctx = GLOBAL_STATE.canvas.getContext('2d');
@@ -568,7 +615,7 @@ function refreshCinemaDisplay(layoutType) {
         GLOBAL_STATE.currentLayout = layoutType;
     }
 
-    // 重绘Canvas（座位数据将直接从main.js获取）
+    // 重绘Canvas
     drawCinema();
 }
 
@@ -594,11 +641,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const toggleBtn = document.getElementById('toggle-layout-btn');
 
     if (canvas && toggleBtn) {
-        // 增加等待时间，确保所有模块完全加载
         setTimeout(() => {
-            // 初始化并绘制Cinema
             initializeAndDrawCinema();
-        }, 200); // 增加到200ms
+        }, 200); 
 
         // 为按钮添加点击事件
         toggleBtn.addEventListener('click', () => {
@@ -627,10 +672,9 @@ window.CanvasRenderer = {
     CANVAS_CONFIG,
     GLOBAL_STATE,
 
-    // 新增的实际数据相关函数
     initializeAndDrawCinema,
     refreshCinemaDisplay,
-    toggleLayout, // 导出布局切换函数
+    toggleLayout, 
 };
 
 console.log('电影院Canvas渲染模块已加载');
