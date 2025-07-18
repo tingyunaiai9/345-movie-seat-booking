@@ -152,7 +152,53 @@
 
 ### 3.7 交互设计
 
-（sigamalTODO）
+#### 交互系统架构
+
+本项目的交互系统采用"状态中心化"设计，以`stateManager.js`为核心构建了完整的交互控制体系：
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Canvas    │ ←→ │ StateManager│ ←→ │ CinemaData  │
+└─────────────┘    └─────────────┘    └─────────────┘
+      ↑                   ↑                   ↑
+      │                   │                   │
+      ↓                   ↓                   ↓
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Renderer  │    │ User Input  │    │ Data Storage│
+└─────────────┘    └─────────────┘    └─────────────┘
+```
+
+`stateManager.js`采用单一全局状态对象管理所有交互状态：
+
+```
+let globalState = {
+    canvasElement: null,      // Canvas DOM元素
+    canvasRect: null,         // Canvas位置信息
+    hoveredSeat: null,        // 当前悬停座位
+    isCtrlPressed: false,     // 键盘控制状态
+    isInitialized: false      // 初始化标志
+};
+```
+
+#### 鼠标交互流程
+
+- **鼠标移动检测**：通过`handleCanvasMouseMove`实时计算鼠标位置
+- **命中检测**：`performSeatHitDetection`计算鼠标与座位的几何关系
+- **状态更新**：更新`hoveredSeat`并触发重绘
+- **视觉反馈**：CanvasRenderer根据悬停状态调整座位渲染效果
+
+#### 点击选择流程
+
+- **点击事件处理**：`handleCanvasClick`捕获点击事件
+- **模式判断**：根据`isCtrlPressed`判断单选/多选模式
+- **座位状态切换**：调用`selectSeat`/`deselectSeat`修改状态
+- **全局通知**：通过`notifySelectionChange`更新UI和订单信息
+
+#### 键盘控制机制
+
+- **多选模式**：通过Ctrl/Command键切换多选状态
+- **事件监听**：`handleKeyDown`和`handleKeyUp`实时更新`isCtrlPressed`状态
+- **视觉提示**：界面显示当前选择模式提示
 
 ## 四、遇到问题及解决办法
 
@@ -186,18 +232,43 @@
 * 原因分析：
 * 解决方法：
 
-问题十：（简称）（sigmalTODO：写3个）
+问题十：多选无法刷新问题
 
-* 问题描述：
-* 原因分析：
-* 解决方法：
+* 问题描述：Ctrl多选不在"已选座位"中显示，也无法激活"预定座位/直接购票"，只有再单击一下时才会刷新
+* 原因分析：多选操作后未及时触发状态更新通知，导致UI未同步最新选中状态。
+* 解决方法：在`handleCanvasClick`函数中确保多选操作后调用`notifySelectionChange()`，并优化`refreshCinemaDisplay()`的调用时机。
+
+问题十一：从支付界面返回选座界面后后无法取消选中座位
+
+* 问题描述：从支付界面返回后无法取消选中座位，已选座位显示会更新但canvas仍显示为选中状态。
+* 原因分析：页面返回时状态管理器未完全重新初始化，导致Canvas渲染状态与数据状态不同步。
+* 解决方法：在页面显示/隐藏事件中添加状态重置逻辑，确保返回时调用`resetStateManager()`和`refreshCinemaDisplay()`。
+
+问题十二：鼠标坐标转换精度问题
+
+- 问题描述：在高分辨率屏幕上鼠标悬停检测不准确。
+- 原因分析：`getMousePosition`函数未考虑Canvas逻辑尺寸与CSS显示尺寸的比例差异。
+- 解决方法：在坐标转换时加入比例计算，通过`scaleX`和`scaleY`参数精确映射鼠标位置到Canvas坐标。
+
+问题十三：多选按钮仅支持Windows系统
+
+- 问题描述：多选功能在Mac系统上无法使用Command键触发。
+- 原因分析：键盘事件处理中只检测了Ctrl键，未考虑Mac的Command键(Meta键)。
+- 解决方法：在`handleKeyDown`和`handleKeyUp`中同时检测`Control`和`Meta`键，更新`INTERACTION_CONFIG`常量包含两种按键配置。
 
 ## 五、总结与感悟
 
 * 停云：（停云TODO：写100~200字）
+
 * 六块：（六块TODO：写100~200字）
+
 * 五粮液：（五粮液TODO：写100~200字）
-* sigmal：（sigmalTODO：写100~200字）
+
+* sigmal：
+
+	在开发电影院选座系统的过程中，我们深刻体会到交互逻辑与状态管理的重要性。通过设计`stateManager.js`这一核心模块，我们实现了Canvas渲染、用户操作与数据存储的高效协同。面对多选模式兼容性、状态同步延迟等问题，我们不断优化事件处理流程，确保跨平台体验的一致性。同时，采用`localStorage`存储影院状态和订单信息，既满足了数据持久化需求，又避免了频繁的服务器交互。
+
+	此外，在开发的过程当中我们也收获了宝贵的团队协作经验。通过 Git 分支管理（main, dev以及成员分支）和Git 提交规范(feat, fix以及refactor等），我们高效地实现了功能开发、Bug修复和版本发布的并行推进。这次项目不仅是技术能力的锻炼，更是团队默契的成长，让我们认识到优秀的软件不仅是代码的集合，更是团队智慧的结晶。在这次项目当中宝贵的合作经验也将为我们下学期的软件工程合作打下坚实的基础。
 
 ## 六、分工
 
@@ -209,4 +280,6 @@
 ## 参考资料
 
 * 1] MDN Web Docs. Canvas API. https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+* 2] W3 Schools.https://www.w3schools.com/html/html5_canvas.asp
+* 3]菜鸟教程HTML DOM. https://www.runoob.com/htmldom/htmldom-tutorial.html
 * 大模型：Gemini，Claude，ChatCPT
