@@ -224,7 +224,7 @@ let globalState = {
 
 - 问题描述：在某天merge后突然发现购买后如果点击刷新网页的话`canvas`中所有的座位都会还原为`available`状态，但订单信息都还在，查看`localStorage`发现其中的对应座位信息也都全部被刷新了。
 - 原因分析：因为前面已经尽量控制过只有`saveCurrentCinemaState()`函数中对`localStorage`进行更改，其他函数只有调用这个函数才能引起`localStorage`变化。那么在刷新后就会被触发的函数只有时时刻刻都在检查的检查预定订单是否过期的`checkAndReleaseExpiredReservations()`函数，因为在网站初始化时还没有任何影院信息，canvas函数会先默认初始化一个10x20的空白影厅，此时的影厅所有座位均为可选择状态。而`checkAndReleaseExpiredReservations()`函数在检查后调用`saveCurrentCinemaState()`函数将更改过的`cinemaSeats`存入`localStorage`。但此时的`cinemaSeats`为默认空影厅，因此原本的影厅被覆盖了。
-- 解决方法：从这个问题我们意识到存入`localStorage`的方式也存在漏洞，之前的`saveCurrentCinemaState()`传入的是当前`main.js`中存储的`cinemaSeats`需要在订单操作中加入影厅的具体信息，根据电影和对应影院的信息
+- 解决方法：从这个问题我们意识到存入`localStorage`的方式也存在漏洞，之前的`saveCurrentCinemaState()`传入的是当前`main.js`中存；储的`cinemaSeats`，这个逻辑在购买和预定时不存在问题，但是其他的取消预订、支付预定、退款等订单操作可能需要更改当前`main.js`所表示的影厅之外的影厅，因此需要在订单操作中加入影厅的具体信息，根据电影和对应影院的信息得到Key去查找`localStorage`中的对应座位状态并更改。
 
 问题七：（简称）（五粮液TODO：写3个）
 
@@ -259,9 +259,7 @@ let globalState = {
 ## 五、总结与感悟
 
 * 停云：（停云TODO：写100~200字）
-
-* 六块：（六块TODO：写100~200字）
-
+* 六块：这是我第一次进行小组协作完成一次大作业，也是第一次使用git协作，感谢sigmal同志为我提供了git协作教程也感谢停云同志为整个小组制定了规范的提交格式。整个团队的协作还是很奇妙的，大家一起商议一些功能具体实现，把工作拆开再合起来的确是一门艺术，这一过程中我觉得明确接口、规范调用、以及协调好调用时机是比较重要的，另外也需要及时开会沟通同步进度和一些问题。这一过程中由于我负责的一直都是js文件，所以主要是熟练了javascript相关的应用，也学习了canvas技术的一些知识以及应用。
 * 五粮液：（五粮液TODO：写100~200字）
 
 * sigmal：
@@ -273,7 +271,7 @@ let globalState = {
 ## 六、分工
 
 * 停云](https://github.com/tingyunaiai9)：（停云TODO）
-* 六块](https://github.com/fujiimoku)：（六块TODO）
+* 六块](https://github.com/fujiimoku)：`canvas.js`的编写，logo以及座位贴图的绘制，后续完成`canvas.js`后将一个css文件拆分为了10个部分；持续处理大小bug，主要聚焦在多页面多订单交互过程中的信息数据传递以及存取方面的问题。
 * 五粮液](https://github.com/wanly23)：（五粮液TODO）
 * sigmal](https://github.com/sigmalyj)：（sigmalTODO）
 
