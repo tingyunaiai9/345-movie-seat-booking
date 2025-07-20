@@ -214,7 +214,7 @@ graph TD
 
 `stateManager.js`采用单一全局状态对象管理所有交互状态：
 
-```
+```javascript
 let globalState = {
     canvasElement: null,      // Canvas DOM元素
     canvasRect: null,         // Canvas位置信息
@@ -353,7 +353,7 @@ setTimeout(() => {
 
 ## 参考资料
 
-* 1] MDN Web Docs. Canvas API. https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-* 2] W3 Schools.https://www.w3schools.com/html/html5_canvas.asp
-* 3]菜鸟教程HTML DOM. https://www.runoob.com/htmldom/htmldom-tutorial.html
-* 大模型：Gemini，Claude，ChatCPT
+* [1] MDN Web Docs. Canvas API. https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+* [2] W3 Schools.https://www.w3schools.com/html/html5_canvas.asp
+* [3] 菜鸟教程HTML DOM. https://www.runoob.com/htmldom/htmldom-tutorial.html
+* 大模型：Gemini，Claude，ChatGPT，GLM
