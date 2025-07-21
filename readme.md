@@ -178,43 +178,7 @@
 ### 3.6 页面逻辑
 
 页面逻辑主要关注各个页面之间的跳转，不同页面之前的跳转逻辑基本是顺序执行，订单页面独立于主要页面之外，可以从任意界面点进后返回该界面，该部分处理模仿目前主流电影选座网站，方便用户即时查看所有订单信息。
-```mermaid
-graph LR
-    subgraph main [" "]
-        A[影厅配置页面] <--> B[电影选择页面]
-        B <--> C[选座页面]
-        C <--> D[支付页面]
-        D --> E[确认页面]
-        E --> F[彩蛋页面]
-        %% 返回连接
-        E --> C[选座页面]
-        F --> A[影厅配置页面]
-    end
-    
-    G[订单页面]
-    
-    %% 从主流程到订单页面的虚线连接
-    C -.-> G
-    D -.-> G
-    
-    
-    
-    %% 订单页面的其他连接
-    A -.-> G
-    B -.-> G
-    E -.-> G
-    F -.-> G
-
-    %% 布局调整
-    classDef mainFlow fill:#e6f7ff,stroke:#1890ff
-    class A,B,C,D,E,F mainFlow
-    class G fill:#f6ffed,stroke:#52c41a
-    
-    %% 隐藏子图边框
-    classDef subgraphStyle fill:transparent,stroke:transparent
-    class main subgraphStyle
-
-```
+![[pic/test/test_00.png]]
 
 除了上述这些点击界面上的按钮的跳转功能，用户还可以点击页首的状态栏**直接进行跳转**，如下图所示，每个页面均可以跳转至之前的全部页面，而无法跳转至后序页面，保证了购票流程的正确性。
 
