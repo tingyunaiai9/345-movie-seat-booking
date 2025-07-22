@@ -505,7 +505,7 @@ setTimeout(() => {
 * [停云](https://github.com/tingyunaiai9)：（停云TODO）
 * [六块](https://github.com/fujiimoku)：`canvas.js`的编写，logo以及座位贴图的绘制，后续完成`canvas.js`后将一个css文件拆分为了10个部分；持续处理大小bug，主要聚焦在多页面多订单交互过程中的信息数据传递以及存取方面的问题。
 * [五粮液](https://github.com/wanly23)：主要负责编写前端相关代码，包括页面布局、样式设计和用户交互逻辑，搭建项目的整体`HTML`结构和`CSS`样式，同时实现界面UI的美化与交互效果，处理界面的所有点击事件并完成与后端的对接。主要负责文件有：`index.html`、全部`css`文件以及与`ui`相关的全部`js`文件。
-* [sigmal](https://github.com/sigmalyj)：（sigmalTODO）
+* [sigmal](https://github.com/sigmalyj)：网页开发前期负责鼠标点击事件的交互逻辑与座位状态管理（详见`stateManager.js`）；后续开发过程当中还负责订单界面的美化（详见`ui-orders.js`以及`orders.css`）、各部分代码简化重构和欢迎界面（`hello.html`以及`hello.css`）的制作。
 
 ## 参考资料
 

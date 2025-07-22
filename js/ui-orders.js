@@ -677,9 +677,21 @@ function showMyOrderDetail(order) {
         seatTagsContainer.innerHTML = '<span class="seat-tag">无座位信息</span>';
     }
 
-    // 更新客户信息
-    document.getElementById('detail-customer-name').textContent = customer.name || '未填写';
-    document.getElementById('detail-customer-age').textContent = customer.age || '未填写';
+    const customersList = document.getElementById('detail-customers-list');
+    if (!customer || customer.length === 0) {
+        customersList.innerHTML = '<div class="no-customers">暂无客户信息</div>';
+        return;
+    }
+
+    customersList.innerHTML = customer.members.map((member, index) => `
+        <div class="customer-item">
+            <div class="customer-index">${index + 1}</div>
+            <div class="customer-info">
+                <div class="customer-name">${member.name || '未知姓名'}</div>
+                <div class="customer-age">${member.age || '未知年龄'}岁</div>
+            </div>
+        </div>
+    `).join('');
 
     // 更新费用明细
     const seatCount = seatInfo.seatCount;

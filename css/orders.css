@@ -664,6 +664,52 @@
     align-items: center;
 }
 
+.customers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.customer-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg-light);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.customer-age {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.customer-index {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    background: var(--primary-color);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 .detail-label {
     color: #6c757d;
     font-weight: 600;
