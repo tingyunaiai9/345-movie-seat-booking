@@ -234,13 +234,13 @@
 
 订单操作的核心为创建新订单，与修改订单状态。
 
-* 创建新订单
+* **创建新订单**
   * 以“前缀+时间戳”的形式，为每个订单生成订单 id，其中 `s-` 为直接购票订单，`r-` 为预订订单
   * 将订单的状态设置为 `sold` 或 `reserved` ，并记录创建订单时的相关时间信息
   * 在订单中记录座位、用户、电影、票价等信息
   * 修改订单中的座位状态
   * 同步至 localStorage
-* 修改订单状态
+* **修改订单状态**
   * 根据订单 id，搜索到对应订单，并修改其订单状态
   * 根据相关操作，修改订单记录的信息
   * 根据相关操作，更改订单涉及的座位的状态
@@ -259,7 +259,7 @@
   - **存储方式**：以对应的Key存在`localStorage`中。
   - **Key**：`cinemaState-{电影名}-{rows}x{cols}`。
   - **存储内容**：二维数组`cinemaSeats`，每个元素包含对应作为的`row`，` col`， `id`，`status`信息。
-- 选座界面输入数据：选座界面接受的输入有客户输入的信息以及客户选择的具体座位。
+- **选座界面输入数据**：选座界面接受的输入有客户输入的信息以及客户选择的具体座位。
   - **存储方式**：客户信息直接存储在 DOM 元素中，而选中座位则直接更改`main.js`中的座位状态并实时查询。
   - **存储内容**：票务类型，用户姓名及年龄。
 - **订单信息**：订单信息包含座位信息、客户信息以及电影信息。
@@ -268,11 +268,11 @@
   - **存储内容**：为一个订单列表，每个订单包含信息有：购票Id`ticketId`，订单状态`status`，座位`seats`，客户信息`customerInfo`，电影信息`movieInfo`，单价`unitPrice`，总价`totalCost`，创建时间`createdAt`，过期时间`expiresAt`（预订票），支付时间`paidAt`（直购票或支付后的预定票）。
 
 
-#### 当前选择电影信息
+#### 3.4.1 当前选择电影信息
 
 需要由前两个页面决定，因此先在第一个页面暂存行列信息后，进入第二个页面后得到所选电影，由此得到电影id、电影名、开始时间等信息，在初始化影院选座界面的实际存入`localStorage`，后续过程中对该信息只读不写，直到整个订单流程结束后，在返回配置界面时清除电影信息在`localStorage`中的存储，等待新订单重复前面的流程。
 
-#### 影院座位状态数据
+#### 3.4.2 影院座位状态数据
 
 整个订单流程中，影院座位状态数据经历了三个阶段。
 
@@ -280,11 +280,11 @@
 - **选座阶段**：这一阶段仅会涉及到`available`和`selected`之间的切换，在订单确认之前无需存入`localStorage`，只需完成交互即可。
 - **订单阶段**：订单完成后需要根据订单具体情况更改`cinemaSeats`的相应座位状态并存入`localStorage`，预定完成和支付完成两个动作只需要更改当前的信息即可，但是涉及到检查预定是否过期、退款、取消预定、支付预定、退款这几个操作则可能去更改当前`cinemaSeats`所存储座位状态以外的数据。因此需要根据订单存储的电影信息来查找对应Key并该Key下存储的影院座位状态数据。
 
-#### 选座界面输入数据
+#### 3.4.3 选座界面输入数据
 
 客户信息只需要调用`getGroupMembersList()`和`getIndividualMembersList()`查询DOM来获取即可，而座位信息在处理订单相关的函数中只需要遍历`cinemaSeats`查看座位是否为`selected`状态即可。
 
-#### 订单信息
+#### 3.4.4 订单信息
 
 在每一个与订单相关的操作完成后都同步到`localStorage`中，在系统启动时自动从`localStorage`中加载订单。
 
@@ -292,13 +292,13 @@
 
 `canvas.js` 文件负责将影院座位数据以可视化方式呈现在页面上，核心机制如下：
 
-#### 数据来源
+#### 3.5.1 数据来源
 
 - **座位数据**：从`main.js`获取，得到二维数组，每个元素为座位对象（包含 row、col、id、status 等）。
 - **当前影厅配置**：从`main.js`获取，包括总排数、总列数等。
 - **选中状态**：从`stateManager.js`获取获取当前被选中的座位列表，辅助高亮显示。
 
-#### 绘制流程
+#### 3.5.2 绘制流程
 
 `canvas.js`维护一个 GLOBAL_STATE 对象，记录当前画布、布局类型、行列数、中心区域信息等，确保绘制时状态一致。
 
@@ -320,7 +320,7 @@
 - **布局支持**
   支持弧形（ARC）和矩形（PARALLEL）两种布局，通过 `GLOBAL_STATE.currentLayout` 切换，分别采用不同的坐标计算方式。
 
-#### 交互与刷新
+#### 3.5.3 交互与刷新
 
 - **布局切换**
   通过 `toggleLayout()` 切换布局类型，并自动重绘。
@@ -340,7 +340,7 @@
 ![](pic/yemei.png)
 ### 3.7 交互设计
 
-#### 交互系统架构
+#### 3.7.1 交互系统架构
 
 本项目的交互系统采用"状态中心化"设计，以`stateManager.js`为核心构建了完整的交互控制体系：
 
@@ -368,21 +368,21 @@ let globalState = {
 };
 ```
 
-#### 鼠标交互流程
+#### 3.7.2 鼠标交互流程
 
 - **鼠标移动检测**：通过`handleCanvasMouseMove`实时计算鼠标位置
 - **命中检测**：`performSeatHitDetection`计算鼠标与座位的几何关系
 - **状态更新**：更新`hoveredSeat`并触发重绘
 - **视觉反馈**：CanvasRenderer根据悬停状态调整座位渲染效果
 
-#### 点击选择流程
+#### 3.7.3 点击选择流程
 
 - **点击事件处理**：`handleCanvasClick`捕获点击事件
 - **模式判断**：根据`isCtrlPressed`判断单选/多选模式
 - **座位状态切换**：调用`selectSeat`/`deselectSeat`修改状态
 - **全局通知**：通过`notifySelectionChange`更新UI和订单信息
 
-#### 键盘控制机制
+#### 3.7.4 键盘控制机制
 
 - **多选模式**：通过Ctrl/Command键切换多选状态
 - **事件监听**：`handleKeyDown`和`handleKeyUp`实时更新`isCtrlPressed`状态
@@ -497,7 +497,7 @@ setTimeout(() => {
 
 ## 参考资料
 
-* [1] MDN Web Docs. Canvas API. https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-* [2] W3 Schools.https://www.w3schools.com/html/html5_canvas.asp
-* [3] 菜鸟教程HTML DOM. https://www.runoob.com/htmldom/htmldom-tutorial.html
-* 大模型：Gemini，Claude，ChatGPT，GLM
+* [1] MDN Web Docs. Canvas API. [https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+* [2] W3 Schools. [https://www.w3schools.com/html/html5_canvas.asp](https://www.w3schools.com/html/html5_canvas.asp)
+* [3] 菜鸟教程HTML DOM. [https://www.runoob.com/htmldom/htmldom-tutorial.html](https://www.runoob.com/htmldom/htmldom-tutorial.html)
+* 大模型：[Gemini](https://gemini.google.com/)，[Claude](https://claude.ai/)，[ChatGPT](https://chatgpt.com/)，[ChatGLM](https://chatglm.cn/)
