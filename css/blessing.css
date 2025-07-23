@@ -277,6 +277,33 @@
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3)); /* 🔑 增强阴影 */
 }
 
+/* 🔑 新增：图片装饰样式 */
+.decoration-img {
+    /* 重置字体大小，因为现在使用图片 */
+    font-size: inherit;
+    /* 保持原有的布局属性 */
+    width: 4.4rem;
+    height: 4.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.decoration-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 保持图片比例 */
+    /* 🔑 为图片添加相同的阴影效果 */
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+    /* 🔑 添加圆角，让图片更柔和 */
+    border-radius: 4px;
+}
+
+/* 🔑 确保GIF动画正常播放 */
+.decoration-icon[src$=".gif"] {
+    image-rendering: auto;
+}
+
 .decoration:nth-child(1) { animation-delay: 0s; }
 .decoration:nth-child(2) { animation-delay: 0.3s; }
 .decoration:nth-child(3) { animation-delay: 0.6s; }
