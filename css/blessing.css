@@ -1,7 +1,7 @@
 /* 最终祝福页面样式 */
 .final-blessing-container {
     min-height: 100vh;
-    background: rgba(0, 0, 0, 0.2); /* 完全透明背景 */
+    background: rgba(0, 0, 0, 0); /* 降低背景透明度 */
     position: relative;
     display: flex;
     align-items: center;
@@ -9,8 +9,9 @@
     overflow: hidden;
     padding: 2rem;
 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    /* 移除全屏毛玻璃效果 */
+    /* backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); */
 }
 
 /* 背景粒子动画 */
@@ -92,6 +93,17 @@
     position: relative;
     max-width: 600px;
     animation: slideInUp 0.8s ease-out;
+
+    /* 🔑 为内容区域添加毛玻璃背景卡片 */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 @keyframes slideInUp {
@@ -119,14 +131,14 @@
     align-items: center;
     justify-content: center;
     animation: bounceIn 0.8s ease-out 0.3s both;
-    
-    /* 🔑 保持原来的阴影和背景效果 */
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+
+    /* 🔑 优化图标容器的毛玻璃效果 */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
     box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+        0 15px 35px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .logo-image {
@@ -134,10 +146,10 @@
     height: 80px;
     object-fit: contain;  /* 🔑 保持图片比例 */
     border-radius: 50%;
-    
+
     /* 🔑 添加图片过滤效果，让logo更突出 */
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-    
+
     /* 🔑 如果logo是白色背景，可以去掉这行注释 */
     /* background: white; */
 }
@@ -339,6 +351,11 @@
     transition: all 0.3s ease;
     text-transform: none;
     font-weight: 600;
+
+    /* 🔑 为按钮添加轻微毛玻璃效果 */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-glow:hover {
@@ -366,65 +383,41 @@
     background: linear-gradient(135deg, #0984e3, #0770c4);
 }
 
-/* 底部装饰波浪 */
-.bottom-decoration {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-    line-height: 0;
-}
 
-.wave-animation svg {
-    position: relative;
-    display: block;
-    width: calc(100% + 1.3px);
-    height: 120px;
-}
-
-.wave-animation .shape-fill {
-    fill: rgba(255, 255, 255, 0.1);
-    animation: waveMove 8s ease-in-out infinite;
-}
-
-@keyframes waveMove {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(-20px);
-    }
-}
 
 /* 响应式设计 */
 @media (max-width: 768px) {
     .final-blessing-container {
         padding: 1rem;
     }
-    
+
+    .blessing-content {
+        padding: 2rem 1.5rem; /* 🔑 移动端调整内边距 */
+        margin: 0 1rem;
+    }
+
     .title-line-1 {
         font-size: 2rem;
     }
-    
+
     .title-line-2 {
         font-size: 2.5rem;
     }
-    
+
     .decoration {
         font-size: 1.5rem;
         margin: 0 0.5rem;
     }
-    
+
     .message-line {
         font-size: 1.1rem;
     }
-    
+
     .final-actions {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .btn-glow {
         padding: 10px 25px;
         font-size: 1rem;
@@ -432,15 +425,20 @@
 }
 
 @media (max-width: 480px) {
-    .success-icon {
-        width: 80px;
+    .blessing-content {
+        padding: 1.5rem 1rem; /* 🔑 小屏幕进一步调整 */
+        margin: 0 0.5rem;
+    }
+
+    .success-icon-image {
+        width: 80px; /* 🔑 调整图标大小 */
         height: 80px;
     }
-    
+
     .title-line-1 {
         font-size: 1.8rem;
     }
-    
+
     .title-line-2 {
         font-size: 2.2rem;
     }
