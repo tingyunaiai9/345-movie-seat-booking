@@ -664,6 +664,55 @@
     align-items: center;
 }
 
+/* 客户信息列表 */
+.customers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.customer-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.customer-age {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.customer-index {
+    font-size: 12px;
+    color: white;
+    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(104, 165, 48, 0.3);
+}
+
 .detail-label {
     color: #6c757d;
     font-weight: 600;

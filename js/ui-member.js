@@ -316,7 +316,7 @@ function getMyCustomerDataEnhanced() {
             // 向后兼容的字段
             name: members.length > 0 ? members[0].name : '未填写',
             age: members.length > 0 ? members[0].age : '未填写',
-            phone: document.getElementById('individual-phone')?.value || '未填写'
+            // phone: document.getElementById('individual-phone')?.value || '未填写'
         };
     } else {
         // 团体票：返回团体信息
@@ -328,7 +328,7 @@ function getMyCustomerDataEnhanced() {
             // 向后兼容的字段
             name: document.getElementById('customer-name')?.value || '未填写',
             age: document.getElementById('customer-age')?.value || '未填写',
-            phone: document.getElementById('customer-phone')?.value || '未填写'
+            // phone: document.getElementById('customer-phone')?.value || '未填写'
         };
     }
 }
