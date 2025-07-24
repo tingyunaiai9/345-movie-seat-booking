@@ -28,7 +28,7 @@
     line-height: 1;
 }
 
-/* 可选：添加一个小的脉冲动画效果 */
+/* 添加脉冲动画效果 */
 .btn-my-orders-circle::before {
     content: '';
     position: absolute;
@@ -67,7 +67,7 @@
     /* 确保圆形按钮与步骤对齐 */
 }
 
-/* 如果想让圆形按钮更突出，可以添加这个样式 */
+/* 令圆形按钮更突出 */
 .btn-my-orders-circle:hover::before {
     animation-duration: 1s;
 }
@@ -137,7 +137,7 @@
 .filter-tabs {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap; /* 允许换行，适应更多按钮 */
+    flex-wrap: wrap;
 }
 
 .filter-tab {
@@ -150,7 +150,7 @@
     transition: all 0.3s ease;
     font-size: 14px;
     font-weight: 500;
-    white-space: nowrap; /* 防止文字换行 */
+    white-space: nowrap;
 }
 
 .filter-tab.active {
@@ -576,6 +576,7 @@
 
     to {
         opacity: 1;
+        
         transform: scale(1) translateY(0);
     }
 }

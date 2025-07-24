@@ -14,7 +14,6 @@ body {
     font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Noto Sans CJK SC', sans-serif;
     line-height: 1.6;
     color: #2c3e50;
-    /* background: rgba(95, 240, 143, 0.5); */
     background: url("../img/background-field.png") no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
@@ -25,7 +24,6 @@ body {
 html,
 body {
     min-width: 900px;
-    /* 限制网页最小宽度为900px */
 }
 
 /* ========================= 页面视图控制 ========================= */
@@ -40,7 +38,7 @@ body {
 /* ========================= 通用组件样式 ========================= */
 .container {
     min-width: 900px;
-    /* 主容器也限制最小宽度 */
+    /* 主容器限制最小宽度 */
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;

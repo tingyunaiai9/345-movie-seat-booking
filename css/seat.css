@@ -209,7 +209,7 @@
     border-radius: 2px;
 }
 
-/* 同时确保个人票也有 */
+/* 确保个人票有正确的position */
 .individual-controls .seat-preference h3::after {
     content: '';
     position: absolute;
@@ -388,15 +388,13 @@
     color: #68a530;
 }
 
-/* 简化Canvas样式，避免复杂的边框和变换 */
+/* Canvas样式*/
 #cinema-canvas {
     display: block !important;
     margin: 0 auto;
     cursor: crosshair;
     background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
     border-radius: 10px;
-    /* 移除边框，避免影响位置计算 */
-    /* border: 2px solid rgba(255, 255, 255, 0.1); */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     /* 让Canvas根据实际尺寸显示，避免CSS尺寸覆盖 */
     width: auto !important;
@@ -724,33 +722,3 @@
     cursor: pointer;
     border: 2px solid transparent;
 }
-
-/*.btn-secondary {
-    background: linear-gradient(135deg, #c2d4d6 0%, #98ccbb 100%);
-    color: #2c3e50;
-}
-
-.btn-secondary:hover {
-    background: linear-gradient(135deg, #a8c5c8 0%, #85b8a8 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(194, 212, 214, 0.4);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #68a530 0%, #398d37 100%);
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #5a8f2a 0%, #2f7a2f 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(104, 165, 48, 0.4);
-}
-
-.btn-primary:disabled {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-    color: #adb5bd;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}*/

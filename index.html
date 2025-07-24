@@ -30,7 +30,6 @@
                     <span class="step" data-step="seat">选座</span>
                     <span class="step" data-step="payment">支付</span>
                     <span class="step" data-step="confirm">确认</span>
-                    <!-- 移动我的订单按钮到确认后面，并改为圆形图标 -->
                     <button class="btn-my-orders-circle" id="my-orders-btn" title="我的订单">
                         <span class="icon">📋
                         </span>
@@ -112,7 +111,7 @@
                 <div class="movie-panel">
                     <h2>选择电影</h2>
                     <div class="movie-list">
-                        <!-- 罗小黑战记 -> 使用cat背景 -->
+                        <!-- 罗小黑战记 -->
                         <div class="movie-item" data-movie="cat">
                             <img src="img/poster_cat.jpg" alt="罗小黑战记">
                             <div class="movie-info">
@@ -122,7 +121,7 @@
                             </div>
                         </div>
 
-                        <!-- 蓦然回首 -> 使用girl背景 -->
+                        <!-- 蓦然回首 -->
                         <div class="movie-item" data-movie="girl">
                             <img src="img/poster_girl.jpg" alt="蓦然回首">
                             <div class="movie-info">
@@ -132,7 +131,7 @@
                             </div>
                         </div>
 
-                        <!-- 情书 -> 使用love背景 -->
+                        <!-- 情书 -->
                         <div class="movie-item" data-movie="love">
                             <img src="img/poster_love.jpg" alt="情书">
                             <div class="movie-info">
@@ -149,7 +148,7 @@
                 </div>
             </section>
 
-            <!-- 选座视图 - 重新布局 -->
+            <!-- 选座视图 -->
             <section id="seat-view" class="view">
                 <div class="seat-panel">
                     <div class="seat-header">
@@ -262,7 +261,7 @@
                         </div>
                     </div>
 
-                    <!-- 第二部分：银幕和Canvas区域 - 放大 -->
+                    <!-- 第二部分：银幕和Canvas区域 -->
                     <div class="seat-canvas-section">
                         <div class="seat-canvas-container-large">
                             <div class="screen-large">
@@ -545,7 +544,7 @@
                     <!-- 在订单列表容器后添加订单项模板 -->
                     <div class="orders-container">
                         <div class="orders-list" id="orders-list">
-                            <!-- 订单项将通过 JavaScript 动态生成 -->
+                            <!-- 订单项通过 JS 动态生成 -->
                             <div class="no-orders" id="no-orders">
                                 <div class="no-orders-icon">🎬</div>
                                 <h3>暂无订单</h3>
@@ -570,7 +569,7 @@
                     
                                 <!-- 中间：主要信息区域 -->
                                 <div class="order-center">
-                                    <!-- 电影标题区 - 突出显示 -->
+                                    <!-- 电影标题区 -->
                                     <div class="movie-title-section">
                                         <h3 class="movie-title">
                                             <span class="title-text"></span>
@@ -634,12 +633,6 @@
                     <div class="blessing-content">
                         <!-- 成功图标 -->
                         <div class="success-icon-container">
-                            <!-- <div class="success-icon">
-                                <div class="check-mark">
-                                    <div class="check-left"></div>
-                                    <div class="check-right"></div>
-                                </div>
-                            </div> -->
                             <div class="success-icon-image">
                                 <img src="img/logo_pic.png" alt="电影院Logo" class="logo-image">
                             </div>
@@ -710,7 +703,7 @@
         </div>
     </div>
 
-    <!-- 🔑 新位置：订单详情模态框 - 现在是全局模态框 -->
+    <!-- 订单详情模态框调整为全局模态框 -->
     <div class="order-detail-modal" id="order-detail-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -718,7 +711,7 @@
                 <button class="modal-close" id="close-order-detail">×</button>
             </div>
             <div class="modal-body" id="order-detail-content">
-                <!-- 在订单详情模态框中，订单信息区域应该按以下顺序排列 -->
+                <!-- 订单信息区域 -->
                 <div class="order-detail-section">
                     <h4>📋 订单信息</h4>
                     <div class="detail-grid">
@@ -759,7 +752,7 @@
                         <span class="detail-label">选择座位:</span>
                         <div class="detail-value">
                             <div class="seat-tags" id="detail-seat-tags">
-                                <!-- 座位标签将在这里动态生成 -->
+                                <!-- 座位标签动态生成 -->
                             </div>
                         </div>
                     </div>
@@ -773,7 +766,7 @@
                     </div>
                 </div>
                 
-                <!-- 费用明细区域保持不变 -->
+                <!-- 费用明细区域 -->
                 <div class="order-detail-section">
                     <h4>💰 费用明细</h4>
                     <div class="detail-grid">
