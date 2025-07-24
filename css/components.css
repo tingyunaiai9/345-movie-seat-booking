@@ -4,29 +4,18 @@
 .btn {
     display: inline-block;
     padding: 14px 28px;
-    /* 从 10px 20px 更改，用于更大的尺寸 */
     border: none;
-    /* 保持不变 */
     border-radius: 10px;
-    /* 从 6px 更改，用于更圆的边角 */
     font-size: 16px;
-    /* 从 14px 更改，用于更大的字体 */
     font-weight: 600;
-    /* 从 500 更改，用于更粗的字体 */
     text-align: center;
-    /* 保持不变 */
     text-decoration: none;
-    /* 保持不变 */
     cursor: pointer;
-    /* 保持不变 */
     transition: all 0.3s ease;
-    /* 保持不变 */
     outline: none;
-    /* 保持不变 */
     min-width: 140px;
-    /* 从 100px 更改，用于统一的最小宽度 */
     border: 2px solid transparent;
-    /* 添加此行以匹配选座界面按钮的边框 */
+    /* 匹配选座界面按钮的边框 */
 }
 
 .btn:hover {
@@ -65,24 +54,7 @@
     box-shadow: 0 6px 15px rgba(194, 212, 214, 0.4);
 }
 
-/*.seat-actions {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    padding-top: 25px;
-    border-top: 2px solid #c2d4d6;
-}*/
 
-/*.seat-actions .btn {
-    min-width: 140px;
-    padding: 14px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 2px solid transparent;
-}*/
 
 .btn-success {
     background: linear-gradient(135deg, #80bc6b 0%, #329363 100%);
