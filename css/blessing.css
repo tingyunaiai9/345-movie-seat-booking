@@ -1,7 +1,7 @@
 /* 最终祝福页面样式 */
 .final-blessing-container {
     min-height: 100vh;
-    background: transparent; /* 🔑 保持完全透明 */
+    background: transparent; /* 保持完全透明 */
     position: relative;
     display: flex;
     align-items: center;
@@ -23,11 +23,11 @@
 
 .particle {
     position: absolute;
-    width: 3px; /* 🔑 稍微缩小粒子 */
+    width: 3px; /* 稍微缩小粒子 */
     height: 3px;
-    background: rgba(255, 255, 255, 0.4); /* 🔑 降低粒子透明度 */
+    background: rgba(255, 255, 255, 0.4); /* 降低粒子透明度 */
     border-radius: 50%;
-    animation: float 8s ease-in-out infinite; /* 🔑 放慢动画 */
+    animation: float 8s ease-in-out infinite; /* 放慢动画 */
 }
 
 .particle:nth-child(1) {
@@ -75,10 +75,10 @@
 @keyframes float {
     0%, 100% {
         transform: translateY(0px) rotate(0deg);
-        opacity: 0.3; /* 🔑 降低起始透明度 */
+        opacity: 0.3; /* 降低起始透明度 */
     }
     50% {
-        transform: translateY(-30px) rotate(180deg); /* 🔑 增加浮动距离 */
+        transform: translateY(-30px) rotate(180deg); /* 增加浮动距离 */
         opacity: 0.7;
     }
 }
@@ -88,23 +88,23 @@
     text-align: center;
     z-index: 10;
     position: relative;
-    max-width: 700px; /* 🔑 扩大宽度 */
-    width: 90%; /* 🔑 添加响应式宽度 */
+    max-width: 700px; /* 扩大宽度 */
+    width: 90%; /* 添加响应式宽度 */
     animation: slideInUp 0.8s ease-out;
-    
-    /* 🔑 优化毛玻璃效果，扩大范围 */
+
+    /* 优化毛玻璃效果，扩大范围 */
     background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border-radius: 28px; /* 🔑 增加圆角 */
-    padding: 4rem 3rem; /* 🔑 增加内边距，扩大范围 */
+    border-radius: 28px; /* 增加圆角 */
+    padding: 4rem 3rem; /* 增加内边距，扩大范围 */
     border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 
         0 32px 64px rgba(0, 0, 0, 0.12),
         0 0 0 1px rgba(255, 255, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25); /* 🔑 增强内阴影 */
-    
-    /* 🔑 添加微妙的渐变叠加 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.25); /* 增强内阴影 */
+
+    /* 添加微妙的渐变叠加 */
     position: relative;
 }
 
@@ -134,11 +134,11 @@
 
 /* 成功图标 */
 .success-icon-container {
-    margin-bottom: 3rem; /* 🔑 增加间距 */
+    margin-bottom: 3rem; /* 增加间距 */
 }
 
 .success-icon-image {
-    width: 130px; /* 🔑 增大图标 */
+    width: 130px; /* 增大图标 */
     height: 130px;
     border-radius: 50%;
     margin: 0 auto;
@@ -147,7 +147,7 @@
     justify-content: center;
     animation: bounceIn 0.8s ease-out 0.3s both;
     
-    /* 🔑 优化图标容器效果 */
+    /* 优化图标容器效果 */
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15));
     backdrop-filter: blur(30px) saturate(200%);
     -webkit-backdrop-filter: blur(30px) saturate(200%);
@@ -156,7 +156,7 @@
         0 0 0 1px rgba(255, 255, 255, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.4);
     
-    /* 🔑 添加光晕效果 */
+    /* 添加光晕效果 */
     position: relative;
 }
 
@@ -170,7 +170,7 @@
     background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     border-radius: 50%;
     z-index: -1;
-    animation: glow 4s ease-in-out infinite alternate; /* 🔑 放慢光晕动画 */
+    animation: glow 4s ease-in-out infinite alternate; /* 放慢光晕动画 */
 }
 
 @keyframes glow {
@@ -185,11 +185,11 @@
 }
 
 .logo-image {
-    width: 100px; /* 🔑 调整logo大小 */
+    width: 100px; /* 调整logo大小 */
     height: 100px;
     object-fit: contain;
     border-radius: 50%;
-    filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.25)); /* 🔑 增强阴影 */
+    filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.25)); /* 增强阴影 */
 }
 
 @keyframes bounceIn {
@@ -209,7 +209,7 @@
 
 /* 主标题 */
 .blessing-title {
-    margin-bottom: 3rem; /* 🔑 增加间距 */
+    margin-bottom: 3rem; /* 增加间距 */
 }
 
 .title-line-1,
@@ -217,26 +217,26 @@
     display: block;
     color: white;
     font-weight: 700;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* 🔑 增强文字阴影 */
-    letter-spacing: 1.5px; /* 🔑 增加字间距 */
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* 增强文字阴影 */
+    letter-spacing: 1.5px; /* 增加字间距 */
 }
 
 .title-line-1 {
-    font-size: 2.8rem; /* 🔑 稍微增大字体 */
-    margin-bottom: 1rem; /* 🔑 增加间距 */
+    font-size: 2.8rem; /* 稍微增大字体 */
+    margin-bottom: 1rem; /* 增加间距 */
     animation: fadeInLeft 0.8s ease-out 0.5s both;
     color: rgba(255, 255, 255, 0.95);
 }
 
 .title-line-2 {
-    font-size: 3.5rem; /* 🔑 稍微增大字体 */
+    font-size: 3.5rem; /* 稍微增大字体 */
     background: linear-gradient(45deg, #ffd700, #ffed4e, #fff59d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: fadeInRight 0.8s ease-out 0.7s both;
     
-    /* 🔑 添加金色光晕 */
+    /* 添加金色光晕 */
     position: relative;
     filter: drop-shadow(0 2px 10px rgba(255, 215, 0, 0.3));
 }
@@ -265,19 +265,19 @@
 
 /* 装饰元素 */
 .decorative-elements {
-    margin: 3rem 0; /* 🔑 增加间距 */
+    margin: 3rem 0; /* 增加间距 */
     animation: fadeIn 0.8s ease-out 0.9s both;
 }
 
 .decoration {
-    font-size: 2.2rem; /* 🔑 稍微增大 */
+    font-size: 2.2rem; /* 稍微增大 */
     margin: 0 1rem;
     display: inline-block;
-    animation: bounce 3s ease-in-out infinite; /* 🔑 放慢动画 */
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3)); /* 🔑 增强阴影 */
+    animation: bounce 3s ease-in-out infinite; /* 放慢动画 */
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3)); /* 增强阴影 */
 }
 
-/* 🔑 新增：图片装饰样式 */
+/* 新增：图片装饰样式 */
 .decoration-img {
     /* 重置字体大小，因为现在使用图片 */
     font-size: inherit;
@@ -293,13 +293,13 @@
     width: 100%;
     height: 100%;
     object-fit: contain; /* 保持图片比例 */
-    /* 🔑 为图片添加相同的阴影效果 */
+    /* 为图片添加相同的阴影效果 */
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
-    /* 🔑 添加圆角，让图片更柔和 */
+    /* 添加圆角 */
     border-radius: 4px;
 }
 
-/* 🔑 确保GIF动画正常播放 */
+/* 确保GIF动画正常播放 */
 .decoration-icon[src$=".gif"] {
     image-rendering: auto;
 }
@@ -315,7 +315,7 @@
         transform: translateY(0);
     }
     40% {
-        transform: translateY(-12px); /* 🔑 增加弹跳高度 */
+        transform: translateY(-12px); /* 增加弹跳高度 */
     }
     60% {
         transform: translateY(-6px);
@@ -333,23 +333,23 @@
 
 /* 祝福文字 */
 .blessing-message {
-    margin-bottom: 4rem; /* 🔑 增加间距 */
+    margin-bottom: 4rem; /* 增加间距 */
     animation: fadeIn 0.8s ease-out 1.1s both;
 }
 
 .message-line {
-    font-size: 1.4rem; /* 🔑 稍微增大字体 */
+    font-size: 1.4rem; /* 稍微增大字体 */
     color: rgba(255, 255, 255, 0.92);
-    margin-bottom: 0.8rem; /* 🔑 增加行间距 */
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* 🔑 增强阴影 */
-    line-height: 1.7; /* 🔑 增加行高 */
-    font-weight: 300; /* 🔑 使用较细字重 */
+    margin-bottom: 0.8rem; /* 增加行间距 */
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* 增强阴影 */
+    line-height: 1.7; /* 增加行高 */
+    font-weight: 300; /* 使用较细字重 */
 }
 
 /* 操作按钮 */
 .final-actions {
     display: flex;
-    gap: 2.5rem; /* 🔑 增加间距 */
+    gap: 2.5rem; /* 增加间距 */
     justify-content: center;
     flex-wrap: wrap;
     animation: slideInUp 0.8s ease-out 1.3s both;
@@ -357,27 +357,27 @@
 
 .btn-glow {
     position: relative;
-    padding: 16px 36px; /* 🔑 增加内边距 */
-    font-size: 1.15rem; /* 🔑 稍微增大字体 */
+    padding: 16px 36px; /* 增加内边距 */
+    font-size: 1.15rem; /* 稍微增大字体 */
     border-radius: 50px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 🔑 更流畅的过渡 */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 更流畅的过渡 */
     text-transform: none;
     font-weight: 600;
-    letter-spacing: 0.8px; /* 🔑 增加字间距 */
-    
-    /* 🔑 优化按钮毛玻璃效果 */
+    letter-spacing: 0.8px; /* 增加字间距 */
+
+    /* 优化按钮毛玻璃效果 */
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    
-    /* 🔑 添加微妙的阴影 */
+
+    /* 添加阴影 */
     box-shadow: 
         0 12px 25px rgba(0, 0, 0, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .btn-glow:hover {
-    transform: translateY(-5px) scale(1.03); /* 🔑 增强悬浮效果 */
+    transform: translateY(-5px) scale(1.03); /* 增强悬浮效果 */
     box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.35);
@@ -410,7 +410,7 @@
     }
 
     .blessing-content {
-        padding: 3rem 2rem; /* 🔑 移动端调整内边距 */
+        padding: 3rem 2rem; /* 移动端调整内边距 */
         margin: 0 1rem;
         max-width: 90%;
     }
@@ -446,12 +446,12 @@
 
 @media (max-width: 480px) {
     .blessing-content {
-        padding: 2.5rem 1.5rem; /* 🔑 小屏幕进一步调整 */
+        padding: 2.5rem 1.5rem; /* 小屏幕进一步调整 */
         margin: 0 0.5rem;
     }
 
     .success-icon-image {
-        width: 100px; /* 🔑 调整图标大小 */
+        width: 100px; /* 调整图标大小 */
         height: 100px;
     }
 
