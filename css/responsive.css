@@ -4,7 +4,6 @@
     #cinema-canvas {
         width: 1200px;
         height: 900px;
-        /* 保持4:3纵横比 */
     }
 
     .screen-large {
@@ -229,7 +228,6 @@
     }
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {
     .individual-members .input-row {
         flex-direction: column;
