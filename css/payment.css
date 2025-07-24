@@ -11,11 +11,11 @@
     backdrop-filter: blur(10px);
     border: 1px solid #c2d4d6;
 
-    /* 🔑 确保包含所有浮动和定位元素 */
+    /* 确保包含所有浮动和定位元素 */
     overflow: hidden;
     position: relative;
     
-    /* 🔑 确保足够的高度 */
+    /* 确保足够的高度 */
     min-height: 600px;
 }
 
@@ -194,7 +194,6 @@
     margin: 0 -5px;
 }
 
-/* 支付方式样式 */
 /* 支付方式区域 */
 .payment-method {
     background: linear-gradient(135deg, rgba(194, 212, 214, 0.2) 0%, rgba(255, 255, 255, 0.95) 100%);
@@ -500,12 +499,9 @@
     gap: 20px;
     align-items: center;
     justify-content: center;
-    /* 🔑 关键修复：确保在面板内部 */
     margin: 20px 0 0 0;
     padding: 25px 20px 0 20px;
     border-top: 2px solid #e9ecef;
-
-    /* 确保按钮在面板内部 */
     width: 100%;
     box-sizing: border-box;
 
@@ -525,7 +521,6 @@
     border: none;
     cursor: pointer;
 
-    /* 🔑 确保按钮不会超出容器 */
     max-width: 200px;
     white-space: nowrap;
     text-overflow: ellipsis;
