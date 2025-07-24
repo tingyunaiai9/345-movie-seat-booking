@@ -434,33 +434,23 @@
     transform: translateY(-2px);
 }
 
-.legend-large .legend-color {
-    width: 16px;
-    height: 12px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+.legend-large .legend-icon {
+    width: 24px;
+    height: 20px;
+    border: none; 
+    border-radius: 0; 
+    box-shadow: none; 
+    object-fit: contain; 
+    image-rendering: -webkit-optimize-contrast; 
+    image-rendering: crisp-edges; 
+    filter: contrast(1.1) saturate(1.1); 
+    transition: all 0.3s ease;
 }
 
-/* 为不同座位状态设置颜色 */
-.legend-color.available {
-    background: #A0FB8E;
-    /* 可用座位 */
-}
-
-.legend-color.selected {
-    background: #ffff66;
-    /* 已选座位 */
-}
-
-.legend-color.sold {
-    background: #D35D6E;
-    /* 已售座位 */
-}
-
-.legend-color.reserved {
-    background: #FF9F5A;
-    /* 已预订座位 */
+/* 鼠标悬停时稍微放大图标 */
+.legend-large .legend-item:hover .legend-icon {
+    transform: scale(1.1);
+    filter: contrast(1.2) saturate(1.2) brightness(1.05);
 }
 
 /* ========================= 第三部分：底部控制区域 ========================= */
