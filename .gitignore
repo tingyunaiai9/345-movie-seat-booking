@@ -121,3 +121,6 @@ Desktop.ini
 .vscode/
 __pycache__/
 .obsidian/
+
+report.md
+*.pdf
