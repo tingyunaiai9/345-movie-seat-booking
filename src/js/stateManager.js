@@ -190,7 +190,7 @@ function handleCanvasClick(event) {
             window.CanvasRenderer.refreshCinemaDisplay();
         }
 
-        // 重要：无论是单选还是多选模式，都确保调用通知函数
+        // 无论是单选还是多选模式，都确保调用通知函数
         notifySelectionChange();
         console.log('通知选座状态变化');
     }
