@@ -30,7 +30,6 @@
                     <span class="step" data-step="seat">选座</span>
                     <span class="step" data-step="payment">支付</span>
                     <span class="step" data-step="confirm">确认</span>
-                    <!-- 移动我的订单按钮到确认后面，并改为圆形图标 -->
                     <button class="btn-my-orders-circle" id="my-orders-btn" title="我的订单">
                         <span class="icon">📋
                         </span>
@@ -112,7 +111,7 @@
                 <div class="movie-panel">
                     <h2>选择电影</h2>
                     <div class="movie-list">
-                        <!-- 罗小黑战记 -> 使用cat背景 -->
+                        <!-- 罗小黑战记 -->
                         <div class="movie-item" data-movie="cat">
                             <img src="img/poster_cat.jpg" alt="罗小黑战记">
                             <div class="movie-info">
@@ -122,7 +121,7 @@
                             </div>
                         </div>
 
-                        <!-- 蓦然回首 -> 使用girl背景 -->
+                        <!-- 蓦然回首 -->
                         <div class="movie-item" data-movie="girl">
                             <img src="img/poster_girl.jpg" alt="蓦然回首">
                             <div class="movie-info">
@@ -132,7 +131,7 @@
                             </div>
                         </div>
 
-                        <!-- 情书 -> 使用love背景 -->
+                        <!-- 情书 -->
                         <div class="movie-item" data-movie="love">
                             <img src="img/poster_love.jpg" alt="情书">
                             <div class="movie-info">
@@ -149,7 +148,7 @@
                 </div>
             </section>
 
-            <!-- 选座视图 - 重新布局 -->
+            <!-- 选座视图 -->
             <section id="seat-view" class="view">
                 <div class="seat-panel">
                     <div class="seat-header">
@@ -262,7 +261,7 @@
                         </div>
                     </div>
 
-                    <!-- 第二部分：银幕和Canvas区域 - 放大 -->
+                    <!-- 第二部分：银幕和Canvas区域 -->
                     <div class="seat-canvas-section">
                         <div class="seat-canvas-container-large">
                             <div class="screen-large">
@@ -282,19 +281,19 @@
 
                             <div class="legend-large">
                                 <div class="legend-item">
-                                    <span class="legend-color available"></span>
+                                    <img src="img/seat_available.svg" alt="可选座位" class="legend-icon">
                                     <span>可选座位</span>
                                 </div>
                                 <div class="legend-item">
-                                    <span class="legend-color selected"></span>
+                                    <img src="img/seat_selected.svg" alt="已选座位" class="legend-icon">
                                     <span>已选座位</span>
                                 </div>
                                 <div class="legend-item">
-                                    <span class="legend-color sold"></span>
+                                    <img src="img/seat_sold.svg" alt="已售座位" class="legend-icon">
                                     <span>已售座位</span>
                                 </div>
                                 <div class="legend-item">
-                                    <span class="legend-color reserved"></span>
+                                    <img src="img/seat_reserved.svg" alt="已预订" class="legend-icon">
                                     <span>已预订</span>
                                 </div>
                             </div>
@@ -545,7 +544,7 @@
                     <!-- 在订单列表容器后添加订单项模板 -->
                     <div class="orders-container">
                         <div class="orders-list" id="orders-list">
-                            <!-- 订单项将通过 JavaScript 动态生成 -->
+                            <!-- 订单项通过 JS 动态生成 -->
                             <div class="no-orders" id="no-orders">
                                 <div class="no-orders-icon">🎬</div>
                                 <h3>暂无订单</h3>
@@ -570,7 +569,7 @@
                     
                                 <!-- 中间：主要信息区域 -->
                                 <div class="order-center">
-                                    <!-- 电影标题区 - 突出显示 -->
+                                    <!-- 电影标题区 -->
                                     <div class="movie-title-section">
                                         <h3 class="movie-title">
                                             <span class="title-text"></span>
@@ -634,12 +633,6 @@
                     <div class="blessing-content">
                         <!-- 成功图标 -->
                         <div class="success-icon-container">
-                            <!-- <div class="success-icon">
-                                <div class="check-mark">
-                                    <div class="check-left"></div>
-                                    <div class="check-right"></div>
-                                </div>
-                            </div> -->
                             <div class="success-icon-image">
                                 <img src="img/logo_pic.png" alt="电影院Logo" class="logo-image">
                             </div>
@@ -653,11 +646,21 @@
 
                         <!-- 装饰元素 -->
                         <div class="decorative-elements">
-                            <span class="decoration">🎬</span>
-                            <span class="decoration">✨</span>
-                            <span class="decoration">🍿</span>
-                            <span class="decoration">🎭</span>
-                            <span class="decoration">⭐</span>
+                            <span class="decoration decoration-img">
+                                <img src="img/decoration-1.png" alt="装饰1" class="decoration-icon">
+                            </span>
+                            <span class="decoration decoration-img">
+                                <img src="img/decoration-2.gif" alt="装饰2" class="decoration-icon">
+                            </span>
+                            <span class="decoration decoration-img">
+                                <img src="img/decoration-3.png" alt="装饰3" class="decoration-icon">
+                            </span>
+                            <span class="decoration decoration-img">
+                                <img src="img/decoration-4.gif" alt="装饰4" class="decoration-icon">
+                            </span>
+                            <span class="decoration decoration-img">
+                                <img src="img/decoration-5.png" alt="装饰5" class="decoration-icon">
+                            </span>
                         </div>
 
                         <!-- 祝福文字 -->
@@ -673,16 +676,6 @@
                         </div>
                     </div>
 
-                    <!-- 底部装饰 -->
-                    <div class="bottom-decoration">
-                        <div class="wave-animation">
-                            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-                                <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill"></path>
-                                <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill"></path>
-                                <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill"></path>
-                            </svg>
-                        </div>
-                    </div>
                 </div>
             </section>  
         </div>
@@ -710,7 +703,7 @@
         </div>
     </div>
 
-    <!-- 🔑 新位置：订单详情模态框 - 现在是全局模态框 -->
+    <!-- 订单详情模态框调整为全局模态框 -->
     <div class="order-detail-modal" id="order-detail-modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -718,7 +711,7 @@
                 <button class="modal-close" id="close-order-detail">×</button>
             </div>
             <div class="modal-body" id="order-detail-content">
-                <!-- 在订单详情模态框中，订单信息区域应该按以下顺序排列 -->
+                <!-- 订单信息区域 -->
                 <div class="order-detail-section">
                     <h4>📋 订单信息</h4>
                     <div class="detail-grid">
@@ -759,7 +752,7 @@
                         <span class="detail-label">选择座位:</span>
                         <div class="detail-value">
                             <div class="seat-tags" id="detail-seat-tags">
-                                <!-- 座位标签将在这里动态生成 -->
+                                <!-- 座位标签动态生成 -->
                             </div>
                         </div>
                     </div>
@@ -773,7 +766,7 @@
                     </div>
                 </div>
                 
-                <!-- 费用明细区域保持不变 -->
+                <!-- 费用明细区域 -->
                 <div class="order-detail-section">
                     <h4>💰 费用明细</h4>
                     <div class="detail-grid">
