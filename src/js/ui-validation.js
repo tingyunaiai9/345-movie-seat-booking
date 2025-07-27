@@ -209,10 +209,10 @@ function handleDirectPurchase() {
         if (window.UIViewController && window.UIViewController.switchToView) {
             window.UIViewController.switchToView('payment');
         } else if (window.UIViewController && window.UIViewController.VIEW_CONFIG) {
-            // 兜底方案：使用视图配置中的支付视图名称
+            // 备用方案：使用视图配置中的支付视图名称
             window.UIViewController.switchToView(window.UIViewController.VIEW_CONFIG.VIEWS.PAYMENT);
         } else {
-            // 最后的兜底方案：直接操作DOM
+            // 最终备用方案：直接操作DOM
             console.warn('UIViewController 不可用，使用DOM方式切换视图');
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             const paymentView = document.getElementById('payment-view');
