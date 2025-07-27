@@ -277,7 +277,6 @@
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3)); /* 增强阴影 */
 }
 
-/* 新增：图片装饰样式 */
 .decoration-img {
     /* 重置字体大小，因为现在使用图片 */
     font-size: inherit;
@@ -299,7 +298,6 @@
     border-radius: 4px;
 }
 
-/* 确保GIF动画正常播放 */
 .decoration-icon[src$=".gif"] {
     image-rendering: auto;
 }
