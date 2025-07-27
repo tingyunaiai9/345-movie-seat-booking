@@ -1,3 +1,9 @@
+# Treat all image files as binary files
+# This prevents line ending normalization and tells Git not to show text diffs.
+*.[jJ][pP][gG] binary
+*.[pP][nN][gG] binary
+*.[wW][eE][bB][pP] binary
+*.[gG][iI][fF] binary
 
-*.png     -text
-*.jpg     -text
+# SVG is XML-based, so it's text. It's useful to see its diffs.
+*.[sS][vV][gG] text diff=text
