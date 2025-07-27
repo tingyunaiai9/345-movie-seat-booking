@@ -74,7 +74,7 @@ function initializeEventListeners() {
             // 确保用户已完成影厅和电影的选择
             if (viewState.selectedCinemaSize && viewState.selectedMovie) {
                 localStorage.setItem('selectedMovie', viewState.selectedMovie);
-                // 【核心改动】在这里执行唯一一次权威的座位初始化
+                // 在这里执行唯一一次座位初始化
                 window.CinemaData.initializeCinemaSeats(
                     viewState.selectedCinemaSize.rows,
                     viewState.selectedCinemaSize.cols,
@@ -140,7 +140,7 @@ function initializeEventListeners() {
         });
     });
 
-    // 🔑 预订和购票按钮
+    // 预订和购票按钮
     const purchaseSeatsBtn = document.getElementById('purchase-seats');
     if (purchaseSeatsBtn) {
         purchaseSeatsBtn.addEventListener('click', () => {
@@ -258,7 +258,7 @@ function switchToView(viewName, options = {}) {
 
     console.log(`视图历史: ${viewState.viewHistory.join(' -> ')}`);
 
-    // 🔑 特殊视图的处理逻辑
+    // 特殊视图的处理逻辑
     handleSpecialViewLogic(viewName, options);
 
     // 触发视图切换后的回调
@@ -669,7 +669,7 @@ function initializeSeatView(resetSelection = true) {
         showMessage('座位交互系统初始化失败！', 'error');
     }
 
-    // 4. 更新UI上的统计信息（可选，但推荐）
+    // 4. 更新UI上的统计信息
     updateCinemaStatusDisplay();
 
 }
@@ -938,12 +938,12 @@ function bindFinalPageEvents() {
  */
 function handleViewMyOrders() {
     console.log('处理查看我的订单');
-    // 🔑 关键修复：隐藏导航栏
+    // 隐藏导航栏
     if (window.UIViewController && window.UIViewController.hideNavigationSteps) {
         window.UIViewController.hideNavigationSteps();
     }
 
-    // 🔑 直接调用 ui-orders.js 中的函数
+    // 直接调用 ui-orders.js 中的函数
     if (window.UIOrders && window.UIOrders.showMyOrdersPage) {
         window.UIOrders.showMyOrdersPage();
     } else {
@@ -1206,7 +1206,6 @@ function getMessageColor(type) {
 
 // ========================= 模块导出 =========================
 
-// 在浏览器环境中，将函数暴露到全局
 if (typeof window !== 'undefined') {
     window.UIViewController = {
         // 核心初始化
