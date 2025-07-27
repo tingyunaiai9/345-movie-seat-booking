@@ -301,7 +301,7 @@ function getIndividualMembersList() {
 // ========================= 客户数据获取 =========================
 
 /**
- * 获取客户数据（增强版，兼容StateManager）
+ * 获取客户数据（兼容StateManager）
  */
 function getMyCustomerDataEnhanced() {
     const uiState = window.UICoreModule ? window.UICoreModule.uiState : { ticketType: 'individual' };
