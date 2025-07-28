@@ -614,6 +614,10 @@ setTimeout(() => {
 * [五粮液](https://github.com/wanly23)：主要负责编写前端UI相关代码，包括页面布局、样式设计和用户交互逻辑，搭建项目的整体`HTML`结构和`CSS`样式，同时实现界面UI的美化与交互效果，处理界面的所有点击事件并完成与 Javascript 逻辑部分的对接。主要负责文件有：`index.html`、全部`css`文件以及与`ui`相关的全部`js`文件。
 * [sigmal](https://github.com/sigmalyj)：网页开发前期负责鼠标点击事件的交互逻辑与座位状态管理（详见`stateManager.js`）；后续开发过程当中还负责订单界面的美化（详见`ui-orders.js`以及`orders.css`）、各部分代码简化重构和欢迎界面（`hello.html`以及`hello.css`）的制作。
 
+## 七、使用的工具链
+
+![](pic/tools.png)
+
 ## 参考资料
 
 * [1] MDN Web Docs. Canvas API. [https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
