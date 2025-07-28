@@ -56,7 +56,7 @@ function initializeNonViewFunctions() {
     // 设置默认状态
     setDefaultStates();
 
-    // 🔑 关键修复：初始化StateManager
+    // 初始化StateManager
     setTimeout(() => {
         if (window.StateManager && window.StateManager.initializeStateManager) {
             window.StateManager.initializeStateManager('cinema-canvas');
@@ -164,7 +164,7 @@ function initializePaymentMethods() {
             // 给当前radio的父label加active
             this.parentElement.classList.add('active');
 
-            // 可选：提示
+            // 提示
             showMessage(`已选择${this.value}支付方式`, 'success');
         });
     });
@@ -220,7 +220,7 @@ function setDefaultStates() {
  * @param {number} duration - 显示时长（毫秒）
  */
 function showMessage(message, type = 'info', duration = 3000) {
-    // 简单的alert实现，后续可以改为更美观的提示组件
+    // alert实现
     if (type === 'error') {
         alert('错误: ' + message);
     } else if (type === 'success') {
@@ -264,10 +264,7 @@ function bindUIEvents() {
     // 绑定窗口大小变化事件
     window.addEventListener('resize', handleWindowResize);
 
-    // 绑定键盘事件
-    document.addEventListener('keydown', handleKeyboardEvents);
-
-    // 🔑 新增：绑定自动选座按钮事件
+    // 绑定自动选座按钮事件
     bindAutoSeatButtons();
 }
 
@@ -348,19 +345,8 @@ function enableAutoSeatButtons() {
  */
 function handleWindowResize() {
     console.log('窗口大小发生变化');
-    // TODO: 可以在这里调整Canvas大小等
 }
 
-/**
- * 处理键盘事件
- * @param {KeyboardEvent} event - 键盘事件
- */
-function handleKeyboardEvents(event) {
-    // ESC键关闭模态框等
-    if (event.key === 'Escape') {
-        // TODO: 关闭当前打开的模态框
-    }
-}
 
 // ========================= 系统集成函数 =========================
 
@@ -431,7 +417,6 @@ function initializeCinemaSeats() {
 
 // ========================= 模块导出 =========================
 
-// 在浏览器环境中，将函数暴露到全局
 if (typeof window !== 'undefined') {
     window.UICoreModule = {
         // 核心初始化

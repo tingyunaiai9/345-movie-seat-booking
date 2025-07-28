@@ -5,9 +5,9 @@
 
 // ========================= 常量定义 =========================
 const movieBackgrounds = {
-    'cat': './img/background_cat.webp',      // 罗小黑战记 -> 猫咪背景
-    'girl': './img/background_girl.webp',   // 蓦然回首 -> 女孩背景
-    'love': './img/background_love.webp'    // 情书 -> 爱情背景
+    'cat': './img/background_cat.webp',      // 罗小黑战记
+    'girl': './img/background_girl.webp',   // 蓦然回首
+    'love': './img/background_love.webp'    // 情书
 };
 
 // 电影信息常量
@@ -223,7 +223,7 @@ function selectMovie(movieElement) {
     let movieData = getMovieInfo(movieId);
 
     if (!movieData) {
-        // 如果常量中没有，则从DOM元素提取（兜底方案）
+        // 如果常量中没有，则从DOM元素提取
         const rawPrice = movieElement.querySelector('.movie-price').textContent;
         const priceNumber = rawPrice.match(/\d+/) ? rawPrice.match(/\d+/)[0] : '0';
 
@@ -292,7 +292,6 @@ function getSelectedMovie() {
 
 // ========================= 模块导出 =========================
 
-// 在浏览器环境中，将函数暴露到全局
 if (typeof window !== 'undefined') {
     window.UIMovieSelector = {
         initializeMovieSelector, // 初始化电影选择器
@@ -306,7 +305,7 @@ if (typeof window !== 'undefined') {
     };
 }
 
-// 页面加载完成后自动初始化
+// 加载完成后初始化
 document.addEventListener('DOMContentLoaded', function () {
     console.log('页面加载完成，初始化电影选择器');
     // 延迟初始化，确保主模块已加载

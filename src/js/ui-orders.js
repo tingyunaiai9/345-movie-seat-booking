@@ -596,34 +596,34 @@ function showMyOrderDetail(order) {
 
     const customer = order.customerInfo || {};
 
-    // 按新的顺序更新订单信息：电影名称、订单号、放映时间、状态、创建时间、支付时间/支付截止时间
+    // 按新的顺序更新订单信息
     
-    // 1. 电影名称（第一个显示）
+    // 1. 电影名称
     const movieTitleElement = document.getElementById('detail-movie-title');
     if (movieTitleElement) {
         movieTitleElement.textContent = movieTitle;
     }
 
-    // 2. 订单号（第二个显示）
+    // 2. 订单号
     document.getElementById('detail-order-id').textContent = order.ticketId;
 
-    // 3. 放映时间（第三个显示）
+    // 3. 放映时间
     const movieTimeElement = document.getElementById('detail-movie-time');
     if (movieTimeElement) {
         movieTimeElement.textContent = movieTime;
     }
 
-    // 4. 状态（第四个显示）
+    // 4. 状态
     const statusElement = document.getElementById('detail-order-status');
     statusElement.textContent = statusText[order.status] || order.status;
     statusElement.className = `detail-value order-status ${order.status}`;
 
-    // 5. 创建时间（第五个显示）
+    // 5. 创建时间
     document.getElementById('detail-created-time').textContent = window.UIMovieSelector && window.UIMovieSelector.formatMovieShowTime 
         ? window.UIMovieSelector.formatMovieShowTime(new Date(order.createdAt))
         : order.createdAt;
 
-    // 6. 支付时间/支付截止时间（第六个显示，根据状态动态显示）
+    // 6. 支付时间/支付截止时间（根据状态动态显示）
     const paidTimeLabel = document.getElementById('detail-paid-time-label');
     const paidTime = document.getElementById('detail-paid-time');
     const expiresLabel = document.getElementById('detail-expires-label');
@@ -663,7 +663,7 @@ function showMyOrderDetail(order) {
             : order.paidAt;
     }
 
-    // 更新座位信息 - 使用新的合并函数
+    // 更新座位信息
     const seatTagsContainer = document.getElementById('detail-seat-tags');
     const seatInfo = getSeatInfoText(order);
     
@@ -719,7 +719,7 @@ function showMyOrderDetail(order) {
     }
     // 已过期订单不显示任何操作按钮
 
-    // 根据订单状态添加模态框类名（用于CSS样式）
+    // 根据订单状态添加模态框类名
     modal.className = `order-detail-modal ${order.status}`;
 
     // 显示模态框并确保在视口中央
@@ -828,7 +828,6 @@ function handleMyRefundOrder() {
 
 // ========================= 模块导出 =========================
 
-// 在浏览器环境中，将函数暴露到全局
 if (typeof window !== 'undefined') {
     window.UIOrders = {
         // 页面管理

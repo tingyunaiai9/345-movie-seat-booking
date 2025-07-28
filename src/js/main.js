@@ -417,7 +417,7 @@ function findConsecutiveSeatsInRowForIndividual(row, count, colFilter = null) {
 }
 
 /**
- * 为个人选座分散选择座位（当无法连续坐时）
+ * 当无法连续坐时，为个人选座分散选择座位
  * @param {Array} members - 成员信息
  * @param {Array} validRows - 有效行号列表
  * @returns {Array|null} 选中的座位对象列表或 null
@@ -463,7 +463,7 @@ function findScatteredSeatsForIndividual(members, validRows, colFilter = null) {
     return selectedSeats;
 }
 /**
- * 计算中心区域信息（main.js专用，无依赖外部变量）
+ * 计算中心区域信息
  * @returns {Object} 中心区域信息
  */
 function calculateCenterZoneForMain() {

@@ -92,7 +92,7 @@ const GLOBAL_STATE = {
 // ========================= 核心绘制函数 =========================
 
 /**
- * 设置高分辨率Canvas，避免图片模糊
+ * 设置高分辨率Canvas
  * @param {HTMLCanvasElement} canvas - Canvas元素
  * @param {CanvasRenderingContext2D} ctx - Canvas上下文
  * @param {number} width - 逻辑宽度
@@ -118,7 +118,7 @@ function setupHighDPICanvas(canvas, ctx, width, height) {
 }
 
 /**
- * 绘制单个座位 - 优化版本（移除文字绘制）
+ * 绘制单个座位
  * @param {number} x - 座位的中心点 x 坐标
  * @param {number} y - 座位的中心点 y 坐标
  * @param {Object} seat - 座位对象（包含状态、行号、列号等信息）
@@ -232,7 +232,7 @@ function drawRowColumnLabels() {
         ctx.fillText(`第${rowNum}排`, labelX, labelY);
     });
 
-    // 绘制列标识 - 根据布局类型采用不同策略
+    // 绘制列标识
     if (currentLayout === CANVAS_CONFIG.LAYOUT_TYPES.PARALLEL) {
         // 平行布局：在每列下方绘制
         ctx.textAlign = 'center';
@@ -243,7 +243,7 @@ function drawRowColumnLabels() {
             ctx.fillText(`第${colNum}列`, labelX, labelY);
         });
     } else {
-        // 弧形布局：在每列的最后排（最后一行）座位下方绘制
+        // 弧形布局：在每列的最后排座位下方绘制
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         
@@ -361,7 +361,7 @@ function drawCinema() {
 }
 
 /**
- * 绘制中心区域标识（支持平行布局和弧形布局）
+ * 绘制中心区域标识
  */
 function drawCenterZone() {
 
@@ -400,7 +400,7 @@ function drawCenterZone() {
             const centerX = canvasWidth / 2;
             const centerY = CIRCLE_CENTER;
 
-            // 计算扇形的角度范围 - 使用与座位位置计算相同的逻辑
+            // 计算扇形的角度范围
             let startColumnOffset, endColumnOffset;
             if (totalCols % 2 === 1) {
                 // 奇数列：以中间列为中心
@@ -634,7 +634,7 @@ function calculateCanvasSize() {
 // ========================= 初始化数据和刷新 =========================
 
 /**
- * 初始化并绘制Cinema - 集成了数据获取、状态初始化和绘制功能
+ * 初始化并绘制Cinema
  * @param {string} layoutType - 布局类型
  */
 function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
@@ -681,7 +681,7 @@ function initializeAndDrawCinema(layoutType = CANVAS_CONFIG.LAYOUT_TYPES.ARC) {
 
 
 /**
- * 刷新Canvas显示（用于数据更新后重绘）
+ * 刷新Canvas显示
  * @param {string} layoutType - 布局类型
  */
 function refreshCinemaDisplay(layoutType) {

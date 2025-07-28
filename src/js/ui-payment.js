@@ -137,7 +137,7 @@ function updatePaymentPriceInfo() {
 }
 
 /**
- * 更新支付页面中的客户信息（增强版）
+ * 更新支付页面中的客户信息
  */
 function updatePaymentCustomerInfo() {
     const customerInfoEl = document.getElementById('payment-customer-info');
@@ -757,7 +757,6 @@ async function setSafeImageSrc(imgElement, src, alt) {
 
 // ========================= 模块导出 =========================
 
-// 在浏览器环境中，将函数暴露到全局
 if (typeof window !== 'undefined') {
     window.UIPayment = {
         // 支付页面管理
